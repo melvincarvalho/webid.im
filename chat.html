@@ -205,8 +205,6 @@ function renderlogs(dateuri, date) {
 
       addLog(avatar[0].object.value, text[0].object.value, url[0].object.value, name[0].object.value, post.subject.value, created[0].object.value.substr(11,8));
 
-      console.log(notify);
-
       // Set the name of the hidden property and the change event for visibility
       var hidden, visibilityChange;
       if (typeof document.hidden !== "undefined") { // Opera 12.10 and Firefox 18 and later support
@@ -405,7 +403,6 @@ function renderlogs(dateuri, date) {
         webidname = value.object.value;
       });
 
-      console.log('name : ' + name);
 
       $('#input').append('<br><br><img height="30" width="30" src="' + webidavatar + '">');
       $('#input').append('<textarea name="chat" id="chat-input" placeholder="message" autofocus=""></textarea>');
@@ -470,7 +467,7 @@ function renderlogs(dateuri, date) {
           });
 
 
-        } // missing closing if brace
+        } 
       });
 
 
