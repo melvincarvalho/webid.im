@@ -27,6 +27,12 @@
     <webid-login id="webid-login"></webid-login>
 
 
+    <div id="avatar">
+    </div>
+
+    <div id="storage">
+    </div>
+
     <div id="profile">
     </div>
 
@@ -55,9 +61,9 @@
       var g = $rdf.graph();
       var f = $rdf.fetcher(g);
       // add CORS proxy
-      var PROXY = "https://data.fm/proxy?uri={uri}";
-      var AUTH_PROXY = "https://rww.io/auth-proxy?uri=";
-      $rdf.Fetcher.crossSiteProxyTemplate=PROXY;
+      //var PROXY = "https://data.fm/proxy?uri={uri}";
+      //var AUTH_PROXY = "https://rww.io/auth-proxy?uri=";
+      //$rdf.Fetcher.crossSiteProxyTemplate=PROXY;
 
       var kb = tabulator.kb;
       var fetcher = tabulator.sf;
@@ -109,6 +115,8 @@
         var RDF = $rdf.Namespace("http://www.w3.org/1999/02/22-rdf-syntax-ns#");
         var FOAF = $rdf.Namespace("http://xmlns.com/foaf/0.1/");
         var PIM = $rdf.Namespace("http://www.w3.org/ns/pim/space#");
+        var RDFS = $rdf.Namespace("http://www.w3.org/2000/01/rdf-schema#");
+
 
 
         var webidname;
@@ -133,14 +141,41 @@
           storage = value.object.value;
         });
 
+        $.each(g.statementsMatching($rdf.sym(webid), RDFS('seeAlso'), undefined), function(index, value) {
+          seeAlso = value.object.value;
+        });
 
-        $('#profile').append('<img size="50" width="50" src="'+ webidavatar +'"/>')
-        $('#profile').append('<div>Storage : <a href="'+storage+'">'+ storage +'</a></div>')
-        if (storage) {
-          $('#profile').append('<div>Personal Diary : <a target="_blank" href="chat.html?ldpc='+storage+'chat/diary/&webid='+encodeURIComponent(webid)+'">Launch</a></div>')
+
+        function addStorage(storage) {
+          if ( ! $('#storage').find('select').length ) {
+            $('#storage').append('<span>Storage : </span>')
+            $('#storage').append($('<select id="storagedropdown"></select>'));
+            $('#profile').append('<div>Personal Diary : <a id="diary" target="_blank">Launch</a></div>');
+            $('#diary').on('click', function() {
+              window.open('chat.html?ldpc='+ encodeURIComponent($('#storagedropdown').val()) +'chat/diary/&webid='+encodeURIComponent(webid));
+              return false;
+            });
+          }
+          if (! $('#storagedropdown option[value="'+storage+'"]').length) {
+            $('#storagedropdown').append( new Option(storage, storage) );
+          }
+        }
+
+        $('#avatar').append('<img size="50" width="50" src="'+ webidavatar +'"/>')
+        addStorage(storage);
+        if (seeAlso) {
+          //$('#profile').append('<div>See Also : <a target="_blank" href="'+seeAlso+'">'+seeAlso+'</a></div>')
+          f.nowOrWhenFetched( seeAlso , undefined, function(ok, body) {
+            console.log('seeAlso fetched ');
+            $.each(g.statementsMatching($rdf.sym(webid), PIM('storage'), undefined), function(index, value) {
+              var storage = value.object.value;
+              addStorage(storage);
+            });
+          });
         }
         $('#profile').append('<div id="name"><strong>'+ webidname +'</strong></div>')
 
+        // friends
         $.each(g.statementsMatching($rdf.sym(webid), FOAF('knows'), undefined), function(index, value) {
 
 
