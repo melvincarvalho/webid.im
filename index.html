@@ -12,17 +12,6 @@
     height:100%;
   }
 
-  h1 {
-    color: white;
-    text-align: center;
-  }
-
-  .text {
-    font-family: "Open Sans", "HelveticaNeue", sans-serif;
-    font-size: 14px;
-    line-height: 140%;
-  }
-
   /*  vertical-align: middle;  for from */
 
   </style>
@@ -73,13 +62,7 @@
       var kb = tabulator.kb;
       var fetcher = tabulator.sf;
 
-      var uri = window.location.href;
-      var base = window.document.title = uri.slice(0, uri.lastIndexOf('/')+1);
-
-      console.log('rendering webid');
-
-
-      console.log('webid : ' + webid);
+      console.log('rending webid : ' + webid);
 
       var profileuri = (webid.split('#'))[0];
 
