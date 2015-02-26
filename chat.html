@@ -1,0 +1,535 @@
+<!DOCTYPE html>
+<html>
+<head><meta charset='UTF-8'>
+  <title>WebID IM</title>
+  <link type="text/css" rel="stylesheet" href="https://linkeddata.github.io/tabulator-firefox/content/tabbedtab.css" />
+  <style>
+
+
+
+  .matrix tr td { background-color: #eef;  border: 0.1em solid white;}
+
+
+
+  html,body,.container
+  {
+    height:100%;
+  }
+  .container
+  {
+    display:table;
+    width: 100%;
+  }
+
+  .row
+  {
+    height: 100%;
+  }
+  .col-md-3.no-float, .col-md-9.no-float {
+    float: none;
+  }
+  .left
+  {
+    display: table-cell;
+    background: #1e3e46;
+    width: 350px;
+  }
+  .sel
+  {
+    color: darkblue;
+  }
+  .col-md-9
+  {
+    display: table-cell;
+    float: none;
+  }
+
+  .meta {
+    font: normal normal 400 12px/19.6px "Open Sans";
+    color: #AAAAAA;
+  }
+
+  h1 {
+    color: white;
+    text-align: center;
+  }
+
+  .text {
+    font-family: "Open Sans", "HelveticaNeue", sans-serif;
+    font-size: 14px;
+    line-height: 140%;
+  }
+
+  /*  vertical-align: middle;  for from */
+
+  </style>
+  <script type="text/javascript" src="https://code.jquery.com/jquery-2.1.3.min.js"></script>
+  <script type="text/javascript" src="https://linkeddata.github.io/tabulator/js/mashup/mashlib.js"></script>
+  <script src="//cdnjs.cloudflare.com/ajax/libs/webcomponentsjs/0.5.2/webcomponents.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/howler/1.1.25/howler.min.js"></script>
+
+
+
+</head>
+<body>
+
+  <div class="container">
+    <div class="row">
+      <div class="left no-float">
+        <h1 class="left-header" id="dates">Chat Logs</h1>
+      </div>
+      <div class="col-md-9 no-float">
+        <div id="logs"></div>
+        <div id="input"></div>
+      </div>
+    </div>
+  </div>
+
+
+  <div class="TabulatorOutline" id="DummyUUID">
+    <table id="outline"></table>
+
+
+  </div>
+
+
+
+</body>
+<script>
+// var room = '54d36959db8155e6700f7b08'; // taskify
+var room = 'chat'; // linkeddata
+var ldpc = getParameterByName('ldpc');
+var webid = getParameterByName('webid');
+var webidname = getParameterByName('name') || webid;
+var webidavatar = getParameterByName('avatar') || 'http://www.murketing.com/journal/wp-content/uploads/2009/04/8tracks.jpg';
+
+var notify = false;
+console.log('webid is : ' + webid);
+
+//var wss = 'wss://gitter.databox.me';
+var wss = 'wss://klaranet.com';
+
+console.log('logs');
+
+var dateuri = ldpc;
+
+/* get parameters */
+function getParameterByName(name) {
+  name = name.replace(/[\[]/, "\\[").replace(/[\]]/, "\\]");
+  var regex = new RegExp("[\\?&]" + name + "=([^&#]*)"),
+  results = regex.exec(location.search);
+  return results === null ? "" : decodeURIComponent(results[1].replace(/\+/g, " "));
+}
+
+function renderlogs(dateuri, date) {
+
+  var fetchuri = dateuri + date + '/*';
+
+  console.log('rendering logs for : ' + fetchuri);
+
+
+
+  //////////////////////////////////////////////
+
+  var g = $rdf.graph();
+  var f = $rdf.fetcher(g);
+  // add CORS proxy
+  var PROXY = "https://data.fm/proxy?uri={uri}";
+  var AUTH_PROXY = "https://rww.io/auth-proxy?uri=";
+  $rdf.Fetcher.crossSiteProxyTemplate=PROXY;
+
+  var kb = tabulator.kb;
+  var fetcher = tabulator.sf;
+
+  var uri = window.location.href;
+  var base = window.document.title = uri.slice(0, uri.lastIndexOf('/')+1);
+
+
+
+  // populate chat
+  f.nowOrWhenFetched( fetchuri , undefined, function(ok, body) {
+    console.log('fetched');
+    console.log(body);
+
+
+
+
+
+    var SIOC = $rdf.Namespace("http://rdfs.org/sioc/ns#");
+    var RDF = $rdf.Namespace("http://www.w3.org/1999/02/22-rdf-syntax-ns#");
+    var DCT = $rdf.Namespace("http://purl.org/dc/terms/");
+    var FOAF = $rdf.Namespace("http://xmlns.com/foaf/0.1/");
+    var OWL = $rdf.Namespace("http://www.w3.org/2002/07/owl#");
+
+
+
+
+
+
+
+    var posts = g.statementsMatching(undefined, undefined, SIOC('Post'));
+
+    console.log('posts : ' + posts);
+    $('#logs').empty();
+    //$('#logs').append(g.toString());
+
+    // sort by date
+    if (posts && posts.length > 0) {
+      posts.sort(function(a, b) {
+        var subjecta = a.subject;
+        var subjectb = b.subject;
+        var createda = g.statementsMatching(subjecta, DCT('created'), undefined);
+        var createdb = g.statementsMatching(subjectb, DCT('created'), undefined);
+        a = new Date(createda[0].object.value);
+        b = new Date(createdb[0].object.value);
+        return a>b ? 1 : a<b ? -1 : 0;
+      });
+    }
+    for (var i=0; i<posts.length; i++) {
+      var post = posts[i];
+      var subject = post.subject;
+      var details = g.statementsMatching(subject, undefined, undefined);
+      var author = g.statementsMatching(subject, DCT('creator'), undefined);
+      var created = g.statementsMatching(subject, DCT('created'), undefined);
+      var text = g.statementsMatching(subject, SIOC('content'), undefined);
+      var name = g.statementsMatching(author[0].object, FOAF('name'), undefined);
+      var url = g.statementsMatching(author[0].object, OWL('sameAs'), undefined);
+      var depiction = g.statementsMatching(author[0].object, FOAF('depiction'), undefined);
+      var image = g.statementsMatching(author[0].object, FOAF('image'), undefined);
+      console.log(author);
+
+      var avatar = depiction;
+      if(!depiction) {
+        avatar = image;
+      }
+
+      addLog(avatar[0].object.value, text[0].object.value, url[0].object.value, name[0].object.value, post.subject.value, created[0].object.value.substr(11,8));
+
+      console.log(notify);
+
+      // Set the name of the hidden property and the change event for visibility
+      var hidden, visibilityChange;
+      if (typeof document.hidden !== "undefined") { // Opera 12.10 and Firefox 18 and later support
+        hidden = "hidden";
+        visibilityChange = "visibilitychange";
+      } else if (typeof document.mozHidden !== "undefined") {
+        hidden = "mozHidden";
+        visibilityChange = "mozvisibilitychange";
+      } else if (typeof document.msHidden !== "undefined") {
+        hidden = "msHidden";
+        visibilityChange = "msvisibilitychange";
+      } else if (typeof document.webkitHidden !== "undefined") {
+        hidden = "webkitHidden";
+        visibilityChange = "webkitvisibilitychange";
+      }
+
+      if(notify && i === posts.length-1 &&  url[0].object.value != webid && hidden ){
+        var notification = new Notification(name[0].object.value,
+          {'icon': "https://cdn1.iconfinder.com/data/icons/app-tab-bar-icons-for-ios/30/User_login.png",
+          "body" : text[0].object.value });
+          notify = false;
+
+          notification.onclick = function(x) {
+            try {
+              window.focus();
+              this.cancel();
+            }
+            catch (ex) {
+            }
+          };
+
+          setTimeout(function(){
+            notification.close()
+          }, 10000);
+
+        }
+
+      }
+
+    });
+
+
+
+  }
+
+  function addLog(avatar, message, webid, name, uri, time) {
+    console.log('Rendering log ');
+
+    var isImage =   (/\.(gif|jpg|jpeg|tiff|png|svg)$/i).test(message);
+
+
+    $('#logs').append('<img height="30" width="30" src="' + avatar + '">');
+    if (isImage) {
+      $('#logs').append('<a target="_blank" href="'+message+'" class="text">' + message + '</a><br>');
+      $('#logs').append('<img src="' + message + '"/><br>');
+    } else {
+      $('#logs').append('<span class="text">' + message + '</span><br>');
+    }
+    $('#logs').append('<span><a class="meta" target="_blank" href="'+ webid +'">' + name + '</a> • <a class="meta" target="_blank" href="' + uri + '">'+ time  + '</a></span><br>');
+
+  }
+
+
+  function renderdates(dateuri, today) {
+
+
+
+
+
+    //////////////////////////////////////////////
+
+    var g = $rdf.graph();
+    var f = $rdf.fetcher(g);
+    // add CORS proxy
+    //$rdf.Fetcher.crossSiteProxyTemplate=PROXY;
+
+    var kb = tabulator.kb;
+    var fetcher = tabulator.sf;
+
+    var uri = window.location.href;
+    var base = window.document.title = uri.slice(0, uri.lastIndexOf('/')+1);
+
+    console.log('rendering dates');
+
+
+    console.log('dateuri : ' + dateuri);
+
+
+    // populate chat
+    f.nowOrWhenFetched( dateuri , undefined, function(ok, body) {
+      console.log('fetched');
+      console.log(body);
+
+
+
+
+
+      var LDP = $rdf.Namespace("http://www.w3.org/ns/ldp#");
+      var RDF = $rdf.Namespace("http://www.w3.org/1999/02/22-rdf-syntax-ns#");
+
+
+      var dates = g.statementsMatching(undefined, LDP('contains'), undefined);
+      //console.log('dates : ' + dates);
+
+      //$('#logs').empty();
+      //$('#logs').append(g.toString());
+
+      for (var i=dates.length-1; i>=0; i--) {
+        var date = dates[i];
+        //console.log(date);
+        if (date && date.object && date.object.value) {
+          var display = date.object.value.substr(-11,10)
+        }
+        console.log(' date : ' + display);
+        $('#dates').append('<h4><span id="'+ display +'" class="date">' + display + '</span></h4>');
+
+        $('#' + display).on('click', function () { renderlogs(dateuri, $(this).html()); $('span').css('color', 'white'); $(this).css('color', 'darkblue') } );
+
+      }
+
+      //$('#2015-02-06').on('click', function () { renderlogs('2015-02-06'); $('span').css('color', 'white'); $(this).css('color', 'darkblue') } );
+      //$('#2015-02-07').on('click', function () { renderlogs('2015-02-07'); $('span').css('color', 'white'); $(this).css('color', 'darkblue') } );
+      //$('#2015-02-08').on('click', function () { renderlogs('2015-02-08'); $('span').css('color', 'white'); $(this).css('color', 'darkblue') } );
+
+
+    });
+
+    $('span').css('color', 'white');
+    if (today) {
+      setTimeout(function(){ $('#' + today).css('color', 'darkblue'); }, 500);
+    }
+  }
+
+
+  function renderwebid(webid) {
+
+
+
+
+
+    //////////////////////////////////////////////
+
+    var g = $rdf.graph();
+    var f = $rdf.fetcher(g);
+    // add CORS proxy
+    //$rdf.Fetcher.crossSiteProxyTemplate=PROXY;
+
+    var kb = tabulator.kb;
+    var fetcher = tabulator.sf;
+
+    var uri = window.location.href;
+    var base = window.document.title = uri.slice(0, uri.lastIndexOf('/')+1);
+
+    console.log('rendering webid');
+
+
+    console.log('webid : ' + webid);
+
+    var profileuri = (webid.split('#'))[0]
+
+    // populate chat
+    f.nowOrWhenFetched( profileuri , undefined, function(ok, body) {
+      console.log('webid fetched');
+
+
+
+
+
+      var LDP = $rdf.Namespace("http://www.w3.org/ns/ldp#");
+      var RDF = $rdf.Namespace("http://www.w3.org/1999/02/22-rdf-syntax-ns#");
+      var FOAF = $rdf.Namespace("http://xmlns.com/foaf/0.1/");
+
+      /*
+      var name = g.statementsMatching(undefined, FOAF('name'), undefined);
+      var depiction = g.statementsMatching(undefined, FOAF('depiction'), undefined);
+      var image = g.statementsMatching(undefined, FOAF('img'), undefined);
+      */
+      var name = webidname;
+      var avatar = webidavatar;
+      var storage;
+
+      $.each(g.statementsMatching($rdf.sym(webid), FOAF('img'), undefined), function(index, value) {
+        avatar = value.object.value;
+        webidavatar = value.object.value;
+      });
+
+
+      $.each(g.statementsMatching($rdf.sym(webid), FOAF('depiction'), undefined), function(index, value) {
+        avatar = value.object.value;
+        webidavatar = value.object.value;
+      });
+
+
+      $.each(g.statementsMatching($rdf.sym(webid), FOAF('name'), undefined), function(index, value) {
+        name = value.object.value;
+        webidname = value.object.value;
+      });
+
+      console.log('name : ' + name);
+
+      $('#input').append('<br><br><img height="30" width="30" src="' + webidavatar + '">');
+      $('#input').append('<textarea name="chat" id="chat-input" placeholder="message" autofocus=""></textarea>');
+      $('#input').append('<br><span><a class="meta" target="_blank" href="'+ webid +'">' + webidname + '</a><br>');
+
+
+      $( "#chat-input" ).keyup(function(e) {
+        var code = e.which; // recommended to use e.which, it's normalized across browsers
+        e.preventDefault();
+        if(code==13){
+          var message = $('#chat-input').val().trim();
+          $('#chat-input').attr('disabled', 'disabled');
+
+          function putFile(file, data) {
+
+            $.ajax({
+              url: file,
+              contentType: "text/turtle",
+              type: 'PUT',
+              data: data,
+              success: function(result) {
+                // Do something with the result
+                addLog(webidavatar, $('#chat-input').val().trim(), webid, webidname, file, new Date().toISOString().substr(11,8));
+                $('#chat-input').val('');
+                $('#chat-input').attr('disabled', false);
+                $('#chat-input').focus();
+
+              }
+            });
+
+          }
+
+          var id = Math.floor(Math.random() * 100000000);
+
+          var turtle = '';
+          turtle += '<#author> ';
+          turtle += 'a <http://xmlns.com/foaf/0.1/#Person> ; ';
+          turtle += '   <http://www.w3.org/2002/07/owl#sameAs> <' + webid + '> ; ';
+          turtle += '    <http://xmlns.com/foaf/0.1/depiction> <'+ webidavatar +'> ; ';
+          turtle += '    <http://xmlns.com/foaf/0.1/name> "'+ webidname +'" . ';
+
+          turtle += '<#this> ';
+          turtle += '    <http://purl.org/dc/terms/created> "'+ new Date().toISOString() +'"^^<http://www.w3.org/2001/XMLSchema#dateTime> ; ';
+          turtle += '    <http://purl.org/dc/terms/creator> <#author> ; ';
+          turtle += '    <http://rdfs.org/sioc/ns#content> "'+ message +'" ; ';
+          turtle += '    a <http://rdfs.org/sioc/ns#Post> ; ';
+          turtle += '    <http://www.w3.org/ns/mblog#author> <#author> . ';
+
+
+          console.log(turtle);
+
+          var today = new Date().toISOString().substr(0,10);
+          putFile(ldpc + today + '/' + id, turtle);
+
+          $.ajax({
+            url: ldpc + today + '/' + ',meta',
+            contentType: "text/turtle",
+            type: 'PUT',
+            data: '<> <http://www.w3.org/ns/posix/stat#mtime> "'+ Math.floor(Date.now() / 1000) +'" . ',
+            success: function(result) {
+            }
+          });
+
+
+        } // missing closing if brace
+      });
+
+
+    });
+
+  }
+
+  function playSound() {
+    var sound = new Howl({
+      urls: ['http://webid.im/pinglow.mp3'],
+      volume: 0.9
+    }).play();
+  }
+
+
+
+      jQuery(document).ready(function() {
+
+        var today = new Date().toISOString().substr(0,10);
+        console.log('Today is : ' + today)
+
+        // get dates
+        renderdates(dateuri, today);
+
+
+        renderlogs(dateuri, today);
+        //renderlogs('2015-02-08');
+
+        renderwebid(webid);
+        //renderlogs('2015-02-08');
+
+
+        var socket = new WebSocket(wss);
+
+        socket.onopen = function(){
+          console.log(this);
+          var today = new Date().toISOString().substr(0,10);
+          this.send('sub ' + ldpc + today +'/,meta');
+        }
+
+        socket.onmessage = function(msg){
+          console.log('Incoming message : ');
+          console.log(msg);
+          var today = new Date().toISOString().substr(0,10);
+
+          Notification.requestPermission(function (permission) {
+            // If the user is okay, let's create a notification
+            if (permission === "granted") {
+              notify = true;
+            }
+          });
+
+          playSound('http://webid.im/pinglow.mp3');
+
+          renderlogs(dateuri, today);
+        }
+
+      });
+
+      </script>
+
+      </html>
