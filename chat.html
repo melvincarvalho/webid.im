@@ -202,7 +202,7 @@ function renderlogs(dateuri, date) {
       if(!depiction) {
         avatar = image;
       }
-      window.scrollTo(0,document.body.scrollHeight);
+      $("html, body").animate({ scrollTop: $(document).height() }, "slow");
 
       addLog(avatar[0].object.value, text[0].object.value, url[0].object.value, name[0].object.value, post.subject.value, created[0].object.value.substr(11,8));
 
