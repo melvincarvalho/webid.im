@@ -202,7 +202,6 @@ function renderlogs(dateuri, date) {
       if(!depiction) {
         avatar = image;
       }
-      $("html, body").animate({ scrollTop: $(document).height() }, "slow");
 
       addLog(avatar[0].object.value, text[0].object.value, url[0].object.value, name[0].object.value, post.subject.value, created[0].object.value.substr(11,8));
 
@@ -265,6 +264,8 @@ function renderlogs(dateuri, date) {
       $('#logs').append('<span class="text">' + message + '</span><br>');
     }
     $('#logs').append('<span><a class="meta" target="_blank" href="'+ webid +'">' + name + '</a> • <a class="meta" target="_blank" href="' + uri + '">'+ time  + '</a></span><br>');
+
+    $("html, body").animate({ scrollTop: $(document).height() }, "slow");
 
   }
 
