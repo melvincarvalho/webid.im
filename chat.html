@@ -1,534 +1,541 @@
-<!DOCTYPE html>
-<html>
-<head><meta charset='UTF-8'>
-  <title>WebID IM</title>
-  <link type="text/css" rel="stylesheet" href="https://linkeddata.github.io/tabulator-firefox/content/tabbedtab.css" />
-  <style>
+<!doctype html>
+<html lang="en">
+<head>
+	<meta charset="utf-8">
+	<meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1">
+	<meta name="description" content="Simple Chat Room">
+	<meta name="author" content="Tomomi Imura  @girlie_mac">
+	<meta name="viewport" content="width=device-width, initial-scale=1.0">
+	<meta name="apple-mobile-web-app-capable" content="yes">
+	<meta name="mobile-web-app-capable" content="yes">
+	<title>WebID Chat</title>
 
+	<link rel="icon" sizes="192x192" href="images/app-icon-192.png">
+	<link rel="icon" sizes="128x128" href="images/app-icon-128.png">
+	<link rel="apple-touch-icon" sizes="128x128" href="images/app-icon-128.png">
+	<link rel="apple-touch-icon-precomposed" sizes="128x128" href="images/app-icon-128.png">
 
-
-  .matrix tr td { background-color: #eef;  border: 0.1em solid white;}
-
-
-
-  html,body,.container
-  {
-    height:100%;
-  }
-  .container
-  {
-    display:table;
-    width: 100%;
-  }
-
-  .row
-  {
-    height: 100%;
-  }
-  .col-md-3.no-float, .col-md-9.no-float {
-    float: none;
-  }
-  .left
-  {
-    display: table-cell;
-    background: #1e3e46;
-    width: 350px;
-  }
-  .sel
-  {
-    color: darkblue;
-  }
-  .col-md-9
-  {
-    display: table-cell;
-    float: none;
-  }
-
-  .meta {
-    font: normal normal 400 12px/19.6px "Open Sans";
-    color: #AAAAAA;
-  }
-
-  h1 {
-    color: white;
-    text-align: center;
-  }
-
-  .text {
-    font-family: "Open Sans", "HelveticaNeue", sans-serif;
-    font-size: 14px;
-    line-height: 140%;
-  }
-
-  /*  vertical-align: middle;  for from */
-
-  </style>
-  <script type="text/javascript" src="https://code.jquery.com/jquery-2.1.3.min.js"></script>
-  <script type="text/javascript" src="https://linkeddata.github.io/tabulator/js/mashup/mashlib.js"></script>
-  <script src="//cdnjs.cloudflare.com/ajax/libs/webcomponentsjs/0.5.2/webcomponents.min.js"></script>
+	<!-- Polymer -->
+	<script src="bower_components/webcomponentsjs/webcomponents.min.js"></script>
+	<script type="text/javascript" src="https://code.jquery.com/jquery-2.1.3.min.js"></script>
+	<script type="text/javascript" src="https://linkeddata.github.io/tabulator/js/mashup/mashlib.js"></script>
   <script src="//cdnjs.cloudflare.com/ajax/libs/howler/1.1.25/howler.min.js"></script>
 
 
-
+	<link rel="import" href="bower_components/pubnub-polymer/pubnub-element.html">
+	<link rel="import" href="bower_components/core-scaffold/core-scaffold.html">
+	<link rel="import" href="bower_components/core-item/core-item.html">
+	<link rel="import" href="bower_components/paper-input/paper-input.html">
+	<link rel="import" href="bower_components/paper-fab/paper-fab.html">
+	<link rel="import" href="x-chat-list.html">
+	<link rel="stylesheet" href="css/style.css">
 </head>
-<body>
 
-  <div class="container">
-    <div class="row">
-      <div class="left no-float">
-        <h1 class="left-header" id="dates">Chat Logs</h1>
-      </div>
-      <div class="col-md-9 no-float">
-        <div id="logs"></div>
-        <div id="input"></div>
-      </div>
-    </div>
-  </div>
+<body unresolved fullbleed class="lite">
 
-
-  <div class="TabulatorOutline" id="DummyUUID">
+	<div class="TabulatorOutline" id="DummyUUID">
     <table id="outline"></table>
-
-
   </div>
 
 
+	<template is="auto-binding">
+
+		<core-scaffold>
+			<core-header-panel navigation flex>
+				<core-toolbar id="navheader" class="tall">
+					<div class="middle avatar {{color}}" style="background-image: url({{avatar}})"></div>
+					<div class="bottom uuid">{{uuid}}</div>
+				</core-toolbar>
+
+				<section layout vertical id="onlineList">
+					<h2>Logs</h2>
+					<div id="dates"></div>
+				</section>
+
+			</core-header-panel>
+
+			<div tool layout horizontal flex>
+				<span flex>WebID Chat</span>
+				<core-icon icon="account-circle"></core-icon><span>{{occupancy}}</span>
+			</div>
+
+			<section layout vertical fit id="chat">
+				<div flex class="chat-list">
+					<template repeat="{{message in messages}}">
+						<x-chat-list color="{{message.color}}" avatar="{{message.avatar}}" username="{{message.uuid}}" text="{{message.text}}"  status="{{message.status}}" timestamp="{{message.timestamp}}"></x-chat-list>
+					</template>
+				</div>
+				<div class="shim"></div>
 
-</body>
-<script>
-// var room = '54d36959db8155e6700f7b08'; // taskify
-var room = 'chat'; // linkeddata
-var ldpc = getParameterByName('ldpc');
-var webid = getParameterByName('webid');
-var webidname = getParameterByName('name') || webid;
-var webidavatar = getParameterByName('avatar') || 'http://www.murketing.com/journal/wp-content/uploads/2009/04/8tracks.jpg';
+				<div class="send-message" layout horizontal>
+					<paper-input flex label="Type message..." id="input" value="{{input}}" on-keyup="{{checkKey}}"></paper-input>
+					<paper-fab icon="send" id="sendButton" on-tap="{{sendMyMessage}}"></paper-fab>
+				</div>
+			</section>
+		</core-scaffold>
 
-var notify = false;
-console.log('webid is : ' + webid);
+	</template>
 
-//var wss = 'wss://gitter.databox.me';
-var wss = 'wss://klaranet.com';
+	<script>
+	jQuery(document).ready(function() {
 
-console.log('logs');
+    var notify = false;
+		var wss = 'wss://klaranet.com';
 
-var dateuri = ldpc;
+		function addLog(avatar, message, webid, name, uri, time) {
 
-/* get parameters */
-function getParameterByName(name) {
-  name = name.replace(/[\[]/, "\\[").replace(/[\]]/, "\\]");
-  var regex = new RegExp("[\\?&]" + name + "=([^&#]*)"),
-  results = regex.exec(location.search);
-  return results === null ? "" : decodeURIComponent(results[1].replace(/\+/g, " "));
-}
+			var isImage =   (/\.(gif|jpg|jpeg|tiff|png|svg)$/i).test(message);
 
-function renderlogs(dateuri, date) {
 
-  var fetchuri = dateuri + date + '/*';
+/*
+			$('#logs').append('<img height="30" width="30" src="' + avatar + '">');
+			if (isImage) {
+				$('#logs').append('<a target="_blank" href="'+message+'" class="text">' + message + '</a><br>');
+				$('#logs').append('<img src="' + message + '"/><br>');
+			} else {
+				$('#logs').append('<span class="text">' + message + '</span><br>');
+			}
+			$('#logs').append('<span><a class="meta" target="_blank" href="'+ webid +'">' + name + '</a> • <a class="meta" target="_blank" href="' + uri + '">'+ time  + '</a></span><br>');
+*/
+			template.messages.push({
+				uuid: name,
+				avatar: avatar,
+				color: color,
+				text: message,
+				timestamp: new Date().toISOString()
+			});
+			//$(window).scrollTop($(document).height());
+			showNewest();
+			/*
+			var chatDiv = document.querySelector('.chat-list');
+			chatDiv.scrollTop = chatDiv.scrollHeight;
 
-  console.log('rendering logs for : ' + fetchuri);
+			setTimeout(function () { chatDiv.scrollTop = chatDiv.scrollHeight }, 2000);
+			*/
 
+		}
 
 
-  //////////////////////////////////////////////
+		/* get parameters */
+		function getParameterByName(name) {
+			name = name.replace(/[\[]/, "\\[").replace(/[\]]/, "\\]");
+			var regex = new RegExp("[\\?&]" + name + "=([^&#]*)"),
+			results = regex.exec(location.search);
+			return results === null ? "" : decodeURIComponent(results[1].replace(/\+/g, " "));
+		}
 
-  var g = $rdf.graph();
-  var f = $rdf.fetcher(g);
-  // add CORS proxy
-  var PROXY = "https://data.fm/proxy?uri={uri}";
-  var AUTH_PROXY = "https://rww.io/auth-proxy?uri=";
-  $rdf.Fetcher.crossSiteProxyTemplate=PROXY;
+		function showNewest() {
+			var chatDiv = document.querySelector('.chat-list');
+			if (chatDiv) {
+			  chatDiv.scrollTop = chatDiv.scrollHeight;
+		  }
+			setTimeout(function () { if (chatDiv) chatDiv.scrollTop = chatDiv.scrollHeight; }, 500);
+			setTimeout(function () { if (chatDiv) chatDiv.scrollTop = chatDiv.scrollHeight; }, 1000);
+			setTimeout(function () { if (chatDiv) chatDiv.scrollTop = chatDiv.scrollHeight; }, 2000);
+			setTimeout(function () { if (chatDiv) chatDiv.scrollTop = chatDiv.scrollHeight; }, 3000);
+		}
 
-  var kb = tabulator.kb;
-  var fetcher = tabulator.sf;
 
-  var uri = window.location.href;
-  var base = window.document.title = uri.slice(0, uri.lastIndexOf('/')+1);
+		function playSound() {
+	    var sound = new Howl({
+	      urls: ['http://webid.im/pinglow.mp3'],
+	      volume: 0.9
+	    }).play();
+	  }
 
+		function renderdates(dateuri, today) {
 
 
-  // populate chat
-  f.nowOrWhenFetched( fetchuri , undefined, function(ok, body) {
-    console.log('fetched');
-    console.log(body);
 
 
 
+	    //////////////////////////////////////////////
 
+	    var g = $rdf.graph();
+	    var f = $rdf.fetcher(g);
+	    // add CORS proxy
+	    //$rdf.Fetcher.crossSiteProxyTemplate=PROXY;
 
-    var SIOC = $rdf.Namespace("http://rdfs.org/sioc/ns#");
-    var RDF = $rdf.Namespace("http://www.w3.org/1999/02/22-rdf-syntax-ns#");
-    var DCT = $rdf.Namespace("http://purl.org/dc/terms/");
-    var FOAF = $rdf.Namespace("http://xmlns.com/foaf/0.1/");
-    var OWL = $rdf.Namespace("http://www.w3.org/2002/07/owl#");
+	    var kb = tabulator.kb;
+	    var fetcher = tabulator.sf;
 
+	    var uri = window.location.href;
+	    var base = window.document.title = uri.slice(0, uri.lastIndexOf('/')+1);
 
+	    console.log('rendering dates');
 
 
+	    console.log('dateuri : ' + dateuri);
 
 
+	    // populate chat
+	    f.nowOrWhenFetched( dateuri , undefined, function(ok, body) {
+	      console.log('fetched');
+	      console.log(body);
 
-    var posts = g.statementsMatching(undefined, undefined, SIOC('Post'));
 
-    console.log('posts : ' + posts);
-    $('#logs').empty();
-    //$('#logs').append(g.toString());
 
-    // sort by date
-    if (posts && posts.length > 0) {
-      posts.sort(function(a, b) {
-        var subjecta = a.subject;
-        var subjectb = b.subject;
-        var createda = g.statementsMatching(subjecta, DCT('created'), undefined);
-        var createdb = g.statementsMatching(subjectb, DCT('created'), undefined);
-        a = new Date(createda[0].object.value);
-        b = new Date(createdb[0].object.value);
-        return a>b ? 1 : a<b ? -1 : 0;
-      });
-    }
-    for (var i=0; i<posts.length; i++) {
-      var post = posts[i];
-      var subject = post.subject;
-      var details = g.statementsMatching(subject, undefined, undefined);
-      var author = g.statementsMatching(subject, DCT('creator'), undefined);
-      var created = g.statementsMatching(subject, DCT('created'), undefined);
-      var text = g.statementsMatching(subject, SIOC('content'), undefined);
-      var name = g.statementsMatching(author[0].object, FOAF('name'), undefined);
-      var url = g.statementsMatching(author[0].object, OWL('sameAs'), undefined);
-      var depiction = g.statementsMatching(author[0].object, FOAF('depiction'), undefined);
-      var image = g.statementsMatching(author[0].object, FOAF('image'), undefined);
-      console.log(author);
 
-      var avatar = depiction;
-      if(!depiction) {
-        avatar = image;
-      }
 
-      addLog(avatar[0].object.value, text[0].object.value, url[0].object.value, name[0].object.value, post.subject.value, created[0].object.value.substr(11,8));
+	      var LDP = $rdf.Namespace("http://www.w3.org/ns/ldp#");
+	      var RDF = $rdf.Namespace("http://www.w3.org/1999/02/22-rdf-syntax-ns#");
 
-      // Set the name of the hidden property and the change event for visibility
-      var hidden, visibilityChange;
-      if (typeof document.hidden !== "undefined") { // Opera 12.10 and Firefox 18 and later support
-        hidden = "hidden";
-        visibilityChange = "visibilitychange";
-      } else if (typeof document.mozHidden !== "undefined") {
-        hidden = "mozHidden";
-        visibilityChange = "mozvisibilitychange";
-      } else if (typeof document.msHidden !== "undefined") {
-        hidden = "msHidden";
-        visibilityChange = "msvisibilitychange";
-      } else if (typeof document.webkitHidden !== "undefined") {
-        hidden = "webkitHidden";
-        visibilityChange = "webkitvisibilitychange";
-      }
 
-      if(notify && i === posts.length-1 &&  url[0].object.value != webid && hidden ){
-        var notification = new Notification(name[0].object.value,
-          {'icon': "https://cdn1.iconfinder.com/data/icons/app-tab-bar-icons-for-ios/30/User_login.png",
-          "body" : text[0].object.value });
-          notify = false;
+	      var dates = g.statementsMatching(undefined, LDP('contains'), undefined);
+	      //console.log('dates : ' + dates);
 
-          notification.onclick = function(x) {
-            try {
-              window.focus();
-              this.cancel();
-            }
-            catch (ex) {
-            }
-          };
+	      //$('#logs').empty();
+	      //$('#logs').append(g.toString());
 
-          setTimeout(function(){
-            notification.close()
-          }, 10000);
+	      for (var i=dates.length-1; i>=0; i--) {
+	        var date = dates[i];
+	        //console.log(date);
+	        if (date && date.object && date.object.value) {
+	          var display = date.object.value.substr(-11,10)
+	        }
+	        console.log(' date : ' + display);
 
-        }
+					//template.items.push({ title : display });
 
-      }
+	        $('#dates').append('<div id="'+ display +'" class="date">' + display + '</div><br>');
 
-    });
+	        $('#' + display).on('click', function () { renderlogs(dateuri, $(this).html()); $('span').css('color', 'white'); $(this).css('color', 'darkblue') } );
 
+	      }
 
 
-  }
 
-  function addLog(avatar, message, webid, name, uri, time) {
-    console.log('Rendering log ');
+	    });
 
-    var isImage =   (/\.(gif|jpg|jpeg|tiff|png|svg)$/i).test(message);
+	    $('span').css('color', 'white');
+	    if (today) {
+	      setTimeout(function(){ $('#' + today).css('color', 'darkblue'); }, 500);
+	    }
+	  }
 
 
-    $('#logs').append('<img height="30" width="30" src="' + avatar + '">');
-    if (isImage) {
-      $('#logs').append('<a target="_blank" href="'+message+'" class="text">' + message + '</a><br>');
-      $('#logs').append('<img src="' + message + '"/><br>');
-    } else {
-      $('#logs').append('<span class="text">' + message + '</span><br>');
-    }
-    $('#logs').append('<span><a class="meta" target="_blank" href="'+ webid +'">' + name + '</a> • <a class="meta" target="_blank" href="' + uri + '">'+ time  + '</a></span><br>');
+		function renderlogs(dateuri, date) {
 
-    $(window).scrollTop($(document).height());
+			template.messages = [];
 
-  }
 
+			var fetchuri = dateuri + date + '/*';
 
-  function renderdates(dateuri, today) {
+			console.log('rendering logs for : ' + fetchuri);
 
 
 
+			//////////////////////////////////////////////
 
+			var g = $rdf.graph();
+			var f = $rdf.fetcher(g);
+			// add CORS proxy
+			var PROXY = "https://data.fm/proxy?uri={uri}";
+			var AUTH_PROXY = "https://rww.io/auth-proxy?uri=";
+			$rdf.Fetcher.crossSiteProxyTemplate=PROXY;
 
-    //////////////////////////////////////////////
+			var kb = tabulator.kb;
+			var fetcher = tabulator.sf;
 
-    var g = $rdf.graph();
-    var f = $rdf.fetcher(g);
-    // add CORS proxy
-    //$rdf.Fetcher.crossSiteProxyTemplate=PROXY;
+			var uri = window.location.href;
+			var base = window.document.title = uri.slice(0, uri.lastIndexOf('/')+1);
 
-    var kb = tabulator.kb;
-    var fetcher = tabulator.sf;
 
-    var uri = window.location.href;
-    var base = window.document.title = uri.slice(0, uri.lastIndexOf('/')+1);
 
-    console.log('rendering dates');
+			// populate chat
+			f.nowOrWhenFetched( fetchuri , undefined, function(ok, body) {
+				console.log('fetched');
+				console.log(body);
 
 
-    console.log('dateuri : ' + dateuri);
 
 
-    // populate chat
-    f.nowOrWhenFetched( dateuri , undefined, function(ok, body) {
-      console.log('fetched');
-      console.log(body);
 
+				var SIOC = $rdf.Namespace("http://rdfs.org/sioc/ns#");
+				var RDF = $rdf.Namespace("http://www.w3.org/1999/02/22-rdf-syntax-ns#");
+				var DCT = $rdf.Namespace("http://purl.org/dc/terms/");
+				var FOAF = $rdf.Namespace("http://xmlns.com/foaf/0.1/");
+				var OWL = $rdf.Namespace("http://www.w3.org/2002/07/owl#");
 
 
 
 
-      var LDP = $rdf.Namespace("http://www.w3.org/ns/ldp#");
-      var RDF = $rdf.Namespace("http://www.w3.org/1999/02/22-rdf-syntax-ns#");
 
 
-      var dates = g.statementsMatching(undefined, LDP('contains'), undefined);
-      //console.log('dates : ' + dates);
 
-      //$('#logs').empty();
-      //$('#logs').append(g.toString());
+				var posts = g.statementsMatching(undefined, undefined, SIOC('Post'));
 
-      for (var i=dates.length-1; i>=0; i--) {
-        var date = dates[i];
-        //console.log(date);
-        if (date && date.object && date.object.value) {
-          var display = date.object.value.substr(-11,10)
-        }
-        console.log(' date : ' + display);
-        $('#dates').append('<h4><span id="'+ display +'" class="date">' + display + '</span></h4>');
+				//console.log('posts : ' + posts);
+				$('#logs').empty();
+				//$('#logs').append(g.toString());
 
-        $('#' + display).on('click', function () { renderlogs(dateuri, $(this).html()); $('span').css('color', 'white'); $(this).css('color', 'darkblue') } );
+				// sort by date
+				if (posts && posts.length > 0) {
+					posts.sort(function(a, b) {
+						var subjecta = a.subject;
+						var subjectb = b.subject;
+						var createda = g.statementsMatching(subjecta, DCT('created'), undefined);
+						var createdb = g.statementsMatching(subjectb, DCT('created'), undefined);
+						a = new Date(createda[0].object.value);
+						b = new Date(createdb[0].object.value);
+						return a>b ? 1 : a<b ? -1 : 0;
+					});
+				}
+				for (var i=0; i<posts.length; i++) {
+					var post = posts[i];
+					var subject = post.subject;
+					var details = g.statementsMatching(subject, undefined, undefined);
+					var author = g.statementsMatching(subject, DCT('creator'), undefined);
+					var created = g.statementsMatching(subject, DCT('created'), undefined);
+					var text = g.statementsMatching(subject, SIOC('content'), undefined);
+					var name = g.statementsMatching(author[0].object, FOAF('name'), undefined);
+					var url = g.statementsMatching(author[0].object, OWL('sameAs'), undefined);
+					var depiction = g.statementsMatching(author[0].object, FOAF('depiction'), undefined);
+					var image = g.statementsMatching(author[0].object, FOAF('image'), undefined);
+					//console.log(author);
 
-      }
+					var avatar = depiction;
+					if(!depiction) {
+						avatar = image;
+					}
 
-      //$('#2015-02-06').on('click', function () { renderlogs('2015-02-06'); $('span').css('color', 'white'); $(this).css('color', 'darkblue') } );
-      //$('#2015-02-07').on('click', function () { renderlogs('2015-02-07'); $('span').css('color', 'white'); $(this).css('color', 'darkblue') } );
-      //$('#2015-02-08').on('click', function () { renderlogs('2015-02-08'); $('span').css('color', 'white'); $(this).css('color', 'darkblue') } );
 
+					addLog(avatar[0].object.value, text[0].object.value, url[0].object.value, name[0].object.value, post.subject.value, created[0].object.value.substr(11,8));
 
-    });
+					// Set the name of the hidden property and the change event for visibility
+					var hidden, visibilityChange;
+					if (typeof document.hidden !== "undefined") { // Opera 12.10 and Firefox 18 and later support
+						hidden = "hidden";
+						visibilityChange = "visibilitychange";
+					} else if (typeof document.mozHidden !== "undefined") {
+						hidden = "mozHidden";
+						visibilityChange = "mozvisibilitychange";
+					} else if (typeof document.msHidden !== "undefined") {
+						hidden = "msHidden";
+						visibilityChange = "msvisibilitychange";
+					} else if (typeof document.webkitHidden !== "undefined") {
+						hidden = "webkitHidden";
+						visibilityChange = "webkitvisibilitychange";
+					}
 
-    $('span').css('color', 'white');
-    if (today) {
-      setTimeout(function(){ $('#' + today).css('color', 'darkblue'); }, 500);
-    }
-  }
+					if(notify && i === posts.length-1 &&  url[0].object.value != webid && hidden ){
+						var notification = new Notification(name[0].object.value,
+							{'icon': "https://cdn1.iconfinder.com/data/icons/app-tab-bar-icons-for-ios/30/User_login.png",
+							"body" : text[0].object.value });
+							notify = false;
 
+							notification.onclick = function(x) {
+								try {
+									window.focus();
+									this.cancel();
+								}
+								catch (ex) {
+								}
+							};
 
-  function renderwebid(webid) {
+							setTimeout(function(){
+								notification.close()
+							}, 10000);
 
+						}
 
+					}
 
 
 
-    //////////////////////////////////////////////
+				});
 
-    var g = $rdf.graph();
-    var f = $rdf.fetcher(g);
-    // add CORS proxy
-    //$rdf.Fetcher.crossSiteProxyTemplate=PROXY;
+				showNewest();
 
-    var kb = tabulator.kb;
-    var fetcher = tabulator.sf;
 
-    var uri = window.location.href;
-    var base = window.document.title = uri.slice(0, uri.lastIndexOf('/')+1);
+			}
 
-    console.log('rendering webid');
 
 
-    console.log('webid : ' + webid);
+			//'use strict';
 
-    var profileuri = (webid.split('#'))[0]
 
-    // populate chat
-    f.nowOrWhenFetched( profileuri , undefined, function(ok, body) {
-      console.log('webid fetched');
+			var ldpc = getParameterByName('ldpc');
+			var webid = getParameterByName('webid');
+			var name = getParameterByName('name') || webid;
+			var avatar = getParameterByName('avatar');
+			var dateuri = ldpc;
 
 
+			var uuid, avatar, color, cat;
 
+			// Assign a uuid made of a random cat and a random color
+			var randomColor = function() {
+				var colors = ['navy', 'slate', 'olive', 'moss', 'chocolate', 'buttercup', 'maroon', 'cerise', 'plum', 'orchid'];
+				return colors[(Math.random() * colors.length) >>> 0];
+			};
 
+			var randomCat = function() {
+				var cats = ['tabby', 'bengal', 'persian', 'mainecoon', 'ragdoll', 'sphynx', 'siamese', 'korat', 'japanesebobtail', 'abyssinian', 'scottishfold'];
+				return cats[(Math.random() * cats.length) >>> 0];
+			};
 
-      var LDP = $rdf.Namespace("http://www.w3.org/ns/ldp#");
-      var RDF = $rdf.Namespace("http://www.w3.org/1999/02/22-rdf-syntax-ns#");
-      var FOAF = $rdf.Namespace("http://xmlns.com/foaf/0.1/");
+			color = randomColor();
+			cat = randomCat();
+			//uuid = color + '-' + cat;
+			uuid = name;
+			avatar = avatar;
 
-      /*
-      var name = g.statementsMatching(undefined, FOAF('name'), undefined);
-      var depiction = g.statementsMatching(undefined, FOAF('depiction'), undefined);
-      var image = g.statementsMatching(undefined, FOAF('img'), undefined);
-      */
-      var name = webidname;
-      var avatar = webidavatar;
-      var storage;
 
-      $.each(g.statementsMatching($rdf.sym(webid), FOAF('img'), undefined), function(index, value) {
-        avatar = value.object.value;
-        webidavatar = value.object.value;
-      });
+			/* Polymer UI and UX */
 
+			var template = document.querySelector('template[is=auto-binding]');
 
-      $.each(g.statementsMatching($rdf.sym(webid), FOAF('depiction'), undefined), function(index, value) {
-        avatar = value.object.value;
-        webidavatar = value.object.value;
-      });
+			template.channel = 'polymer-chat';
+			template.uuid = uuid;
+			template.avatar = avatar;
+			template.color = color;
 
+			template.items = [
+				{title: 'LDP', icon: 'cloud'},
+				{title: 'Polymer', icon: 'polymer'},
+				{title: 'WebID', icon: 'favorite'}
+			];
 
-      $.each(g.statementsMatching($rdf.sym(webid), FOAF('name'), undefined), function(index, value) {
-        name = value.object.value;
-        webidname = value.object.value;
-      });
+			template.messages = [
+/*
+				{
+					uuid: "Melvin Carvalho",
+					avatar: avatar,
+					color: color,
+					text: "hello!",
+					timestamp: new Date().toISOString()
+				}
+				*/
+			];
 
+			template.checkKey = function(e) {
+				if(e.keyCode === 13 || e.charCode === 13) {
+					template.publish();
+				}
+			};
 
-      $('#input').append('<br><br><img height="30" width="30" src="' + webidavatar + '">');
-      $('#input').append('<textarea name="chat" id="chat-input" placeholder="message" autofocus=""></textarea>');
-      $('#input').append('<br><span><a class="meta" target="_blank" href="'+ webid +'">' + webidname + '</a><br>');
+			template.sendMyMessage = function(e) {
+				template.publish();
+			};
 
 
-      $( "#chat-input" ).keyup(function(e) {
-        var code = e.which; // recommended to use e.which, it's normalized across browsers
-        e.preventDefault();
-        if(code==13){
-          var message = $('#chat-input').val().trim();
-          $('#chat-input').attr('disabled', 'disabled');
+			/* PubNub Realtime Chat */
 
-          function putFile(file, data) {
+			template.publish = function() {
+				if(!template.input) return;
 
-            $.ajax({
-              url: file,
-              contentType: "text/turtle",
-              type: 'PUT',
-              data: data,
-              success: function(result) {
-                // Do something with the result
-                addLog(webidavatar, $('#chat-input').val().trim(), webid, webidname, file, new Date().toISOString().substr(11,8));
-                $('#chat-input').val('');
-                $('#chat-input').attr('disabled', false);
-                $('#chat-input').focus();
+				//template.$.pub.message = {
+				var message = {
+					uuid: uuid,
+					avatar: avatar,
+					color: color,
+					text: template.input,
+					timestamp: new Date().toISOString()
+				};
+				//template.$.pub.publish();
+				template.messages.push(message);
+				template.input = '';
 
-              }
-            });
+				function putFile(file, data) {
 
-          }
+					$.ajax({
+						url: file,
+						contentType: "text/turtle",
+						type: 'PUT',
+						data: data,
+						success: function(result) {
+							// Do something with the result
+							//addLog(avatar, message.text.trim(), webid, uuid, file, new Date().toISOString().substr(11,8));
+							//$('#chat-input').val('');
+							//$('#chat-input').attr('disabled', false);
+							//$('#chat-input').focus();
+							showNewest();
 
-          var id = Math.floor(Math.random() * 100000000);
+						}
+					});
 
-          var turtle = '';
-          turtle += '<#author> ';
-          turtle += 'a <http://xmlns.com/foaf/0.1/#Person> ; ';
-          turtle += '   <http://www.w3.org/2002/07/owl#sameAs> <' + webid + '> ; ';
-          turtle += '    <http://xmlns.com/foaf/0.1/depiction> <'+ webidavatar +'> ; ';
-          turtle += '    <http://xmlns.com/foaf/0.1/name> "'+ webidname +'" . ';
+				}
 
-          turtle += '<#this> ';
-          turtle += '    <http://purl.org/dc/terms/created> "'+ new Date().toISOString() +'"^^<http://www.w3.org/2001/XMLSchema#dateTime> ; ';
-          turtle += '    <http://purl.org/dc/terms/creator> <#author> ; ';
-          turtle += '    <http://rdfs.org/sioc/ns#content> "'+ message +'" ; ';
-          turtle += '    a <http://rdfs.org/sioc/ns#Post> ; ';
-          turtle += '    <http://www.w3.org/ns/mblog#author> <#author> . ';
+				var id = Math.floor(Math.random() * 100000000);
 
+				var turtle = '';
+				turtle += '<#author> ';
+				turtle += 'a <http://xmlns.com/foaf/0.1/#Person> ; ';
+				turtle += '   <http://www.w3.org/2002/07/owl#sameAs> <' + webid + '> ; ';
+				turtle += '    <http://xmlns.com/foaf/0.1/depiction> <'+ avatar +'> ; ';
+				turtle += '    <http://xmlns.com/foaf/0.1/name> "'+ uuid +'" . ';
 
-          console.log(turtle);
+				turtle += '<#this> ';
+				turtle += '    <http://purl.org/dc/terms/created> "'+ new Date().toISOString() +'"^^<http://www.w3.org/2001/XMLSchema#dateTime> ; ';
+				turtle += '    <http://purl.org/dc/terms/creator> <#author> ; ';
+				turtle += '    <http://rdfs.org/sioc/ns#content> "'+ message.text.trim() +'" ; ';
+				turtle += '    a <http://rdfs.org/sioc/ns#Post> ; ';
+				turtle += '    <http://www.w3.org/ns/mblog#author> <#author> . ';
 
-          var today = new Date().toISOString().substr(0,10);
-          putFile(ldpc + today + '/' + id, turtle);
 
-          $.ajax({
-            url: ldpc + today + '/' + ',meta',
-            contentType: "text/turtle",
-            type: 'PUT',
-            data: '<> <http://www.w3.org/ns/posix/stat#mtime> "'+ Math.floor(Date.now() / 1000) +'" . ',
-            success: function(result) {
-            }
-          });
+				console.log(turtle);
 
+				var today = new Date().toISOString().substr(0,10);
+				putFile(ldpc + today + '/' + id, turtle);
 
-        }
-      });
+				$.ajax({
+					url: ldpc + today + '/' + ',meta',
+					contentType: "text/turtle",
+					type: 'PUT',
+					data: '<> <http://www.w3.org/ns/posix/stat#mtime> "'+ Math.floor(Date.now() / 1000) +'" . ',
+					success: function(result) {
+					}
+				});
 
+				showNewest();
 
-    });
 
-  }
 
-  function playSound() {
-    var sound = new Howl({
-      urls: ['http://webid.im/pinglow.mp3'],
-      volume: 0.9
-    }).play();
-  }
+			};
 
+			template.subscribeCallback = function(e) {
+				template.async(showNewest);
+			};
 
+			var today = new Date().toISOString().substr(0,10);
+			console.log('Today is : ' + today)
 
-      jQuery(document).ready(function() {
+			// get dates
+			renderdates(dateuri, today);
 
-        var today = new Date().toISOString().substr(0,10);
-        console.log('Today is : ' + today)
 
-        // get dates
-        renderdates(dateuri, today);
+			renderlogs(dateuri, today);
 
+      // socket
+			console.log("Opening socket to : " + wss);
+			var socket = new WebSocket(wss);
 
-        renderlogs(dateuri, today);
-        //renderlogs('2015-02-08');
+			socket.onopen = function(){
+				console.log(this);
+				var today = new Date().toISOString().substr(0,10);
+				this.send('sub ' + ldpc + today +'/,meta');
+			}
 
-        renderwebid(webid);
-        //renderlogs('2015-02-08');
+			socket.onmessage = function(msg){
+				console.log('Incoming message : ');
+				console.log(msg);
+				var today = new Date().toISOString().substr(0,10);
 
+				Notification.requestPermission(function (permission) {
+					// If the user is okay, let's create a notification
+					if (permission === "granted") {
+						notify = true;
+					}
+				});
 
-        var socket = new WebSocket(wss);
+				playSound('http://webid.im/pinglow.mp3');
+				renderlogs(dateuri, today);
+			}
 
-        socket.onopen = function(){
-          console.log(this);
-          var today = new Date().toISOString().substr(0,10);
-          this.send('sub ' + ldpc + today +'/,meta');
-        }
 
-        socket.onmessage = function(msg){
-          console.log('Incoming message : ');
-          console.log(msg);
-          var today = new Date().toISOString().substr(0,10);
 
-          Notification.requestPermission(function (permission) {
-            // If the user is okay, let's create a notification
-            if (permission === "granted") {
-              notify = true;
-            }
-          });
-
-          playSound('http://webid.im/pinglow.mp3');
-
-          renderlogs(dateuri, today);
-        }
-
-      });
-
-      </script>
-
-      </html>
+		});
+		</script>
+	</body>
+	</html>

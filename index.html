@@ -22,159 +22,160 @@
 
   <script src="bower_components/webcomponentsjs/webcomponents.min.js"></script>
   <link rel="import" href="login.html">
-  </head>
-  <body>
-    <webid-login id="webid-login"></webid-login>
+</head>
+<body>
+  <webid-login id="webid-login"></webid-login>
 
 
-    <div id="avatar">
-    </div>
+  <div id="avatar">
+  </div>
 
-    <div id="storage">
-    </div>
+  <div id="storage">
+  </div>
 
-    <div id="profile">
-    </div>
+  <div id="profile">
+  </div>
 
-    <div id="avatars">
-    </div>
+  <div id="avatars">
+  </div>
 
-    <div id="names">
-    </div>
+  <div id="names">
+  </div>
 
-    <div id="knows">
-    </div>
-
-
-    <script>
+  <div id="knows">
+  </div>
 
 
-    function renderwebid(webid) {
+  <script>
 
 
-
-      $('#webid-login').hide();
-
-
-      //////////////////////////////////////////////
-
-      var g = $rdf.graph();
-      var f = $rdf.fetcher(g);
-      // add CORS proxy
-      //var PROXY = "https://data.fm/proxy?uri={uri}";
-      //var AUTH_PROXY = "https://rww.io/auth-proxy?uri=";
-      //$rdf.Fetcher.crossSiteProxyTemplate=PROXY;
-
-      var kb = tabulator.kb;
-      var fetcher = tabulator.sf;
-
-      console.log('rending webid : ' + webid);
-
-      var profileuri = (webid.split('#'))[0];
-
-      // populate chat
-      f.nowOrWhenFetched( profileuri , undefined, function(ok, body) {
-        console.log('webid fetched');
+  function renderwebid(webid) {
 
 
 
+    $('#webid-login').hide();
 
 
-        // TODO: cleanup
-        // TODO:   html
-        // TODO:   error check
-        // TODO: arch
-        // TODO:   webid -> workspace -> spaces -> channels -> posts
-        // TODO:   ChatChannel
-        // TODO: klaranet and haproxy
-        // TODO: ACLs
-        // TODO: favicon
-        // TODO: multiple channels
-        // TODO: presence
-        // TODO: payments
-        // TODO: emoticons
-        // TODO: notifications
-        // TODO:  title notifications (1) focus and favicon
-        // TODO: default avatar
-        // TODO: encryption
-        // TODO: set HEAD to klaranet
-        // TODO: come up with url for chat
-        // TODO:   individual URLs rooms
-        // TODO: expand links into content
-        // TODO: mobile
-        // TODO: github integration
-        // TODO: like
-        // TODO: snapchat 10 workflow
-        // TODO: highlight links
-        // TODO: mark
-        // TODO: facebook integration
-        // TODO: multi user integration
-        // TODO: add knowledgebase
-        // TODO: multiple stores
-        var LDP = $rdf.Namespace("http://www.w3.org/ns/ldp#");
-        var RDF = $rdf.Namespace("http://www.w3.org/1999/02/22-rdf-syntax-ns#");
-        var FOAF = $rdf.Namespace("http://xmlns.com/foaf/0.1/");
-        var PIM = $rdf.Namespace("http://www.w3.org/ns/pim/space#");
-        var RDFS = $rdf.Namespace("http://www.w3.org/2000/01/rdf-schema#");
+    //////////////////////////////////////////////
+
+    var g = $rdf.graph();
+    var f = $rdf.fetcher(g);
+    // add CORS proxy
+    //var PROXY = "https://data.fm/proxy?uri={uri}";
+    //var AUTH_PROXY = "https://rww.io/auth-proxy?uri=";
+    //$rdf.Fetcher.crossSiteProxyTemplate=PROXY;
+
+    var kb = tabulator.kb;
+    var fetcher = tabulator.sf;
+
+    console.log('rending webid : ' + webid);
+
+    var profileuri = (webid.split('#'))[0];
+
+    // populate chat
+    f.nowOrWhenFetched( profileuri , undefined, function(ok, body) {
+      console.log('webid fetched');
 
 
 
-        var webidname;
-        var webidavatar;
-        var storage;
-
-        $.each(g.statementsMatching($rdf.sym(webid), FOAF('img'), undefined), function(index, value) {
-          webidavatar = value.object.value;
-        });
 
 
-        $.each(g.statementsMatching($rdf.sym(webid), FOAF('depiction'), undefined), function(index, value) {
-          webidavatar = value.object.value;
-        });
+      // TODO: cleanup
+      // TODO:   html
+      // TODO:   error check
+      // TODO: arch
+      // TODO:   webid -> workspace -> spaces -> channels -> posts
+      // TODO:   ChatChannel
+      // TODO: klaranet and haproxy
+      // TODO: ACLs
+      // TODO: favicon
+      // TODO: multiple channels
+      // TODO: presence
+      // TODO: payments
+      // TODO: emoticons
+      // TODO: notifications
+      // TODO:  title notifications (1) focus and favicon
+      // TODO: default avatar
+      // TODO: encryption
+      // TODO: set HEAD to klaranet
+      // TODO: come up with url for chat
+      // TODO:   individual URLs rooms
+      // TODO: expand links into content
+      // TODO: mobile
+      // TODO: github integration
+      // TODO: like
+      // TODO: snapchat 10 workflow
+      // TODO: highlight links
+      // TODO: mark
+      // TODO: facebook integration
+      // TODO: multi user integration
+      // TODO: add knowledgebase
+      // TODO: multiple stores
+      var LDP = $rdf.Namespace("http://www.w3.org/ns/ldp#");
+      var RDF = $rdf.Namespace("http://www.w3.org/1999/02/22-rdf-syntax-ns#");
+      var FOAF = $rdf.Namespace("http://xmlns.com/foaf/0.1/");
+      var PIM = $rdf.Namespace("http://www.w3.org/ns/pim/space#");
+      var RDFS = $rdf.Namespace("http://www.w3.org/2000/01/rdf-schema#");
 
 
-        $.each(g.statementsMatching($rdf.sym(webid), FOAF('name'), undefined), function(index, value) {
-          webidname = value.object.value;
-        });
 
-        $.each(g.statementsMatching($rdf.sym(webid), PIM('storage'), undefined), function(index, value) {
-          storage = value.object.value;
-        });
+      var webidname;
+      var webidavatar;
+      var storage;
 
-        $.each(g.statementsMatching($rdf.sym(webid), RDFS('seeAlso'), undefined), function(index, value) {
-          seeAlso = value.object.value;
-        });
+      $.each(g.statementsMatching($rdf.sym(webid), FOAF('img'), undefined), function(index, value) {
+        webidavatar = value.object.value;
+      });
 
 
-        function addStorage(storage) {
-          if ( ! $('#storage').find('select').length ) {
-            $('#storage').append('<span>Storage : </span>')
-            $('#storage').append($('<select id="storagedropdown"></select>'));
-            $('#profile').append('<div>Personal Diary : <a id="diary" target="_blank">Launch</a></div>');
-            $('#diary').on('click', function() {
-              window.open('chat.html?ldpc='+ encodeURIComponent($('#storagedropdown').val()) +'chat/diary/&webid='+encodeURIComponent(webid));
-              return false;
-            });
-          }
-          if (! $('#storagedropdown option[value="'+storage+'"]').length) {
-            $('#storagedropdown').append( new Option(storage, storage) );
-          }
-        }
+      $.each(g.statementsMatching($rdf.sym(webid), FOAF('depiction'), undefined), function(index, value) {
+        webidavatar = value.object.value;
+      });
 
-        $('#avatar').append('<img size="50" width="50" src="'+ webidavatar +'"/>')
-        addStorage(storage);
-        if (seeAlso) {
-          //$('#profile').append('<div>See Also : <a target="_blank" href="'+seeAlso+'">'+seeAlso+'</a></div>')
-          f.nowOrWhenFetched( seeAlso , undefined, function(ok, body) {
-            console.log('seeAlso fetched ');
-            $.each(g.statementsMatching($rdf.sym(webid), PIM('storage'), undefined), function(index, value) {
-              var storage = value.object.value;
-              addStorage(storage);
-            });
+
+      $.each(g.statementsMatching($rdf.sym(webid), FOAF('name'), undefined), function(index, value) {
+        webidname = value.object.value;
+      });
+
+      $.each(g.statementsMatching($rdf.sym(webid), PIM('storage'), undefined), function(index, value) {
+        storage = value.object.value;
+      });
+
+      $.each(g.statementsMatching($rdf.sym(webid), RDFS('seeAlso'), undefined), function(index, value) {
+        seeAlso = value.object.value;
+      });
+
+
+      function addStorage(storage) {
+        if ( ! $('#storage').find('select').length ) {
+          $('#storage').append('<span>Storage : </span>')
+          $('#storage').append($('<select id="storagedropdown"></select>'));
+          $('#profile').append('<div>Personal Diary : <a id="diary" target="_blank">Launch</a></div>');
+          $('#diary').on('click', function() {
+            window.open('chat.html?ldpc='+ encodeURIComponent($('#storagedropdown').val()) +'chat/diary/&webid='+encodeURIComponent(webid));
+            return false;
           });
         }
-        $('#profile').append('<div id="name"><strong>'+ webidname +'</strong></div>')
+        if (! $('#storagedropdown option[value="'+storage+'"]').length) {
+          $('#storagedropdown').append( new Option(storage, storage) );
+        }
+      }
 
+      $('#avatar').append('<img size="50" width="50" src="'+ webidavatar +'"/>')
+      addStorage(storage);
+      if (seeAlso) {
+        //$('#profile').append('<div>See Also : <a target="_blank" href="'+seeAlso+'">'+seeAlso+'</a></div>')
+        f.nowOrWhenFetched( seeAlso , undefined, function(ok, body) {
+          console.log('seeAlso fetched ');
+          $.each(g.statementsMatching($rdf.sym(webid), PIM('storage'), undefined), function(index, value) {
+            var storage = value.object.value;
+            addStorage(storage);
+          });
+        });
+      }
+      $('#profile').append('<div id="name"><strong>'+ webidname +'</strong></div>')
+
+      function addFriends() {
         // friends
         $.each(g.statementsMatching($rdf.sym(webid), FOAF('knows'), undefined), function(index, value) {
 
@@ -188,7 +189,7 @@
           var hash = CryptoJS.SHA256(users);
           console.log('hash ('+ users +') = ' + hash);
 
-          $('#knows').append('<div>Start <a target="_blank" href="/chat.html?ldpc=https://klaranet.com/d/chat/'+hash+'/&webid='+encodeURIComponent(webid)+'">Chat</a> or [<a href="/chat.html?ldpc=https://klaranet.com/d/chat/'+hash+'/&webid='+encodeURIComponent(friend)+'" target="_blank">Share</a>] : <a about="'+ friend +'" href="'+ friend +'">'+ friend +'</a></div>')
+          $('#knows').append('<div>Start <a target="_blank" href="chat.html?ldpc=https://klaranet.com/d/chat/'+hash+'/&webid='+encodeURIComponent(webid)+'">Chat</a> or [<a href="chat.html?ldpc=https://klaranet.com/d/chat/'+hash+'/&webid='+encodeURIComponent(friend)+'" target="_blank">Share</a>] : <a about="'+ friend +'" href="'+ friend +'">'+ friend +'</a></div>')
           console.log(friend);
 
 
@@ -248,25 +249,28 @@
 
         });
 
-
-      });
-
-    }
-
-
-    // Listen to WebIDAuth events
-    window.addEventListener('WebIDAuth',function(e) {
-      console.log(e.detail);
-      if (e.detail.success === true) {
-        console.log("Auth successful! WebID: "+e.detail.user);
-        renderwebid(e.detail.user);
-      } else {
-        console.log("Auth failed!");
-        console.log(e.detail);
       }
-    },false);
+
+      setTimeout(addFriends, 1000);
+
+    });
+
+  }
 
 
-    </script>
-  </body>
-  </html>
+  // Listen to WebIDAuth events
+  window.addEventListener('WebIDAuth',function(e) {
+    console.log(e.detail);
+    if (e.detail.success === true) {
+      console.log("Auth successful! WebID: "+e.detail.user);
+      renderwebid(e.detail.user);
+    } else {
+      console.log("Auth failed!");
+      console.log(e.detail);
+    }
+  },false);
+
+
+  </script>
+</body>
+</html>
