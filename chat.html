@@ -369,7 +369,6 @@
 			};
 
 			color = randomColor();
-			avatar = avatar;
 
 
 			/* Polymer UI and UX */
@@ -494,6 +493,10 @@
 				console.log(msg);
 				var today = new Date().toISOString().substr(0,10);
 
+				playSound(soundURI);
+				renderlogs(dateuri, today);
+
+
 				Notification.requestPermission(function (permission) {
 					// If the user is okay, let's create a notification
 					if (permission === "granted") {
@@ -501,8 +504,6 @@
 					}
 				});
 
-				playSound(soundURI);
-				renderlogs(dateuri, today);
 			}
 
 
