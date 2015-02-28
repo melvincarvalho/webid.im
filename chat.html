@@ -62,7 +62,7 @@
 			<section layout vertical fit id="chat">
 				<div flex class="chat-list">
 					<template repeat="{{message in messages}}">
-						<x-chat-list img="{{message.img}}" color="{{message.color}}" avatar="{{message.avatar}}" username="{{message.uuid}}" text="{{message.text}}"  status="{{message.status}}" timestamp="{{message.timestamp}}"></x-chat-list>
+						<x-chat-list uri="{{message.uri}}" img="{{message.img}}" color="{{message.color}}" avatar="{{message.avatar}}" username="{{message.uuid}}" text="{{message.text}}"  status="{{message.status}}" timestamp="{{message.timestamp}}"></x-chat-list>
 					</template>
 				</div>
 				<div class="shim"></div>
@@ -107,7 +107,8 @@
 					color: color,
 					text: message,
 					timestamp: time,
-					img: message
+					img: message,
+					uri: uri
 				};
 			} else {
         m = {
@@ -116,20 +117,13 @@
 					color: color,
 					text: message,
 					timestamp: time,
+					uri : uri
 				};
 
 			}
-console.log(m);
 
 			template.messages.push(m);
-			//$(window).scrollTop($(document).height());
 			showNewest();
-			/*
-			var chatDiv = document.querySelector('.chat-list');
-			chatDiv.scrollTop = chatDiv.scrollHeight;
-
-			setTimeout(function () { chatDiv.scrollTop = chatDiv.scrollHeight }, 2000);
-			*/
 
 		}
 
