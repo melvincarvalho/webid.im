@@ -85,44 +85,20 @@
 		var wss = 'wss://klaranet.com';
 		var soundURI = 'http://webid.im/pinglow.mp3';
 
-		function addLog(avatar, message, webid, name, uri, time) {
+		function addMessage(avatar, message, webid, name, uri, time) {
 
 			var isImage =   (/\.(gif|jpg|jpeg|tiff|png|svg)$/i).test(message);
-
-
-/*
-			$('#logs').append('<img height="30" width="30" src="' + avatar + '">');
-			if (isImage) {
-				$('#logs').append('<a target="_blank" href="'+message+'" class="text">' + message + '</a><br>');
-				$('#logs').append('<img src="' + message + '"/><br>');
-			} else {
-				$('#logs').append('<span class="text">' + message + '</span><br>');
-			}
-			$('#logs').append('<span><a class="meta" target="_blank" href="'+ webid +'">' + name + '</a> • <a class="meta" target="_blank" href="' + uri + '">'+ time  + '</a></span><br>');
-*/
-
-      var m;
+			var m = {
+				name: name,
+				avatar: avatar,
+				color: color,
+				text: message,
+				timestamp: time,
+				uri : uri
+			};
 
 			if (isImage) {
-				m = {
-					name: name,
-					avatar: avatar,
-					color: color,
-					text: message,
-					timestamp: time,
-					img: message,
-					uri: uri
-				};
-			} else {
-        m = {
-					name: name,
-					avatar: avatar,
-					color: color,
-					text: message,
-					timestamp: time,
-					uri : uri
-				};
-
+				m.img = message;
 			}
 
       var exists = false;
@@ -323,7 +299,7 @@
 					}
 
 
-					addLog(avatar[0].object.value, text[0].object.value, url[0].object.value, name[0].object.value, post.subject.value, created[0].object.value );
+					addMessage(avatar[0].object.value, text[0].object.value, url[0].object.value, name[0].object.value, post.subject.value, created[0].object.value );
 
 					// Set the name of the hidden property and the change event for visibility
 					var hidden, visibilityChange;
@@ -441,7 +417,7 @@
 						data: data,
 						success: function(result) {
 							// Do something with the result
-							//addLog(avatar, message.text.trim(), webid, name, file, new Date().toISOString().substr(11,8));
+							//addMessage(avatar, message.text.trim(), webid, name, file, new Date().toISOString().substr(11,8));
 							//$('#chat-input').val('');
 							//$('#chat-input').attr('disabled', false);
 							//$('#chat-input').focus();
@@ -483,7 +459,7 @@
 					}
 				});
 
-				addLog(avatar, message.text.trim(), webid, name, ldpc + today + '/' + id + '#this', new Date().toISOString() );
+				addMessage(avatar, message.text.trim(), webid, name, ldpc + today + '/' + id + '#this', new Date().toISOString() );
 				showNewest();
 
 
