@@ -80,6 +80,7 @@
 	jQuery(document).ready(function() {
 
     // globals
+		'use strict';
     var notify = false;
 		var wss = 'wss://klaranet.com';
 		var soundURI = 'http://webid.im/pinglow.mp3';
@@ -374,9 +375,8 @@
 
 
 
-			//'use strict';
 
-
+      // main
 			var ldpc = getParameterByName('ldpc');
 			var webid = getParameterByName('webid');
 			var name = getParameterByName('name') || webid;
@@ -404,24 +404,7 @@
 			template.name = name;
 			template.avatar = avatar;
 			template.color = color;
-
-			template.items = [
-				{title: 'LDP', icon: 'cloud'},
-				{title: 'Polymer', icon: 'polymer'},
-				{title: 'WebID', icon: 'favorite'}
-			];
-
-			template.messages = [
-/*
-				{
-					name: "Melvin Carvalho",
-					avatar: avatar,
-					color: color,
-					text: "hello!",
-					timestamp: new Date().toISOString()
-				}
-				*/
-			];
+			template.messages = [];
 
 			template.checkKey = function(e) {
 				if(e.keyCode === 13 || e.charCode === 13) {
@@ -433,8 +416,6 @@
 				template.publish();
 			};
 
-
-			/* PubNub Realtime Chat */
 
 			template.publish = function() {
 				if(!template.input) return;
@@ -502,7 +483,7 @@
 					}
 				});
 
-				addLog(avatar, message.text.trim(), webid, name, ldpc + today + '/' + id, new Date().toISOString() );
+				addLog(avatar, message.text.trim(), webid, name, ldpc + today + '/' + id + '#this', new Date().toISOString() );
 				showNewest();
 
 
