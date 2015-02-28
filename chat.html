@@ -102,7 +102,7 @@
 				avatar: avatar,
 				color: color,
 				text: message,
-				timestamp: new Date().toISOString()
+				timestamp: time
 			});
 			//$(window).scrollTop($(document).height());
 			showNewest();
@@ -300,7 +300,7 @@
 					}
 
 
-					addLog(avatar[0].object.value, text[0].object.value, url[0].object.value, name[0].object.value, post.subject.value, created[0].object.value.substr(11,8));
+					addLog(avatar[0].object.value, text[0].object.value, url[0].object.value, name[0].object.value, post.subject.value, created[0].object.value );
 
 					// Set the name of the hidden property and the change event for visibility
 					var hidden, visibilityChange;
