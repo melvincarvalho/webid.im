@@ -152,7 +152,7 @@
           $('#storage').append($('<select id="storagedropdown"></select>'));
           $('#profile').append('<div>Personal Diary : <a id="diary" target="_blank">Launch</a></div>');
           $('#diary').on('click', function() {
-            window.open('chat.html?ldpc='+ encodeURIComponent($('#storagedropdown').val()) +'chat/diary/&webid='+encodeURIComponent(webid));
+            window.open('chat.html?ldpc='+ encodeURIComponent($('#storagedropdown').val()) +'chat/diary/&webid='+encodeURIComponent(webid) + '&name=' + encodeURIComponent(webidname) + '&avatar=' + encodeURIComponent(webidavatar) );
             return false;
           });
         }
