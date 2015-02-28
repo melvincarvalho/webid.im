@@ -122,8 +122,16 @@
 
 			}
 
-			template.messages.push(m);
-			showNewest();
+      var exists = false;
+			for (var i=0; i<template.messages.length; i++) {
+				if (template.messages[i].uri === m.uri) {
+					exists = true;
+				}
+			}
+			if (!exists) {
+				template.messages.push(m);
+				showNewest();
+			}
 
 		}
 
@@ -211,7 +219,7 @@
 
 	        $('#dates').append('<div id="'+ display +'" class="date">' + display + '</div><br>');
 
-	        $('#' + display).on('click', function () { renderlogs(dateuri, $(this).html()); $('span').css('color', 'white'); $(this).css('color', 'darkblue') } );
+	        $('#' + display).on('click', function () { template.messages = [] ; renderlogs(dateuri, $(this).html()); $('span').css('color', 'white'); $(this).css('color', 'darkblue') } );
 
 	      }
 
@@ -228,7 +236,7 @@
 
 		function renderlogs(dateuri, date) {
 
-			template.messages = [];
+			if (!template.messages) template.messages = [];
 
 
 			var fetchuri = dateuri + date + '/*';
@@ -446,7 +454,7 @@
 					timestamp: new Date().toISOString()
 				};
 				//template.$.pub.publish();
-				template.messages.push(message);
+				//template.messages.push(message);
 				template.input = '';
 
 				function putFile(file, data) {
@@ -500,6 +508,7 @@
 					}
 				});
 
+				addLog(avatar, message.text.trim(), ldpc + today + '/' + id, uuid, webid, new Date().toISOString() );
 				showNewest();
 
 
