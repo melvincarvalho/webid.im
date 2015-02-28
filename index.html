@@ -28,7 +28,8 @@
 	<link rel="import" href="bower_components/core-item/core-item.html">
 	<link rel="import" href="bower_components/paper-input/paper-input.html">
 	<link rel="import" href="bower_components/paper-fab/paper-fab.html">
-	<link rel="import" href="x-chat-list.html">
+  <link rel="import" href="x-chat-list.html">
+  <link rel="import" href="x-friend-list.html">
 	<link rel="import" href="login.html">
 	<link rel="stylesheet" href="css/style.css">
 </head>
@@ -66,7 +67,7 @@
 			<section layout vertical fit id="chat">
 				<div flex class="chat-list">
 					<template repeat="{{message in messages}}">
-						<x-chat-list uri="{{message.uri}}" img="{{message.img}}" color="{{message.color}}" avatar="{{message.avatar}}" username="{{message.name}}" text="{{message.text}}"  status="{{message.status}}" timestamp="{{message.timestamp}}"></x-chat-list>
+						<x-friend-list uri="{{message.uri}}" img="{{message.img}}" color="{{message.color}}" avatar="{{message.avatar}}" username="{{message.name}}" text="{{message.text}}"  status="{{message.status}}" timestamp="{{message.timestamp}}"></x-friend-list>
 					</template>
 
 					<webid-login id="webid-login"></webid-login>
@@ -85,7 +86,6 @@
 
 
 				</div>
-				<div class="shim"></div>
 
 			</section>
 		</core-scaffold>
@@ -111,7 +111,8 @@
 
 
       // main
-			var webid = getParameterByName('webid');
+      var ldpc = 'https://klaranet.com/d/chat/';
+      var webid = getParameterByName('webid');
 			var name = getParameterByName('name') || webid;
 			var avatar = getParameterByName('avatar');
 
@@ -200,7 +201,6 @@
 		      // TODO: facebook integration
 		      // TODO: multi user integration
 		      // TODO: add knowledgebase
-		      // TODO: multiple stores
 		      var LDP = $rdf.Namespace("http://www.w3.org/ns/ldp#");
 		      var RDF = $rdf.Namespace("http://www.w3.org/1999/02/22-rdf-syntax-ns#");
 		      var FOAF = $rdf.Namespace("http://xmlns.com/foaf/0.1/");
@@ -279,30 +279,35 @@
 		          var hash = CryptoJS.SHA256(users);
 		          console.log('hash ('+ users +') = ' + hash);
 
-		          $('#knows').append('<div>Start <a target="_blank" href="chat.html?ldpc=https://klaranet.com/d/chat/'+hash+'/&webid='+encodeURIComponent(webid)+'">Chat</a> or [<a href="chat.html?ldpc=https://klaranet.com/d/chat/'+hash+'/&webid='+encodeURIComponent(friend)+'" target="_blank">Share</a>] : <a about="'+ friend +'" href="'+ friend +'">'+ friend +'</a></div>')
+		          //$('#knows').append('<div>Start <a target="_blank" href="chat.html?ldpc=https://klaranet.com/d/chat/'+hash+'/&webid='+encodeURIComponent(webid)+'">Chat</a> or [<a href="chat.html?ldpc=https://klaranet.com/d/chat/'+hash+'/&webid='+encodeURIComponent(friend)+'" target="_blank">Share</a>] : <a about="'+ friend +'" href="'+ friend +'">'+ friend +'</a></div>')
 		          console.log(friend);
 
 
 		          var profileuri = (friend.split('#'))[0];
 		          f.nowOrWhenFetched( profileuri , undefined, function(ok, body) {
+                var name;
+                var avatar;
+
 
 		            $.each(g.statementsMatching($rdf.sym(friend), FOAF('name'), undefined), function(index, value) {
-		              var name = value.object.value;
+		              name = value.object.value;
 		              console.log(name);
 		              var friendel = $( "[about='"+ friend +"']" );
 		              friendel.text(name);
+
+                  /*
 		              friendel.parent().insertAfter('#names');
 		              var sharehref = friendel.prev().attr('href');
 		              var chathref = friendel.prev().prev().attr('href');
 
 		              friendel.prev().attr('href', sharehref + '&name=' + encodeURIComponent(name) );
 		              friendel.prev().prev().attr('href', chathref + '&name=' + encodeURIComponent(webidname) );
+                  */
 
 		              //console.log('share  : ' + sharehref );
 		              //console.log('chat : ' +  chathref);
 		            });
 
-		            var avatar;
 		            $.each(g.statementsMatching($rdf.sym(friend), FOAF('img'), undefined), function(index, value) {
 		              var img = value.object.value;
 		              console.log(img);
@@ -319,6 +324,7 @@
 		              //$( "[about='"+ friend +"']" ).parent().insertAfter('#avatars');
 		            });
 
+/*
 		            if (avatar) {
 		              var friendel = $( "[about='"+ friend +"']" );
 		              friendel.parent().insertAfter('#names');
@@ -332,6 +338,15 @@
 		              friendel.before('<img height="30" width="30" src="' + avatar + '">');
 		              friendel.parent().insertAfter('#avatars');
 		            }
+                */
+
+                if (avatar) {
+                  template.messages.unshift( { avatar : avatar, uri : 'chat.html?ldpc=' +encodeURIComponent(ldpc)+ hash + '/&webid='+encodeURIComponent(friend)+'&avatar='+encodeURIComponent(avatar)+'&name='+encodeURIComponent(name),
+                  text : 'chat.html?ldpc=' +encodeURIComponent(ldpc)+ hash + '/&webid='+encodeURIComponent(webid)+'&avatar='+encodeURIComponent(webidavatar)+'&name='+encodeURIComponent(webidname), name : name || friend }  );
+                } else {
+                  template.messages.push( { avatar : avatar, uri : 'chat.html?ldpc=' +encodeURIComponent(ldpc)+ hash + '/&webid='+encodeURIComponent(friend)+'&avatar='+encodeURIComponent(avatar)+'&name='+encodeURIComponent(name),
+                  text : 'chat.html?ldpc=' +encodeURIComponent(ldpc)+ hash + '/&webid='+encodeURIComponent(webid)+'&avatar='+encodeURIComponent(webidavatar)+'&name='+encodeURIComponent(webidname), name : name || friend }  );
+                }
 
 
 		          });
