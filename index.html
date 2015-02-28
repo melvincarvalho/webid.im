@@ -1,276 +1,368 @@
-<html>
+<!doctype html>
+<html lang="en">
 <head>
+	<meta charset="utf-8">
+	<meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1">
+	<meta name="description" content="Simple Chat Room">
+	<meta name="author" content="Tomomi Imura  @girlie_mac">
+	<meta name="viewport" content="width=device-width, initial-scale=1.0">
+	<meta name="apple-mobile-web-app-capable" content="yes">
+	<meta name="mobile-web-app-capable" content="yes">
+	<title>WebID Chat</title>
+
+	<link rel="icon" sizes="192x192" href="images/app-icon-192.png">
+	<link rel="icon" sizes="128x128" href="images/app-icon-128.png">
+	<link rel="apple-touch-icon" sizes="128x128" href="images/app-icon-128.png">
+	<link rel="apple-touch-icon-precomposed" sizes="128x128" href="images/app-icon-128.png">
+
+	<!-- Polymer -->
+	<script src="http://crypto-js.googlecode.com/svn/tags/3.1.2/build/rollups/sha256.js"></script>
+	<script src="bower_components/webcomponentsjs/webcomponents.min.js"></script>
+	<script type="text/javascript" src="https://code.jquery.com/jquery-2.1.3.min.js"></script>
+	<script type="text/javascript" src="https://linkeddata.github.io/tabulator/js/mashup/mashlib.js"></script>
+  <script src="//cdnjs.cloudflare.com/ajax/libs/howler/1.1.25/howler.min.js"></script>
 
 
-  <title>WebID -- Instant Message</title>
-  <link type="text/css" rel="stylesheet" href="https://linkeddata.github.io/tabulator-firefox/content/tabbedtab.css" />
-  <style>
-
-
-  html,body,.container
-  {
-    height:100%;
-  }
-
-  /*  vertical-align: middle;  for from */
-
-  </style>
-  <script src="http://crypto-js.googlecode.com/svn/tags/3.1.2/build/rollups/sha256.js"></script>
-  <script type="text/javascript" src="https://code.jquery.com/jquery-2.1.3.min.js"></script>
-  <script type="text/javascript" src="https://linkeddata.github.io/tabulator/js/mashup/mashlib.js"></script>
-
-
-  <script src="bower_components/webcomponentsjs/webcomponents.min.js"></script>
-  <link rel="import" href="login.html">
+	<link rel="import" href="bower_components/pubnub-polymer/pubnub-element.html">
+	<link rel="import" href="bower_components/core-scaffold/core-scaffold.html">
+	<link rel="import" href="bower_components/core-item/core-item.html">
+	<link rel="import" href="bower_components/paper-input/paper-input.html">
+	<link rel="import" href="bower_components/paper-fab/paper-fab.html">
+	<link rel="import" href="x-chat-list.html">
+	<link rel="import" href="login.html">
+	<link rel="stylesheet" href="css/style.css">
 </head>
-<body>
-  <webid-login id="webid-login"></webid-login>
 
+<body unresolved fullbleed class="lite">
 
-  <div id="avatar">
-  </div>
-
-  <div id="storage">
-  </div>
-
-  <div id="profile">
-  </div>
-
-  <div id="avatars">
-  </div>
-
-  <div id="names">
-  </div>
-
-  <div id="knows">
+	<div class="TabulatorOutline" id="DummyUUID">
+    <table id="outline"></table>
   </div>
 
 
-  <script>
+	<template is="auto-binding">
+
+		<core-scaffold>
+			<core-header-panel navigation flex>
+				<core-toolbar id="navheader" class="tall">
+					<div class="middle avatar {{color}}" style="background-image: url({{avatar}})"></div>
+					<div class="bottom uuid">{{name}}</div>
+				</core-toolbar>
+
+				<section layout vertical id="onlineList">
+					<h2>Diary</h2>
+					<div id="storage">
+				  </div>
+
+				</section>
+
+			</core-header-panel>
+
+			<div tool layout horizontal flex>
+				<span flex>WebID Chat</span>
+				<core-icon icon="account-circle"></core-icon><span>{{occupancy}}</span>
+			</div>
+
+			<section layout vertical fit id="chat">
+				<div flex class="chat-list">
+					<template repeat="{{message in messages}}">
+						<x-chat-list uri="{{message.uri}}" img="{{message.img}}" color="{{message.color}}" avatar="{{message.avatar}}" username="{{message.name}}" text="{{message.text}}"  status="{{message.status}}" timestamp="{{message.timestamp}}"></x-chat-list>
+					</template>
+
+					<webid-login id="webid-login"></webid-login>
+
+				  <div id="profile">
+				  </div>
+
+				  <div id="avatars">
+				  </div>
+
+				  <div id="names">
+				  </div>
+
+				  <div id="knows">
+				  </div>
 
 
-  function renderwebid(webid) {
+				</div>
+				<div class="shim"></div>
 
+			</section>
+		</core-scaffold>
 
+	</template>
 
-    $('#webid-login').hide();
+	<script>
+	jQuery(document).ready(function() {
 
+    // globals
+		'use strict';
 
-    //////////////////////////////////////////////
-
-    var g = $rdf.graph();
-    var f = $rdf.fetcher(g);
-    // add CORS proxy
-    //var PROXY = "https://data.fm/proxy?uri={uri}";
-    //var AUTH_PROXY = "https://rww.io/auth-proxy?uri=";
-    //$rdf.Fetcher.crossSiteProxyTemplate=PROXY;
-
-    var kb = tabulator.kb;
-    var fetcher = tabulator.sf;
-
-    console.log('rending webid : ' + webid);
-
-    var profileuri = (webid.split('#'))[0];
-
-    // populate chat
-    f.nowOrWhenFetched( profileuri , undefined, function(ok, body) {
-      console.log('webid fetched');
-
-
-
-
-
-      // TODO: cleanup
-      // TODO:   html
-      // TODO:   error check
-      // TODO: arch
-      // TODO:   webid -> workspace -> spaces -> channels -> posts
-      // TODO:   ChatChannel
-      // TODO: klaranet and haproxy
-      // TODO: ACLs
-      // TODO: favicon
-      // TODO: multiple channels
-      // TODO: presence
-      // TODO: payments
-      // TODO: emoticons
-      // TODO: notifications
-      // TODO:  title notifications (1) focus and favicon
-      // TODO: default avatar
-      // TODO: encryption
-      // TODO: set HEAD to klaranet
-      // TODO: come up with url for chat
-      // TODO:   individual URLs rooms
-      // TODO: expand links into content
-      // TODO: mobile
-      // TODO: github integration
-      // TODO: like
-      // TODO: snapchat 10 workflow
-      // TODO: highlight links
-      // TODO: mark
-      // TODO: facebook integration
-      // TODO: multi user integration
-      // TODO: add knowledgebase
-      // TODO: multiple stores
-      var LDP = $rdf.Namespace("http://www.w3.org/ns/ldp#");
-      var RDF = $rdf.Namespace("http://www.w3.org/1999/02/22-rdf-syntax-ns#");
-      var FOAF = $rdf.Namespace("http://xmlns.com/foaf/0.1/");
-      var PIM = $rdf.Namespace("http://www.w3.org/ns/pim/space#");
-      var RDFS = $rdf.Namespace("http://www.w3.org/2000/01/rdf-schema#");
+		/* get parameters */
+		function getParameterByName(name) {
+			name = name.replace(/[\[]/, "\\[").replace(/[\]]/, "\\]");
+			var regex = new RegExp("[\\?&]" + name + "=([^&#]*)"),
+			results = regex.exec(location.search);
+			return results === null ? "" : decodeURIComponent(results[1].replace(/\+/g, " "));
+		}
 
 
 
-      var webidname;
-      var webidavatar;
-      var storage;
-
-      $.each(g.statementsMatching($rdf.sym(webid), FOAF('img'), undefined), function(index, value) {
-        webidavatar = value.object.value;
-      });
 
 
-      $.each(g.statementsMatching($rdf.sym(webid), FOAF('depiction'), undefined), function(index, value) {
-        webidavatar = value.object.value;
-      });
-
-
-      $.each(g.statementsMatching($rdf.sym(webid), FOAF('name'), undefined), function(index, value) {
-        webidname = value.object.value;
-      });
-
-      $.each(g.statementsMatching($rdf.sym(webid), PIM('storage'), undefined), function(index, value) {
-        storage = value.object.value;
-      });
-
-      $.each(g.statementsMatching($rdf.sym(webid), RDFS('seeAlso'), undefined), function(index, value) {
-        seeAlso = value.object.value;
-      });
-
-
-      function addStorage(storage) {
-        if ( ! $('#storage').find('select').length ) {
-          $('#storage').append('<span>Storage : </span>')
-          $('#storage').append($('<select id="storagedropdown"></select>'));
-          $('#profile').append('<div>Personal Diary : <a id="diary" target="_blank">Launch</a></div>');
-          $('#diary').on('click', function() {
-            window.open('chat.html?ldpc='+ encodeURIComponent($('#storagedropdown').val()) +'chat/diary/&webid='+encodeURIComponent(webid) + '&name=' + encodeURIComponent(webidname) + '&avatar=' + encodeURIComponent(webidavatar) );
-            return false;
-          });
-        }
-        if (! $('#storagedropdown option[value="'+storage+'"]').length) {
-          $('#storagedropdown').append( new Option(storage, storage) );
-        }
-      }
-
-      $('#avatar').append('<img size="50" width="50" src="'+ webidavatar +'"/>')
-      addStorage(storage);
-      if (seeAlso) {
-        //$('#profile').append('<div>See Also : <a target="_blank" href="'+seeAlso+'">'+seeAlso+'</a></div>')
-        f.nowOrWhenFetched( seeAlso , undefined, function(ok, body) {
-          console.log('seeAlso fetched ');
-          $.each(g.statementsMatching($rdf.sym(webid), PIM('storage'), undefined), function(index, value) {
-            var storage = value.object.value;
-            addStorage(storage);
-          });
-        });
-      }
-      $('#profile').append('<div id="name"><strong>'+ webidname +'</strong></div>')
-
-      function addFriends() {
-        // friends
-        $.each(g.statementsMatching($rdf.sym(webid), FOAF('knows'), undefined), function(index, value) {
+      // main
+			var webid = getParameterByName('webid');
+			var name = getParameterByName('name') || webid;
+			var avatar = getParameterByName('avatar');
 
 
 
-          var friend = value.object.value;
 
-          var users = [webid,friend];
-          users.sort();
-          users = users.join("\n");
-          var hash = CryptoJS.SHA256(users);
-          console.log('hash ('+ users +') = ' + hash);
+			/* Polymer UI and UX */
 
-          $('#knows').append('<div>Start <a target="_blank" href="chat.html?ldpc=https://klaranet.com/d/chat/'+hash+'/&webid='+encodeURIComponent(webid)+'">Chat</a> or [<a href="chat.html?ldpc=https://klaranet.com/d/chat/'+hash+'/&webid='+encodeURIComponent(friend)+'" target="_blank">Share</a>] : <a about="'+ friend +'" href="'+ friend +'">'+ friend +'</a></div>')
-          console.log(friend);
+			var template = document.querySelector('template[is=auto-binding]');
 
+			var color;
 
-          var profileuri = (friend.split('#'))[0];
-          f.nowOrWhenFetched( profileuri , undefined, function(ok, body) {
+			// Assign a name made of a random cat and a random color
+			var randomColor = function() {
+				var colors = ['navy', 'slate', 'olive', 'moss', 'chocolate', 'buttercup', 'maroon', 'cerise', 'plum', 'orchid'];
+				return colors[(Math.random() * colors.length) >>> 0];
+			};
 
-            $.each(g.statementsMatching($rdf.sym(friend), FOAF('name'), undefined), function(index, value) {
-              var name = value.object.value;
-              console.log(name);
-              var friendel = $( "[about='"+ friend +"']" );
-              friendel.text(name);
-              friendel.parent().insertAfter('#names');
-              var sharehref = friendel.prev().attr('href');
-              var chathref = friendel.prev().prev().attr('href');
-
-              friendel.prev().attr('href', sharehref + '&name=' + encodeURIComponent(name) );
-              friendel.prev().prev().attr('href', chathref + '&name=' + encodeURIComponent(webidname) );
-
-              //console.log('share  : ' + sharehref );
-              //console.log('chat : ' +  chathref);
-            });
-
-            var avatar;
-            $.each(g.statementsMatching($rdf.sym(friend), FOAF('img'), undefined), function(index, value) {
-              var img = value.object.value;
-              console.log(img);
-              avatar = img;
-              //$( "[about='"+ friend +"']" ).before('<img height="30" width="30" src="' + img + '">');
-              //$( "[about='"+ friend +"']" ).parent().insertAfter('#avatars');
-            });
-
-            $.each(g.statementsMatching($rdf.sym(friend), FOAF('depiction'), undefined), function(index, value) {
-              var depiction = value.object.value;
-              console.log(depiction);
-              avatar = depiction;
-              //$( "[about='"+ friend +"']" ).before('<img height="30" width="30" src="' + depiction + '">');
-              //$( "[about='"+ friend +"']" ).parent().insertAfter('#avatars');
-            });
-
-            if (avatar) {
-              var friendel = $( "[about='"+ friend +"']" );
-              friendel.parent().insertAfter('#names');
-              var sharehref = friendel.prev().attr('href');
-              var chathref = friendel.prev().prev().attr('href');
-
-              friendel.prev().attr('href', sharehref + '&avatar=' + encodeURIComponent(avatar) );
-              friendel.prev().prev().attr('href', chathref + '&avatar=' + encodeURIComponent(webidavatar) );
+			color = randomColor();
 
 
-              friendel.before('<img height="30" width="30" src="' + avatar + '">');
-              friendel.parent().insertAfter('#avatars');
-            }
+			template.name = name;
+			template.avatar = avatar;
+			template.color = color;
+			template.messages = [];
 
 
-          });
+			function renderwebid(webid) {
 
 
-        });
 
-      }
-
-      setTimeout(addFriends, 1000);
-
-    });
-
-  }
+		    $('#webid-login').hide();
 
 
-  // Listen to WebIDAuth events
-  window.addEventListener('WebIDAuth',function(e) {
-    console.log(e.detail);
-    if (e.detail.success === true) {
-      console.log("Auth successful! WebID: "+e.detail.user);
-      renderwebid(e.detail.user);
-    } else {
-      console.log("Auth failed!");
-      console.log(e.detail);
-    }
-  },false);
+		    //////////////////////////////////////////////
+
+		    var g = $rdf.graph();
+		    var f = $rdf.fetcher(g);
+		    // add CORS proxy
+		    //var PROXY = "https://data.fm/proxy?uri={uri}";
+		    //var AUTH_PROXY = "https://rww.io/auth-proxy?uri=";
+		    //$rdf.Fetcher.crossSiteProxyTemplate=PROXY;
+
+		    var kb = tabulator.kb;
+		    var fetcher = tabulator.sf;
+
+		    console.log('rending webid : ' + webid);
+
+		    var profileuri = (webid.split('#'))[0];
+
+		    // populate chat
+		    f.nowOrWhenFetched( profileuri , undefined, function(ok, body) {
+		      console.log('webid fetched');
 
 
-  </script>
-</body>
-</html>
+
+
+
+		      // TODO: cleanup
+		      // TODO:   html
+		      // TODO:   error check
+		      // TODO: arch
+		      // TODO:   webid -> workspace -> spaces -> channels -> posts
+		      // TODO:   ChatChannel
+		      // TODO: klaranet and haproxy
+		      // TODO: ACLs
+		      // TODO: favicon
+		      // TODO: multiple channels
+		      // TODO: presence
+		      // TODO: payments
+		      // TODO: emoticons
+		      // TODO: notifications
+		      // TODO:  title notifications (1) focus and favicon
+		      // TODO: default avatar
+		      // TODO: encryption
+		      // TODO: set HEAD to klaranet
+		      // TODO: come up with url for chat
+		      // TODO:   individual URLs rooms
+		      // TODO: expand links into content
+		      // TODO: mobile
+		      // TODO: github integration
+		      // TODO: like
+		      // TODO: snapchat 10 workflow
+		      // TODO: highlight links
+		      // TODO: mark
+		      // TODO: facebook integration
+		      // TODO: multi user integration
+		      // TODO: add knowledgebase
+		      // TODO: multiple stores
+		      var LDP = $rdf.Namespace("http://www.w3.org/ns/ldp#");
+		      var RDF = $rdf.Namespace("http://www.w3.org/1999/02/22-rdf-syntax-ns#");
+		      var FOAF = $rdf.Namespace("http://xmlns.com/foaf/0.1/");
+		      var PIM = $rdf.Namespace("http://www.w3.org/ns/pim/space#");
+		      var RDFS = $rdf.Namespace("http://www.w3.org/2000/01/rdf-schema#");
+
+
+
+		      var webidname;
+		      var webidavatar;
+		      var storage;
+					var seeAlso;
+
+		      $.each(g.statementsMatching($rdf.sym(webid), FOAF('img'), undefined), function(index, value) {
+		        webidavatar = value.object.value;
+		      });
+
+
+		      $.each(g.statementsMatching($rdf.sym(webid), FOAF('depiction'), undefined), function(index, value) {
+		        webidavatar = value.object.value;
+		      });
+
+
+		      $.each(g.statementsMatching($rdf.sym(webid), FOAF('name'), undefined), function(index, value) {
+		        webidname = value.object.value;
+		      });
+
+		      $.each(g.statementsMatching($rdf.sym(webid), PIM('storage'), undefined), function(index, value) {
+		        storage = value.object.value;
+		      });
+
+		      $.each(g.statementsMatching($rdf.sym(webid), RDFS('seeAlso'), undefined), function(index, value) {
+		        seeAlso = value.object.value;
+		      });
+
+
+		      function addStorage(storage) {
+		        if ( ! $('#storage').find('select').length ) {
+		          $('#storage').append($('<select id="storagedropdown"></select>'));
+		          $('#storage').append('<div>Personal Diary : <a id="diary" target="_blank">Launch</a></div>');
+		          $('#diary').on('click', function() {
+		            window.open('chat.html?ldpc='+ encodeURIComponent($('#storagedropdown').val()) +'chat/diary/&webid='+encodeURIComponent(webid) + '&name=' + encodeURIComponent(webidname) + '&avatar=' + encodeURIComponent(webidavatar) );
+		            return false;
+		          });
+		        }
+		        if (! $('#storagedropdown option[value="'+storage+'"]').length) {
+		          $('#storagedropdown').append( new Option(storage, storage) );
+		        }
+		      }
+
+					template.avatar = webidavatar;
+		      addStorage(storage);
+		      if (seeAlso) {
+		        //$('#profile').append('<div>See Also : <a target="_blank" href="'+seeAlso+'">'+seeAlso+'</a></div>')
+		        f.nowOrWhenFetched( seeAlso , undefined, function(ok, body) {
+		          console.log('seeAlso fetched ');
+		          $.each(g.statementsMatching($rdf.sym(webid), PIM('storage'), undefined), function(index, value) {
+		            var storage = value.object.value;
+		            addStorage(storage);
+		          });
+		        });
+		      }
+					template.name = webidname;
+
+		      function addFriends() {
+		        // friends
+		        $.each(g.statementsMatching($rdf.sym(webid), FOAF('knows'), undefined), function(index, value) {
+
+
+
+		          var friend = value.object.value;
+
+		          var users = [webid,friend];
+		          users.sort();
+		          users = users.join("\n");
+		          var hash = CryptoJS.SHA256(users);
+		          console.log('hash ('+ users +') = ' + hash);
+
+		          $('#knows').append('<div>Start <a target="_blank" href="chat.html?ldpc=https://klaranet.com/d/chat/'+hash+'/&webid='+encodeURIComponent(webid)+'">Chat</a> or [<a href="chat.html?ldpc=https://klaranet.com/d/chat/'+hash+'/&webid='+encodeURIComponent(friend)+'" target="_blank">Share</a>] : <a about="'+ friend +'" href="'+ friend +'">'+ friend +'</a></div>')
+		          console.log(friend);
+
+
+		          var profileuri = (friend.split('#'))[0];
+		          f.nowOrWhenFetched( profileuri , undefined, function(ok, body) {
+
+		            $.each(g.statementsMatching($rdf.sym(friend), FOAF('name'), undefined), function(index, value) {
+		              var name = value.object.value;
+		              console.log(name);
+		              var friendel = $( "[about='"+ friend +"']" );
+		              friendel.text(name);
+		              friendel.parent().insertAfter('#names');
+		              var sharehref = friendel.prev().attr('href');
+		              var chathref = friendel.prev().prev().attr('href');
+
+		              friendel.prev().attr('href', sharehref + '&name=' + encodeURIComponent(name) );
+		              friendel.prev().prev().attr('href', chathref + '&name=' + encodeURIComponent(webidname) );
+
+		              //console.log('share  : ' + sharehref );
+		              //console.log('chat : ' +  chathref);
+		            });
+
+		            var avatar;
+		            $.each(g.statementsMatching($rdf.sym(friend), FOAF('img'), undefined), function(index, value) {
+		              var img = value.object.value;
+		              console.log(img);
+		              avatar = img;
+		              //$( "[about='"+ friend +"']" ).before('<img height="30" width="30" src="' + img + '">');
+		              //$( "[about='"+ friend +"']" ).parent().insertAfter('#avatars');
+		            });
+
+		            $.each(g.statementsMatching($rdf.sym(friend), FOAF('depiction'), undefined), function(index, value) {
+		              var depiction = value.object.value;
+		              console.log(depiction);
+		              avatar = depiction;
+		              //$( "[about='"+ friend +"']" ).before('<img height="30" width="30" src="' + depiction + '">');
+		              //$( "[about='"+ friend +"']" ).parent().insertAfter('#avatars');
+		            });
+
+		            if (avatar) {
+		              var friendel = $( "[about='"+ friend +"']" );
+		              friendel.parent().insertAfter('#names');
+		              var sharehref = friendel.prev().attr('href');
+		              var chathref = friendel.prev().prev().attr('href');
+
+		              friendel.prev().attr('href', sharehref + '&avatar=' + encodeURIComponent(avatar) );
+		              friendel.prev().prev().attr('href', chathref + '&avatar=' + encodeURIComponent(webidavatar) );
+
+
+		              friendel.before('<img height="30" width="30" src="' + avatar + '">');
+		              friendel.parent().insertAfter('#avatars');
+		            }
+
+
+		          });
+
+
+		        });
+
+		      }
+
+		      setTimeout(addFriends, 1000);
+
+		    });
+
+		  }
+
+
+		  // Listen to WebIDAuth events
+		  window.addEventListener('WebIDAuth',function(e) {
+		    console.log(e.detail);
+		    if (e.detail.success === true) {
+		      console.log("Auth successful! WebID: "+e.detail.user);
+		      renderwebid(e.detail.user);
+		    } else {
+		      console.log("Auth failed!");
+		      console.log(e.detail);
+		    }
+		  },false);
+
+
+
+		});
+		</script>
+	</body>
+	</html>
