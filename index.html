@@ -152,9 +152,9 @@
 		    var g = $rdf.graph();
 		    var f = $rdf.fetcher(g);
 		    // add CORS proxy
-		    //var PROXY = "https://data.fm/proxy?uri={uri}";
+		    var PROXY = "https://data.fm/proxy?uri={uri}";
 		    //var AUTH_PROXY = "https://rww.io/auth-proxy?uri=";
-		    //$rdf.Fetcher.crossSiteProxyTemplate=PROXY;
+		    $rdf.Fetcher.crossSiteProxyTemplate=PROXY;
 
 		    var kb = tabulator.kb;
 		    var fetcher = tabulator.sf;
@@ -240,7 +240,7 @@
 		      function addStorage(storage) {
 		        if ( ! $('#storage').find('select').length ) {
 		          $('#storage').append($('<select id="storagedropdown"></select>'));
-		          $('#storage').append('<div>Personal Diary : <a id="diary" target="_blank">Launch</a></div>');
+		          $('#storage').append('<div><paper-button raised="true" type="button" id="diary" target="_blank">My Journal</paper-button></div>');
 		          $('#diary').on('click', function() {
 		            window.open('chat.html?ldpc='+ encodeURIComponent($('#storagedropdown').val()) +'chat/diary/&webid='+encodeURIComponent(webid) + '&name=' + encodeURIComponent(webidname) + '&avatar=' + encodeURIComponent(webidavatar) );
 		            return false;
