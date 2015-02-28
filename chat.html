@@ -62,7 +62,7 @@
 			<section layout vertical fit id="chat">
 				<div flex class="chat-list">
 					<template repeat="{{message in messages}}">
-						<x-chat-list color="{{message.color}}" avatar="{{message.avatar}}" username="{{message.uuid}}" text="{{message.text}}"  status="{{message.status}}" timestamp="{{message.timestamp}}"></x-chat-list>
+						<x-chat-list img="{{message.img}}" color="{{message.color}}" avatar="{{message.avatar}}" username="{{message.uuid}}" text="{{message.text}}"  status="{{message.status}}" timestamp="{{message.timestamp}}"></x-chat-list>
 					</template>
 				</div>
 				<div class="shim"></div>
@@ -97,13 +97,31 @@
 			}
 			$('#logs').append('<span><a class="meta" target="_blank" href="'+ webid +'">' + name + '</a> • <a class="meta" target="_blank" href="' + uri + '">'+ time  + '</a></span><br>');
 */
-			template.messages.push({
-				uuid: name,
-				avatar: avatar,
-				color: color,
-				text: message,
-				timestamp: time
-			});
+
+      var m;
+
+			if (isImage) {
+				m = {
+					uuid: name,
+					avatar: avatar,
+					color: color,
+					text: message,
+					timestamp: time,
+					img: message
+				};
+			} else {
+        m = {
+					uuid: name,
+					avatar: avatar,
+					color: color,
+					text: message + 'l',
+					timestamp: time,
+				};
+
+			}
+console.log(m);
+
+			template.messages.push(m);
 			//$(window).scrollTop($(document).height());
 			showNewest();
 			/*

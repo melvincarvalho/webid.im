@@ -7,7 +7,7 @@ A single user list with a username, avatar, and desc.
 
 -->
 <script src="bower_components/time-elements/time-elements.js"></script>
-<polymer-element name="x-chat-list" attributes="avatar color username text status timestamp">
+<polymer-element name="x-chat-list" attributes="img gun avatar color username text status timestamp">
   <template>
 	<style>
 	:host {
@@ -99,7 +99,8 @@ A single user list with a username, avatar, and desc.
 		</div>
 		<div flex>
 			<div class="username">{{username}}</div>
-			<div class="text">{{text}}</div>
+      <div class="text">{{text}}</div>
+      <img src="{{img}}"/>
 		</div>
 		<time class="timestamp" is="relative-time" datetime="{{timestamp}}"></time>
 	</section>
@@ -111,6 +112,7 @@ Polymer('x-chat-list', {
 	username: '',
 	text: '',
 	status: '',
+  img: '',
 	timestamp: new Date().toISOString(),
 });
 </script>
