@@ -44,7 +44,7 @@
 			<core-header-panel navigation flex>
 				<core-toolbar id="navheader" class="tall">
 					<div class="middle avatar {{color}}" style="background-image: url({{avatar}})"></div>
-					<div class="bottom uuid">{{uuid}}</div>
+					<div class="bottom uuid">{{name}}</div>
 				</core-toolbar>
 
 				<section layout vertical id="onlineList">
@@ -62,7 +62,7 @@
 			<section layout vertical fit id="chat">
 				<div flex class="chat-list">
 					<template repeat="{{message in messages}}">
-						<x-chat-list uri="{{message.uri}}" img="{{message.img}}" color="{{message.color}}" avatar="{{message.avatar}}" username="{{message.uuid}}" text="{{message.text}}"  status="{{message.status}}" timestamp="{{message.timestamp}}"></x-chat-list>
+						<x-chat-list uri="{{message.uri}}" img="{{message.img}}" color="{{message.color}}" avatar="{{message.avatar}}" username="{{message.name}}" text="{{message.text}}"  status="{{message.status}}" timestamp="{{message.timestamp}}"></x-chat-list>
 					</template>
 				</div>
 				<div class="shim"></div>
@@ -102,7 +102,7 @@
 
 			if (isImage) {
 				m = {
-					uuid: name,
+					name: name,
 					avatar: avatar,
 					color: color,
 					text: message,
@@ -112,7 +112,7 @@
 				};
 			} else {
         m = {
-					uuid: name,
+					name: name,
 					avatar: avatar,
 					color: color,
 					text: message,
@@ -382,23 +382,15 @@
 			var dateuri = ldpc;
 
 
-			var uuid, avatar, color, cat;
+			var color;
 
-			// Assign a uuid made of a random cat and a random color
+			// Assign a name made of a random cat and a random color
 			var randomColor = function() {
 				var colors = ['navy', 'slate', 'olive', 'moss', 'chocolate', 'buttercup', 'maroon', 'cerise', 'plum', 'orchid'];
 				return colors[(Math.random() * colors.length) >>> 0];
 			};
 
-			var randomCat = function() {
-				var cats = ['tabby', 'bengal', 'persian', 'mainecoon', 'ragdoll', 'sphynx', 'siamese', 'korat', 'japanesebobtail', 'abyssinian', 'scottishfold'];
-				return cats[(Math.random() * cats.length) >>> 0];
-			};
-
 			color = randomColor();
-			cat = randomCat();
-			//uuid = color + '-' + cat;
-			uuid = name;
 			avatar = avatar;
 
 
@@ -407,7 +399,7 @@
 			var template = document.querySelector('template[is=auto-binding]');
 
 			template.channel = 'polymer-chat';
-			template.uuid = uuid;
+			template.name = name;
 			template.avatar = avatar;
 			template.color = color;
 
@@ -420,7 +412,7 @@
 			template.messages = [
 /*
 				{
-					uuid: "Melvin Carvalho",
+					name: "Melvin Carvalho",
 					avatar: avatar,
 					color: color,
 					text: "hello!",
@@ -447,7 +439,7 @@
 
 				//template.$.pub.message = {
 				var message = {
-					uuid: uuid,
+					name: name,
 					avatar: avatar,
 					color: color,
 					text: template.input,
@@ -466,7 +458,7 @@
 						data: data,
 						success: function(result) {
 							// Do something with the result
-							//addLog(avatar, message.text.trim(), webid, uuid, file, new Date().toISOString().substr(11,8));
+							//addLog(avatar, message.text.trim(), webid, name, file, new Date().toISOString().substr(11,8));
 							//$('#chat-input').val('');
 							//$('#chat-input').attr('disabled', false);
 							//$('#chat-input').focus();
@@ -484,7 +476,7 @@
 				turtle += 'a <http://xmlns.com/foaf/0.1/#Person> ; ';
 				turtle += '   <http://www.w3.org/2002/07/owl#sameAs> <' + webid + '> ; ';
 				turtle += '    <http://xmlns.com/foaf/0.1/depiction> <'+ avatar +'> ; ';
-				turtle += '    <http://xmlns.com/foaf/0.1/name> "'+ uuid +'" . ';
+				turtle += '    <http://xmlns.com/foaf/0.1/name> "'+ name +'" . ';
 
 				turtle += '<#this> ';
 				turtle += '    <http://purl.org/dc/terms/created> "'+ new Date().toISOString() +'"^^<http://www.w3.org/2001/XMLSchema#dateTime> ; ';
@@ -508,7 +500,7 @@
 					}
 				});
 
-				addLog(avatar, message.text.trim(), webid, uuid, ldpc + today + '/' + id, new Date().toISOString() );
+				addLog(avatar, message.text.trim(), webid, name, ldpc + today + '/' + id, new Date().toISOString() );
 				showNewest();
 
 
