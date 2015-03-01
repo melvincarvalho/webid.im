@@ -81,9 +81,6 @@
 
     // globals
 		'use strict';
-    var notify = false;
-		var wss = 'wss://klaranet.com';
-		var soundURI = 'http://webid.im/pinglow.mp3';
 
 		function addMessage(avatar, message, webid, name, uri, time) {
 
@@ -358,6 +355,9 @@
 			var name = getParameterByName('name') || webid;
 			var avatar = getParameterByName('avatar');
 			var dateuri = ldpc;
+			var notify = false;
+			var wss = 'wss://' + ldpc.split('/')[2];
+			var soundURI = 'http://webid.im/pinglow.mp3';
 
 
 			var color;
