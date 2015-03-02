@@ -62,7 +62,7 @@
 			<section layout vertical fit id="chat">
 				<div flex class="chat-list">
 					<template repeat="{{message in messages}}">
-						<x-chat-list on-like-tap="handleLike" webid="{{message.webid}}" like="{{message.like}}" uri="{{message.uri}}" img="{{message.img}}" color="{{message.color}}" avatar="{{message.avatar}}" username="{{message.name}}" text="{{message.text}}"  status="{{message.status}}" timestamp="{{message.timestamp}}"></x-chat-list>
+						<x-chat-list on-like-tap="handleLike" viewer="{{message.viewer}}" webid="{{message.webid}}" like="{{message.like}}" uri="{{message.uri}}" img="{{message.img}}" color="{{message.color}}" avatar="{{message.avatar}}" username="{{message.name}}" text="{{message.text}}"  status="{{message.status}}" timestamp="{{message.timestamp}}"></x-chat-list>
 					</template>
 				</div>
 				<div class="shim"></div>
@@ -82,7 +82,7 @@
 		// globals
 		'use strict';
 
-		function addMessage(avatar, message, webid, name, uri, time, like) {
+		function addMessage(avatar, message, webid, name, uri, time, like, viewer) {
 
       like = !!like;
 
@@ -91,6 +91,7 @@
 				name: name,
 				avatar: avatar,
 				color: color,
+				viewer: viewer,
 				webid: webid,
 				text: message,
 				timestamp: time,
@@ -308,7 +309,7 @@
 					}
 
 
-					addMessage(avatar[0].object.value, text[0].object.value, url[0].object.value, name[0].object.value, post.subject.value, created[0].object.value, like );
+					addMessage(avatar[0].object.value, text[0].object.value, url[0].object.value, name[0].object.value, post.subject.value, created[0].object.value, like, webid );
 
 					// Set the name of the hidden property and the change event for visibility
 					var hidden, visibilityChange;
@@ -391,6 +392,7 @@
 			template.name = name;
 			template.avatar = avatar;
 			template.color = color;
+			template.viewer = webid;
 			template.webid = webid;
 			template.like = false;
 			template.messages = [];
@@ -414,6 +416,7 @@
 					name: name,
 					avatar: avatar,
 					color: color,
+					viewer: webid,
 					webid: webid,
 					like: false,
 					text: template.input,
@@ -474,7 +477,7 @@
 					}
 				});
 
-				addMessage(avatar, message.text.trim(), webid, name, ldpc + today + '/' + id + '#this', new Date().toISOString(), false );
+				addMessage(avatar, message.text.trim(), webid, name, ldpc + today + '/' + id + '#this', new Date().toISOString(), false, message.viewer );
 				showNewest();
 
 
