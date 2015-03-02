@@ -293,14 +293,13 @@
 					var url = g.statementsMatching(author[0].object, OWL('sameAs'), undefined);
 					var depiction = g.statementsMatching(author[0].object, FOAF('depiction'), undefined);
 					var image = g.statementsMatching(author[0].object, FOAF('image'), undefined);
-					// TODO: change to webid
-					var like = g.statementsMatching(undefined, LIKE('likes'), subject);
-					//console.log(author);
+					var like = g.statementsMatching($rdf.sym(webid), LIKE('likes'), subject);
 
 					if ( like.length === 0 ) {
 						like = false;
 					} else {
 						like = true;
+						console.log(like);
 					}
 
 					var avatar = depiction;
