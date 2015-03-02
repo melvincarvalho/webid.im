@@ -62,7 +62,7 @@
 			<section layout vertical fit id="chat">
 				<div flex class="chat-list">
 					<template repeat="{{message in messages}}">
-						<x-chat-list uri="{{message.uri}}" img="{{message.img}}" color="{{message.color}}" avatar="{{message.avatar}}" username="{{message.name}}" text="{{message.text}}"  status="{{message.status}}" timestamp="{{message.timestamp}}"></x-chat-list>
+						<x-chat-list on-like-tap="handleLike" webid="{{message.webid}}" like="{{message.like}}" uri="{{message.uri}}" img="{{message.img}}" color="{{message.color}}" avatar="{{message.avatar}}" username="{{message.name}}" text="{{message.text}}"  status="{{message.status}}" timestamp="{{message.timestamp}}"></x-chat-list>
 					</template>
 				</div>
 				<div class="shim"></div>
@@ -82,16 +82,20 @@
 		// globals
 		'use strict';
 
-		function addMessage(avatar, message, webid, name, uri, time) {
+		function addMessage(avatar, message, webid, name, uri, time, like) {
+
+      like = !!like;
 
 			var isImage =   (/\.(gif|jpg|jpeg|tiff|png|svg)$/i).test(message);
 			var m = {
 				name: name,
 				avatar: avatar,
 				color: color,
+				webid: webid,
 				text: message,
 				timestamp: time,
-				uri : uri
+				uri : uri,
+				like : like
 			};
 
 			if (isImage) {
@@ -252,6 +256,7 @@
 				var DCT = $rdf.Namespace("http://purl.org/dc/terms/");
 				var FOAF = $rdf.Namespace("http://xmlns.com/foaf/0.1/");
 				var OWL = $rdf.Namespace("http://www.w3.org/2002/07/owl#");
+				var LIKE = $rdf.Namespace("http://ontologi.es/like#");
 
 
 
@@ -288,7 +293,15 @@
 					var url = g.statementsMatching(author[0].object, OWL('sameAs'), undefined);
 					var depiction = g.statementsMatching(author[0].object, FOAF('depiction'), undefined);
 					var image = g.statementsMatching(author[0].object, FOAF('image'), undefined);
+					// TODO: change to webid
+					var like = g.statementsMatching(undefined, LIKE('likes'), subject);
 					//console.log(author);
+
+					if ( like.length === 0 ) {
+						like = false;
+					} else {
+						like = true;
+					}
 
 					var avatar = depiction;
 					if(!depiction) {
@@ -296,7 +309,7 @@
 					}
 
 
-					addMessage(avatar[0].object.value, text[0].object.value, url[0].object.value, name[0].object.value, post.subject.value, created[0].object.value );
+					addMessage(avatar[0].object.value, text[0].object.value, url[0].object.value, name[0].object.value, post.subject.value, created[0].object.value, like );
 
 					// Set the name of the hidden property and the change event for visibility
 					var hidden, visibilityChange;
@@ -379,6 +392,8 @@
 			template.name = name;
 			template.avatar = avatar;
 			template.color = color;
+			template.webid = webid;
+			template.like = false;
 			template.messages = [];
 
 			template.checkKey = function(e) {
@@ -400,6 +415,8 @@
 					name: name,
 					avatar: avatar,
 					color: color,
+					webid: webid,
+					like: false,
 					text: template.input,
 					timestamp: new Date().toISOString()
 				};
@@ -458,7 +475,7 @@
 					}
 				});
 
-				addMessage(avatar, message.text.trim(), webid, name, ldpc + today + '/' + id + '#this', new Date().toISOString() );
+				addMessage(avatar, message.text.trim(), webid, name, ldpc + today + '/' + id + '#this', new Date().toISOString(), false );
 				showNewest();
 
 
