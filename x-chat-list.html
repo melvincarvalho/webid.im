@@ -144,6 +144,7 @@ Polymer('x-chat-list', {
 
   },
   handleLike: function() {
+    if (!this.viewer) return;
     console.log(' like : ' + this.like);
     var verb;
     if (this.like) {
