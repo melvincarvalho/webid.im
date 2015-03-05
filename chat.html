@@ -55,7 +55,7 @@
 			</core-header-panel>
 
 			<div tool layout horizontal flex>
-				<span flex>WebID Chat</span>
+				<span flex>{{title}}</span>
 				<core-icon icon="account-circle"></core-icon><span>{{occupancy}}</span>
 			</div>
 
@@ -372,6 +372,7 @@
 			var name = getParameterByName('name') || webid;
 			var avatar = getParameterByName('avatar');
 			var date = getParameterByName('date');
+			var title = getParameterByName('title');
 			var dateuri = ldpc;
 			var notify = false;
 			var wss = 'wss://' + ldpc.split('/')[2];
@@ -408,6 +409,7 @@
 			template.viewer = webid;
 			template.webid = webid;
 			template.like = false;
+			template.title = title || 'WebID IM';
 			template.messages = [];
 
 			if(!webid) {

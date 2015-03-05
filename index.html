@@ -60,14 +60,14 @@
 			</core-header-panel>
 
 			<div tool layout horizontal flex>
-				<span flex>WebID Chat</span>
+				<span flex>{{title}}</span>
 				<core-icon icon="account-circle"></core-icon><span>{{occupancy}}</span>
 			</div>
 
 			<section layout vertical fit id="chat">
 				<div flex class="chat-list">
-					<template repeat="{{message in messages}}">
-						<x-friend-list uri="{{message.uri}}" img="{{message.img}}" color="{{message.color}}" avatar="{{message.avatar}}" username="{{message.name}}" text="{{message.text}}"  status="{{message.status}}" timestamp="{{message.timestamp}}"></x-friend-list>
+					<template repeat="{{friend in friends}}">
+							<x-friend-list uri="{{friend.uri}}" img="{{friend.img}}" color="{{friend.color}}" avatar="{{friend.avatar}}" username="{{friend.name}}" text="{{friend.text}}"  status="{{friend.status}}" timestamp="{{friend.timestamp}}"></x-friend-list>
 					</template>
 
 					<webid-login id="webid-login"></webid-login>
@@ -137,7 +137,8 @@
 			template.name = name;
 			template.avatar = avatar;
 			template.color = color;
-			template.messages = [];
+			template.friends = [];
+			template.title = 'WebID Chat';
 
 
 			function renderwebid(webid) {
@@ -242,7 +243,7 @@
 		          $('#storage').append($('<select id="storagedropdown"></select>'));
 		          $('#storage').append('<div><paper-button raised="true" type="button" id="diary" target="_blank">My Journal</paper-button></div>');
 		          $('#diary').on('click', function() {
-		            window.open('chat.html?ldpc='+ encodeURIComponent($('#storagedropdown').val()) +'chat/diary/&webid='+encodeURIComponent(webid) + '&name=' + encodeURIComponent(webidname) + '&avatar=' + encodeURIComponent(webidavatar) );
+		            window.open('chat.html?ldpc='+ encodeURIComponent($('#storagedropdown').val()) +'chat/diary/&webid='+encodeURIComponent(webid) + '&name=' + encodeURIComponent(webidname) + '&avatar=' + encodeURIComponent(webidavatar) + '&title=Diary' );
 		            return false;
 		          });
 		        }
@@ -341,10 +342,10 @@
                 */
 
                 if (avatar) {
-                  template.messages.unshift( { avatar : avatar, uri : 'chat.html?ldpc=' +encodeURIComponent(ldpc)+ hash + '/&webid='+encodeURIComponent(friend)+'&avatar='+encodeURIComponent(avatar)+'&name='+encodeURIComponent(name),
-                  text : 'chat.html?ldpc=' +encodeURIComponent(ldpc)+ hash + '/&webid='+encodeURIComponent(webid)+'&avatar='+encodeURIComponent(webidavatar)+'&name='+encodeURIComponent(webidname), name : name || friend }  );
+                  template.friends.unshift( { avatar : avatar, uri : 'chat.html?ldpc=' +encodeURIComponent(ldpc)+ hash + '/&webid='+encodeURIComponent(friend)+'&avatar='+encodeURIComponent(avatar)+'&name='+encodeURIComponent(name) + '&title=' + encodeURIComponent(webidname),
+                  text : 'chat.html?ldpc=' +encodeURIComponent(ldpc)+ hash + '/&webid='+encodeURIComponent(webid)+'&avatar='+encodeURIComponent(webidavatar)+'&name='+encodeURIComponent(webidname) + '&title=' +encodeURIComponent(name), name : name || friend }  );
                 } else {
-                  template.messages.push( { avatar : avatar, uri : 'chat.html?ldpc=' +encodeURIComponent(ldpc)+ hash + '/&webid='+encodeURIComponent(friend)+'&avatar='+encodeURIComponent(avatar)+'&name='+encodeURIComponent(name),
+                  template.friends.push( { avatar : avatar, uri : 'chat.html?ldpc=' +encodeURIComponent(ldpc)+ hash + '/&webid='+encodeURIComponent(friend)+'&avatar='+encodeURIComponent(avatar)+'&name='+encodeURIComponent(name),
                   text : 'chat.html?ldpc=' +encodeURIComponent(ldpc)+ hash + '/&webid='+encodeURIComponent(webid)+'&avatar='+encodeURIComponent(webidavatar)+'&name='+encodeURIComponent(webidname), name : name || friend }  );
                 }
 
