@@ -1,0 +1,45 @@
+{
+  "name": "flag-icon",
+  "homepage": "https://github.com/stevenrskelton/flag-icon",
+  "description": "Polymer Web Component for SVG and PNG icons of country, state, province and other flags",
+  "main": "flag-icon.html",
+  "authors": [
+    "Steven Skelton"
+  ],
+  "license": "MIT",
+  "ignore": [
+    "**/.*",
+    "node_modules",
+    "bower_components",
+    "test",
+    "tests"
+  ],
+  "keywords": [
+    "web-component",
+    "web-components",
+    "polymer",
+    "geography",
+    "countries",
+    "world",
+    "state",
+    "provincial",
+    "territory",
+    "icon",
+    "svg",
+    "flag",
+    "maritime",
+    "nascar",
+    "indycar",
+    "racing",
+    "australia",
+    "brazil",
+    "canada",
+    "germany",
+    "spain",
+    "russia",
+    "united states"
+  ],
+  "dependencies": {
+    "polymer": "Polymer/polymer#>=0.5.1"
+  }
+}

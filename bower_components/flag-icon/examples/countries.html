@@ -1,0 +1,75 @@
+<!DOCTYPE html>
+<head>
+	<title>Country Flag Icons</title>
+	<meta name="viewport" content="width=device-width, initial-scale=1.0">
+	<meta charset="utf-8">
+	<meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1">
+	<script src="../../webcomponentsjs/webcomponents.min.js"></script>
+	<link rel="import" href="../flag-icon.html">
+	<link rel="import" href="index-links.html">
+	<link rel="import" href="flag-show.html">
+</head>
+<body unresolved>
+	<index-links page="countries.html"></index-links>
+
+	<h1>World Country Flags</h1>
+
+	<table style="width:700px">
+		<tr>
+			<th style="width:450px">Country</th>
+			<th style="width:450px"></th>
+			<th>Alpha2</th>
+			<th style="width:75px;">Alpha3</th>
+			<th>Numeric</th>
+			<th>SVG</th>
+		</tr>
+		<template id="otherTable" repeat="[[other]]">
+			<tr onmouseover="changeShow('[[alpha2]]',true);">
+				<td colspan="2"><flag-icon key="[[name]]" img></flag-icon>[[name]]</td>
+				<td colspan="3"><flag-icon key="[[alpha2]]" img></flag-icon> [[alpha2]]</td>
+				<td><flag-icon key="[[alpha2]]"></flag-icon></td>
+			</tr>
+		</template>
+		<tr><td colspan="6"><hr></td></tr>
+		<template id="countryTable" repeat="[[countries]]">
+			<tr onmouseover="changeShow('[[alpha2]]',false);">
+				<td><flag-icon key="[[name]]" img></flag-icon>[[name]]</td>
+				<td><flag-icon key="[[endonym]]" img></flag-icon>[[endonym]]</td>
+				<td><flag-icon key="[[alpha2]]" img></flag-icon> [[alpha2]]</td>
+				<td><flag-icon key="[[alpha3]]" img></flag-icon> [[alpha3]]</td>
+				<td><flag-icon key="[[numeric]]" img></flag-icon> [[numeric]]</td>
+				<td><flag-icon key="[[alpha2]]"></flag-icon></td>
+			</tr>
+		</template>
+	</table>
+
+	<flag-show id="show"></flag-show>
+
+	<script>
+	function head(arr){
+		if(typeof arr == "object"){
+			if(arr.length>0) return arr[0];
+			else return null;
+		} else return arr;
+	};
+	var flagicon;
+	function changeShow(key,isOther){
+		document.getElementById('show').key = key;
+		var country = flagicon.findCountry(key);
+		document.getElementById('show').name = country.title;
+		document.getElementById('show').endonym = country.data.endonym ? country.data.endonym[0] : '';
+		document.getElementById('show').data = country;
+	}
+	window.addEventListener('polymer-ready', function(){
+		flagicon = new FlagIcon();
+		document.getElementById('otherTable').model = {
+			other: flagicon.countries.filter(function(t){ return !t.numeric; }).map(function(t){ return { name: head(t.name), alpha2: t.alpha2, alpha3: t.alpha3, numeric: t.numeric, endonym: head(t.endonym) }; })
+		};
+		document.getElementById('countryTable').model = {
+			countries: flagicon.countries.filter(function(t){ return t.numeric; }).map(function(t){ return { name: head(t.name), alpha2: t.alpha2, alpha3: t.alpha3, numeric: t.numeric, endonym: head(t.endonym) }; })
+		};
+		changeShow('ca');
+	});
+	</script>
+</body>
+</html>
