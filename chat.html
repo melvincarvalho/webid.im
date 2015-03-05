@@ -293,7 +293,7 @@
 					var name = g.statementsMatching(author[0].object, FOAF('name'), undefined);
 					var url = g.statementsMatching(author[0].object, OWL('sameAs'), undefined);
 					var depiction = g.statementsMatching(author[0].object, FOAF('depiction'), undefined);
-					var image = g.statementsMatching(author[0].object, FOAF('image'), undefined);
+					var img = g.statementsMatching(author[0].object, FOAF('img'), undefined);
 					var like = g.statementsMatching($rdf.sym(webid), LIKE('likes'), subject);
 
 					if ( like.length === 0 ) {
@@ -303,9 +303,9 @@
 						console.log(like);
 					}
 
-					var avatar = depiction;
-					if(!depiction) {
-						avatar = image;
+					var avatar = img;
+					if(img.length === 0) {
+						avatar = depiction;
 					}
 
 
@@ -452,8 +452,12 @@
 				turtle += '<#author> ';
 				turtle += 'a <http://xmlns.com/foaf/0.1/#Person> ; ';
 				turtle += '   <http://www.w3.org/2002/07/owl#sameAs> <' + webid + '> ; ';
-				turtle += '    <http://xmlns.com/foaf/0.1/depiction> <'+ avatar +'> ; ';
-				turtle += '    <http://xmlns.com/foaf/0.1/name> "'+ name +'" . ';
+				if (avatar) {
+  				turtle += '    <http://xmlns.com/foaf/0.1/img> <'+ avatar +'> ; ';
+	  		}
+				if (name) {
+				  turtle += '    <http://xmlns.com/foaf/0.1/name> "'+ name +'" . ';
+				}
 
 				turtle += '<#this> ';
 				turtle += '    <http://purl.org/dc/terms/created> "'+ new Date().toISOString() +'"^^<http://www.w3.org/2001/XMLSchema#dateTime> ; ';
