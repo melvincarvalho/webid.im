@@ -65,12 +65,14 @@
 						<x-chat-list on-like-tap="handleLike" viewer="{{message.viewer}}" webid="{{message.webid}}" like="{{message.like}}" uri="{{message.uri}}" img="{{message.img}}" color="{{message.color}}" avatar="{{message.avatar}}" username="{{message.name}}" text="{{message.text}}"  status="{{message.status}}" timestamp="{{message.timestamp}}"></x-chat-list>
 					</template>
 				</div>
-				<div class="shim"></div>
 
-				<div class="send-message" layout horizontal>
-					<paper-input flex label="Type message..." id="input" value="{{input}}" on-keyup="{{checkKey}}"></paper-input>
-					<paper-fab icon="send" id="sendButton" on-tap="{{sendMyMessage}}"></paper-fab>
-				</div>
+        <template if={{show}}>
+					<div class="shim"></div>
+				  <div class="send-message" layout horizontal>
+					  <paper-input flex label="Type message..." id="input" value="{{input}}" on-keyup="{{checkKey}}"></paper-input>
+					  <paper-fab icon="send" id="sendButton" on-tap="{{sendMyMessage}}"></paper-fab>
+				  </div>
+			  </template>
 			</section>
 		</core-scaffold>
 
@@ -359,18 +361,21 @@
 
 			}
 
-
+      function getWebid() {
+				var webid = getParameterByName('webid');
+				return webid;
+			}
 
 
 			// main
 			var ldpc = getParameterByName('ldpc');
-			var webid = getParameterByName('webid');
 			var name = getParameterByName('name') || webid;
 			var avatar = getParameterByName('avatar');
 			var dateuri = ldpc;
 			var notify = false;
 			var wss = 'wss://' + ldpc.split('/')[2];
 			var soundURI = 'http://webid.im/pinglow.mp3';
+			var webid = getWebid();
 
 
 			var color;
@@ -396,6 +401,12 @@
 			template.webid = webid;
 			template.like = false;
 			template.messages = [];
+
+			if(!webid) {
+				template.show = false;
+			} else {
+				template.show = true;				
+			}
 
 			template.checkKey = function(e) {
 				if(e.keyCode === 13 || e.charCode === 13) {
