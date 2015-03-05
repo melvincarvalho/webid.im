@@ -121,8 +121,9 @@ A single user list with a username, avatar, and desc.
       icon="favorite"
        on-tap="{{handleLike}}">
       </core-icon-button>
-      <img class="img" src="{{img}}"/>
-
+      <template if="{{img}}">
+        <img class="img" src="{{img}}"/>
+      </template>
   </div>
   <div><a target="_blank" href="{{uri}}"><time class="timestamp" is="relative-time" datetime="{{timestamp}}"></time></a></div>
 </section>
