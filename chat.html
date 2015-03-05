@@ -371,11 +371,19 @@
 			var ldpc = getParameterByName('ldpc');
 			var name = getParameterByName('name') || webid;
 			var avatar = getParameterByName('avatar');
+			var date = getParameterByName('date');
 			var dateuri = ldpc;
 			var notify = false;
 			var wss = 'wss://' + ldpc.split('/')[2];
 			var soundURI = 'http://webid.im/pinglow.mp3';
 			var webid = getWebid();
+			var today;
+			if (date) {
+				today = date;
+			} else {
+			  today = new Date().toISOString().substr(0,10);
+			}
+			console.log('Today is : ' + today)
 
 
 			var color;
@@ -405,7 +413,7 @@
 			if(!webid) {
 				template.show = false;
 			} else {
-				template.show = true;				
+				template.show = true;
 			}
 
 			template.checkKey = function(e) {
@@ -503,8 +511,6 @@
 				template.async(showNewest);
 			};
 
-			var today = new Date().toISOString().substr(0,10);
-			console.log('Today is : ' + today)
 
 			// render
 			renderdates(dateuri, today);
