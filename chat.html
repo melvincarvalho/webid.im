@@ -104,6 +104,12 @@
 				m.img = message;
 			}
 
+			if (viewer===webid) {
+				m.status = 'online';
+			} else {
+				m.status = 'offline';
+			}
+
 			var exists = false;
 			for (var i=0; i<template.messages.length; i++) {
 				if (template.messages[i].uri === m.uri) {
@@ -421,6 +427,7 @@
 					webid: webid,
 					like: false,
 					text: template.input,
+					status: 'online',
 					timestamp: new Date().toISOString()
 				};
 				//template.$.pub.publish();
