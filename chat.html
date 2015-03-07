@@ -107,15 +107,21 @@
       // work out presence -- 1 hour means online
       if (webid) {
 				if (!template.users[webid]) template.users[webid] = {};
-				var duration = 1;
+				var duration1 = 1;
+				var duration2 = 12;
         var messagetime = new Date(time);
+				var prevdate1 = new Date();
+				var prevdate2 = new Date();
 				var now = new Date();
-				now.setHours(now.getHours() - duration);
-				console.log(now)
-				console.log(messagetime)
+				var prevdate1 = new Date(prevdate1.setHours(prevdate1.getHours() - duration1));
+				var prevdate2 = new Date(prevdate2.setHours(prevdate2.getHours() - duration2));
 
-				if (now < messagetime) {
+				if (messagetime.getTime() > prevdate1.getTime()) {
+					console.log('online')
   				template.users[webid].status = 'online';
+				} else if (messagetime > prevdate2) {
+					console.log('away')
+  				template.users[webid].status = 'away';
 				}
 			}
 
