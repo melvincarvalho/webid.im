@@ -20,15 +20,15 @@
 	<script src="bower_components/webcomponentsjs/webcomponents.min.js"></script>
 	<script type="text/javascript" src="https://code.jquery.com/jquery-2.1.3.min.js"></script>
 	<script type="text/javascript" src="https://linkeddata.github.io/tabulator/js/mashup/mashlib.js"></script>
-  <script src="//cdnjs.cloudflare.com/ajax/libs/howler/1.1.25/howler.min.js"></script>
+	<script src="//cdnjs.cloudflare.com/ajax/libs/howler/1.1.25/howler.min.js"></script>
 
 
 	<link rel="import" href="bower_components/core-scaffold/core-scaffold.html">
 	<link rel="import" href="bower_components/core-item/core-item.html">
 	<link rel="import" href="bower_components/paper-input/paper-input.html">
 	<link rel="import" href="bower_components/paper-fab/paper-fab.html">
-  <link rel="import" href="x-chat-list.html">
-  <link rel="import" href="x-friend-list.html">
+	<link rel="import" href="x-chat-list.html">
+	<link rel="import" href="x-friend-list.html">
 	<link rel="import" href="login.html">
 	<link rel="stylesheet" href="css/style.css">
 </head>
@@ -36,8 +36,8 @@
 <body unresolved fullbleed class="lite">
 
 	<div class="TabulatorOutline" id="DummyUUID">
-    <table id="outline"></table>
-  </div>
+		<table id="outline"></table>
+	</div>
 
 
 	<template is="auto-binding">
@@ -52,7 +52,7 @@
 				<section layout vertical id="onlineList">
 					<h2>Diary</h2>
 					<div id="storage">
-				  </div>
+					</div>
 
 				</section>
 
@@ -66,22 +66,22 @@
 			<section layout vertical fit id="chat">
 				<div flex class="chat-list">
 					<template repeat="{{friend in friends}}">
-							<x-friend-list uri="{{friend.uri}}" img="{{friend.img}}" color="{{friend.color}}" avatar="{{friend.avatar}}" username="{{friend.name}}" text="{{friend.text}}"  status="{{friend.status}}" timestamp="{{friend.timestamp}}"></x-friend-list>
+						<x-friend-list lastActive="{{friend.lastActive}}" uri="{{friend.uri}}" img="{{friend.img}}" color="{{friend.color}}" avatar="{{friend.avatar}}" username="{{friend.name}}" text="{{friend.text}}"  status="{{friend.status}}" timestamp="{{friend.timestamp}}"></x-friend-list>
 					</template>
 
 					<webid-login id="webid-login"></webid-login>
 
-				  <div id="profile">
-				  </div>
+					<div id="profile">
+					</div>
 
-				  <div id="avatars">
-				  </div>
+					<div id="avatars">
+					</div>
 
-				  <div id="names">
-				  </div>
+					<div id="names">
+					</div>
 
-				  <div id="knows">
-				  </div>
+					<div id="knows">
+					</div>
 
 
 				</div>
@@ -94,7 +94,7 @@
 	<script>
 	jQuery(document).ready(function() {
 
-    // globals
+		// globals
 		'use strict';
 
 		/* get parameters */
@@ -109,273 +109,348 @@
 
 
 
-      // main
-      var ldpc = 'https://klaranet.com/d/chat/';
-      var webid = getParameterByName('webid');
-			var name = getParameterByName('name') || webid;
-			var avatar = getParameterByName('avatar');
+		// main
+		var ldpc = 'https://klaranet.com/d/chat/'; // hard code for now until more websockets are there
+		var presenceURI = ldpc + ',presence'; // FYN to add
+		var webid = getParameterByName('webid');
+		var name = getParameterByName('name') || webid;
+		var avatar = getParameterByName('avatar');
 
 
 
 
-			/* Polymer UI and UX */
+		/* Polymer UI and UX */
 
-			var template = document.querySelector('template[is=auto-binding]');
+		var template = document.querySelector('template[is=auto-binding]');
 
-			var color;
+		var color;
 
-			// Assign a name made of a random cat and a random color
-			var randomColor = function() {
-				var colors = ['navy', 'slate', 'olive', 'moss', 'chocolate', 'buttercup', 'maroon', 'cerise', 'plum', 'orchid'];
-				return colors[(Math.random() * colors.length) >>> 0];
-			};
+		// Assign a name made of a random cat and a random color
+		var randomColor = function() {
+			var colors = ['navy', 'slate', 'olive', 'moss', 'chocolate', 'buttercup', 'maroon', 'cerise', 'plum', 'orchid'];
+			return colors[(Math.random() * colors.length) >>> 0];
+		};
 
-			color = randomColor();
+		color = randomColor();
 
 
-			template.name = name;
-			template.avatar = avatar;
-			template.color = color;
-			template.friends = [];
-			template.title = 'WebID Chat';
+		template.name = name;
+		template.avatar = avatar;
+		template.color = color;
+		template.friends = [];
+		template.title = 'WebID Chat';
 
+		function updatePresence(webid) {
+			var g = $rdf.graph();
+			var f = $rdf.fetcher(g);
+			// add CORS proxy
+			var PROXY = "https://data.fm/proxy?uri={uri}";
+			//var AUTH_PROXY = "https://rww.io/auth-proxy?uri=";
+			$rdf.Fetcher.crossSiteProxyTemplate=PROXY;
 
-			function renderwebid(webid) {
+			var kb = tabulator.kb;
+			var fetcher = tabulator.sf;
 
 
+			f.nowOrWhenFetched( presenceURI , undefined, function(ok, body) {
+				var LDP = $rdf.Namespace("http://www.w3.org/ns/ldp#");
+				var RDF = $rdf.Namespace("http://www.w3.org/1999/02/22-rdf-syntax-ns#");
+				var FOAF = $rdf.Namespace("http://xmlns.com/foaf/0.1/");
+				var PIM = $rdf.Namespace("http://www.w3.org/ns/pim/space#");
+				var USER = $rdf.Namespace("https://schema.rww.io/user#");
 
-		    $('#webid-login').hide();
 
+				var turtle = 'DELETE DATA { ';
 
-		    //////////////////////////////////////////////
+				$.each(g.statementsMatching(undefined, USER('lastActive'), undefined), function(index, value) {
+					console.log('logins : ' + value.object);
+					if (webid === value.subject.value) {
+  					turtle += '<'+webid+'> <https://schema.rww.io/user#lastActive> "' + value.object.value + '" . ';
+					}
+					setPresence(value.subject.value, value.object.value);
+				});
+				turtle += " } \n";
+				console.log(turtle);
 
-		    var g = $rdf.graph();
-		    var f = $rdf.fetcher(g);
-		    // add CORS proxy
-		    var PROXY = "https://data.fm/proxy?uri={uri}";
-		    //var AUTH_PROXY = "https://rww.io/auth-proxy?uri=";
-		    $rdf.Fetcher.crossSiteProxyTemplate=PROXY;
+				$.ajax({
+					url: presenceURI,
+					contentType: "application/sparql-update",
+					type: 'PATCH',
+					data: turtle,
+					success: function(result) {
+					}
+				});
 
-		    var kb = tabulator.kb;
-		    var fetcher = tabulator.sf;
 
-		    console.log('rending webid : ' + webid);
+				turtle = 'INSERT DATA { <'+(webid)+'> <https://schema.rww.io/user#lastActive>  "'+ new Date().toISOString() +'" . } ';
 
-		    var profileuri = (webid.split('#'))[0];
+				console.log(turtle);
 
-		    // populate chat
-		    f.nowOrWhenFetched( profileuri , undefined, function(ok, body) {
-		      console.log('webid fetched');
+				$.ajax({
+					url: presenceURI,
+					contentType: "application/sparql-update",
+					type: 'PATCH',
+					data: turtle,
+					success: function(result) {
+					}
+				});
 
 
+			});
 
+		}
 
 
-		      // TODO: cleanup
-		      // TODO:   html
-		      // TODO:   error check
-		      // TODO: arch
-		      // TODO:   webid -> workspace -> spaces -> channels -> posts
-		      // TODO:   ChatChannel
-		      // TODO: klaranet and haproxy
-		      // TODO: ACLs
-		      // TODO: favicon
-		      // TODO: multiple channels
-		      // TODO: presence
-		      // TODO: payments
-		      // TODO: emoticons
-		      // TODO: notifications
-		      // TODO:  title notifications (1) focus and favicon
-		      // TODO: default avatar
-		      // TODO: encryption
-		      // TODO: set HEAD to klaranet
-		      // TODO: come up with url for chat
-		      // TODO:   individual URLs rooms
-		      // TODO: expand links into content
-		      // TODO: github integration
-		      // TODO: snapchat 10 workflow
-		      // TODO: highlight links
-		      // TODO: mark
-		      // TODO: facebook integration
-		      // TODO: multi user integration
-		      // TODO: add knowledgebase
-		      var LDP = $rdf.Namespace("http://www.w3.org/ns/ldp#");
-		      var RDF = $rdf.Namespace("http://www.w3.org/1999/02/22-rdf-syntax-ns#");
-		      var FOAF = $rdf.Namespace("http://xmlns.com/foaf/0.1/");
-		      var PIM = $rdf.Namespace("http://www.w3.org/ns/pim/space#");
-		      var RDFS = $rdf.Namespace("http://www.w3.org/2000/01/rdf-schema#");
+		function setPresence(webid, time) {
+			if (!template.uesrs) {
+				template.users = {};
+				template.users[webid] = {status: 'online', lastActive: time};
+			}
+			for(var i=0; i<template.friends.length; i++) {
+				template.friends[i].statue = 'online';
+				template.friends[i].lastActive = time;
+			}
+		}
 
+		function renderwebid(webid) {
 
 
-		      var webidname;
-		      var webidavatar;
-		      var storage;
-					var seeAlso;
-
-		      $.each(g.statementsMatching($rdf.sym(webid), FOAF('img'), undefined), function(index, value) {
-		        webidavatar = value.object.value;
-		      });
-
-
-		      $.each(g.statementsMatching($rdf.sym(webid), FOAF('depiction'), undefined), function(index, value) {
-		        webidavatar = value.object.value;
-		      });
-
-
-		      $.each(g.statementsMatching($rdf.sym(webid), FOAF('name'), undefined), function(index, value) {
-		        webidname = value.object.value;
-		      });
-
-		      $.each(g.statementsMatching($rdf.sym(webid), PIM('storage'), undefined), function(index, value) {
-		        storage = value.object.value;
-		      });
-
-		      $.each(g.statementsMatching($rdf.sym(webid), RDFS('seeAlso'), undefined), function(index, value) {
-		        seeAlso = value.object.value;
-		      });
-
-
-		      function addStorage(storage) {
-		        if ( ! $('#storage').find('select').length ) {
-		          $('#storage').append($('<select id="storagedropdown"></select>'));
-		          $('#storage').append('<div><paper-button raised="true" type="button" id="diary" target="_blank">My Journal</paper-button></div>');
-		          $('#diary').on('click', function() {
-		            window.open('chat.html?ldpc='+ encodeURIComponent($('#storagedropdown').val()) +'chat/diary/&webid='+encodeURIComponent(webid) + '&name=' + encodeURIComponent(webidname) + '&avatar=' + encodeURIComponent(webidavatar) + '&title=Diary' );
-		            return false;
-		          });
-		        }
-		        if (! $('#storagedropdown option[value="'+storage+'"]').length) {
-		          $('#storagedropdown').append( new Option(storage, storage) );
-		        }
-		      }
-
-					template.avatar = webidavatar;
-		      addStorage(storage);
-		      if (seeAlso) {
-		        //$('#profile').append('<div>See Also : <a target="_blank" href="'+seeAlso+'">'+seeAlso+'</a></div>')
-		        f.nowOrWhenFetched( seeAlso , undefined, function(ok, body) {
-		          console.log('seeAlso fetched ');
-		          $.each(g.statementsMatching($rdf.sym(webid), PIM('storage'), undefined), function(index, value) {
-		            var storage = value.object.value;
-		            addStorage(storage);
-		          });
-		        });
-		      }
-					template.name = webidname;
 
-		      function addFriends() {
-		        // friends
-		        $.each(g.statementsMatching($rdf.sym(webid), FOAF('knows'), undefined), function(index, value) {
+			$('#webid-login').hide();
 
+			//////////////////////////////////////////////
 
+			var g = $rdf.graph();
+			var f = $rdf.fetcher(g);
+			// add CORS proxy
+			var PROXY = "https://data.fm/proxy?uri={uri}";
+			//var AUTH_PROXY = "https://rww.io/auth-proxy?uri=";
+			$rdf.Fetcher.crossSiteProxyTemplate=PROXY;
 
-		          var friend = value.object.value;
-
-		          var users = [webid,friend];
-		          users.sort();
-		          users = users.join("\n");
-		          var hash = CryptoJS.SHA256(users);
-		          console.log('hash ('+ users +') = ' + hash);
+			var kb = tabulator.kb;
+			var fetcher = tabulator.sf;
 
-		          //$('#knows').append('<div>Start <a target="_blank" href="chat.html?ldpc=https://klaranet.com/d/chat/'+hash+'/&webid='+encodeURIComponent(webid)+'">Chat</a> or [<a href="chat.html?ldpc=https://klaranet.com/d/chat/'+hash+'/&webid='+encodeURIComponent(friend)+'" target="_blank">Share</a>] : <a about="'+ friend +'" href="'+ friend +'">'+ friend +'</a></div>')
-		          console.log(friend);
 
+			updatePresence(webid);
 
-		          var profileuri = (friend.split('#'))[0];
-		          f.nowOrWhenFetched( profileuri , undefined, function(ok, body) {
-                var name;
-                var avatar;
 
+			console.log('rendering webid : ' + webid);
+
+			var profileuri = (webid.split('#'))[0];
+
+			// populate chat
+			f.nowOrWhenFetched( profileuri , undefined, function(ok, body) {
+				console.log('webid fetched');
+
+
 
-		            $.each(g.statementsMatching($rdf.sym(friend), FOAF('name'), undefined), function(index, value) {
-		              name = value.object.value;
-		              console.log(name);
-		              var friendel = $( "[about='"+ friend +"']" );
-		              friendel.text(name);
 
-                  /*
-		              friendel.parent().insertAfter('#names');
-		              var sharehref = friendel.prev().attr('href');
-		              var chathref = friendel.prev().prev().attr('href');
 
-		              friendel.prev().attr('href', sharehref + '&name=' + encodeURIComponent(name) );
-		              friendel.prev().prev().attr('href', chathref + '&name=' + encodeURIComponent(webidname) );
-                  */
+				// TODO: cleanup
+				// TODO:   html
+				// TODO:   error check
+				// TODO: arch
+				// TODO:   webid -> workspace -> spaces -> channels -> posts
+				// TODO:   ChatChannel
+				// TODO: klaranet and haproxy
+				// TODO: ACLs
+				// TODO: favicon
+				// TODO: multiple channels
+				// TODO: presence
+				// TODO: payments
+				// TODO: emoticons
+				// TODO: notifications
+				// TODO:  title notifications (1) focus and favicon
+				// TODO: default avatar
+				// TODO: encryption
+				// TODO: set HEAD to klaranet
+				// TODO: come up with url for chat
+				// TODO:   individual URLs rooms
+				// TODO: expand links into content
+				// TODO: github integration
+				// TODO: snapchat 10 workflow
+				// TODO: highlight links
+				// TODO: mark
+				// TODO: facebook integration
+				// TODO: multi user integration
+				// TODO: add knowledgebase
+				var LDP = $rdf.Namespace("http://www.w3.org/ns/ldp#");
+				var RDF = $rdf.Namespace("http://www.w3.org/1999/02/22-rdf-syntax-ns#");
+				var FOAF = $rdf.Namespace("http://xmlns.com/foaf/0.1/");
+				var PIM = $rdf.Namespace("http://www.w3.org/ns/pim/space#");
+				var RDFS = $rdf.Namespace("http://www.w3.org/2000/01/rdf-schema#");
 
-		              //console.log('share  : ' + sharehref );
-		              //console.log('chat : ' +  chathref);
-		            });
 
-		            $.each(g.statementsMatching($rdf.sym(friend), FOAF('img'), undefined), function(index, value) {
-		              var img = value.object.value;
-		              console.log(img);
-		              avatar = img;
-		              //$( "[about='"+ friend +"']" ).before('<img height="30" width="30" src="' + img + '">');
-		              //$( "[about='"+ friend +"']" ).parent().insertAfter('#avatars');
-		            });
 
-		            $.each(g.statementsMatching($rdf.sym(friend), FOAF('depiction'), undefined), function(index, value) {
-		              var depiction = value.object.value;
-		              console.log(depiction);
-		              avatar = depiction;
-		              //$( "[about='"+ friend +"']" ).before('<img height="30" width="30" src="' + depiction + '">');
-		              //$( "[about='"+ friend +"']" ).parent().insertAfter('#avatars');
-		            });
+				var webidname;
+				var webidavatar;
+				var storage;
+				var seeAlso;
 
-/*
-		            if (avatar) {
-		              var friendel = $( "[about='"+ friend +"']" );
-		              friendel.parent().insertAfter('#names');
-		              var sharehref = friendel.prev().attr('href');
-		              var chathref = friendel.prev().prev().attr('href');
+				$.each(g.statementsMatching($rdf.sym(webid), FOAF('img'), undefined), function(index, value) {
+					webidavatar = value.object.value;
+				});
 
-		              friendel.prev().attr('href', sharehref + '&avatar=' + encodeURIComponent(avatar) );
-		              friendel.prev().prev().attr('href', chathref + '&avatar=' + encodeURIComponent(webidavatar) );
 
+				$.each(g.statementsMatching($rdf.sym(webid), FOAF('depiction'), undefined), function(index, value) {
+					webidavatar = value.object.value;
+				});
+
+
+				$.each(g.statementsMatching($rdf.sym(webid), FOAF('name'), undefined), function(index, value) {
+					webidname = value.object.value;
+				});
+
+				$.each(g.statementsMatching($rdf.sym(webid), PIM('storage'), undefined), function(index, value) {
+					storage = value.object.value;
+				});
+
+				$.each(g.statementsMatching($rdf.sym(webid), RDFS('seeAlso'), undefined), function(index, value) {
+					seeAlso = value.object.value;
+				});
+
+
+				function addStorage(storage) {
+					if ( ! $('#storage').find('select').length ) {
+						$('#storage').append($('<select id="storagedropdown"></select>'));
+						$('#storage').append('<div><paper-button raised="true" type="button" id="diary" target="_blank">My Journal</paper-button></div>');
+						$('#diary').on('click', function() {
+							window.open('chat.html?ldpc='+ encodeURIComponent($('#storagedropdown').val()) +'chat/diary/&webid='+encodeURIComponent(webid) + '&name=' + encodeURIComponent(webidname) + '&avatar=' + encodeURIComponent(webidavatar) + '&title=Diary' );
+							return false;
+						});
+					}
+					if (! $('#storagedropdown option[value="'+storage+'"]').length) {
+						$('#storagedropdown').append( new Option(storage, storage) );
+					}
+				}
+
+				template.avatar = webidavatar;
+				addStorage(storage);
+				if (seeAlso) {
+					//$('#profile').append('<div>See Also : <a target="_blank" href="'+seeAlso+'">'+seeAlso+'</a></div>')
+					f.nowOrWhenFetched( seeAlso , undefined, function(ok, body) {
+						console.log('seeAlso fetched ');
+						$.each(g.statementsMatching($rdf.sym(webid), PIM('storage'), undefined), function(index, value) {
+							var storage = value.object.value;
+							addStorage(storage);
+						});
+					});
+				}
+				template.name = webidname;
 
-		              friendel.before('<img height="30" width="30" src="' + avatar + '">');
-		              friendel.parent().insertAfter('#avatars');
-		            }
-                */
+				function addFriends() {
+					// friends
+					$.each(g.statementsMatching($rdf.sym(webid), FOAF('knows'), undefined), function(index, value) {
 
-                if (avatar) {
-                  template.friends.unshift( { avatar : avatar, uri : 'chat.html?ldpc=' +encodeURIComponent(ldpc)+ hash + '/&webid='+encodeURIComponent(friend)+'&avatar='+encodeURIComponent(avatar)+'&name='+encodeURIComponent(name) + '&title=' + encodeURIComponent(webidname),
-                  text : 'chat.html?ldpc=' +encodeURIComponent(ldpc)+ hash + '/&webid='+encodeURIComponent(webid)+'&avatar='+encodeURIComponent(webidavatar)+'&name='+encodeURIComponent(webidname) + '&title=' +encodeURIComponent(name), name : name || friend }  );
-                } else {
-                  template.friends.push( { avatar : avatar, uri : 'chat.html?ldpc=' +encodeURIComponent(ldpc)+ hash + '/&webid='+encodeURIComponent(friend)+'&avatar='+encodeURIComponent(avatar)+'&name='+encodeURIComponent(name),
-                  text : 'chat.html?ldpc=' +encodeURIComponent(ldpc)+ hash + '/&webid='+encodeURIComponent(webid)+'&avatar='+encodeURIComponent(webidavatar)+'&name='+encodeURIComponent(webidname), name : name || friend }  );
-                }
+
+
+						var friend = value.object.value;
+
+						var users = [webid,friend];
+						users.sort();
+						users = users.join("\n");
+						var hash = CryptoJS.SHA256(users);
+						//console.log('hash ('+ users +') = ' + hash);
 
-
-		          });
-
-
-		        });
-
-		      }
-
-		      setTimeout(addFriends, 1000);
-
-		    });
-
-		  }
-
-
-		  // Listen to WebIDAuth events
-		  window.addEventListener('WebIDAuth',function(e) {
-		    console.log(e.detail);
-		    if (e.detail.success === true) {
-		      console.log("Auth successful! WebID: "+e.detail.user);
-		      renderwebid(e.detail.user);
-		    } else {
-		      console.log("Auth failed!");
-		      console.log(e.detail);
-		    }
-		  },false);
-
-
-
-		});
-		</script>
-	</body>
-	</html>
+						//$('#knows').append('<div>Start <a target="_blank" href="chat.html?ldpc=https://klaranet.com/d/chat/'+hash+'/&webid='+encodeURIComponent(webid)+'">Chat</a> or [<a href="chat.html?ldpc=https://klaranet.com/d/chat/'+hash+'/&webid='+encodeURIComponent(friend)+'" target="_blank">Share</a>] : <a about="'+ friend +'" href="'+ friend +'">'+ friend +'</a></div>')
+						console.log(friend);
+
+
+						var profileuri = (friend.split('#'))[0];
+						f.nowOrWhenFetched( profileuri , undefined, function(ok, body) {
+							var name;
+							var avatar;
+
+
+							$.each(g.statementsMatching($rdf.sym(friend), FOAF('name'), undefined), function(index, value) {
+								name = value.object.value;
+								console.log(name);
+								var friendel = $( "[about='"+ friend +"']" );
+								friendel.text(name);
+
+								/*
+								friendel.parent().insertAfter('#names');
+								var sharehref = friendel.prev().attr('href');
+								var chathref = friendel.prev().prev().attr('href');
+
+								friendel.prev().attr('href', sharehref + '&name=' + encodeURIComponent(name) );
+								friendel.prev().prev().attr('href', chathref + '&name=' + encodeURIComponent(webidname) );
+								*/
+
+								//console.log('share  : ' + sharehref );
+								//console.log('chat : ' +  chathref);
+							});
+
+							$.each(g.statementsMatching($rdf.sym(friend), FOAF('img'), undefined), function(index, value) {
+								var img = value.object.value;
+								console.log(img);
+								avatar = img;
+								//$( "[about='"+ friend +"']" ).before('<img height="30" width="30" src="' + img + '">');
+								//$( "[about='"+ friend +"']" ).parent().insertAfter('#avatars');
+							});
+
+							$.each(g.statementsMatching($rdf.sym(friend), FOAF('depiction'), undefined), function(index, value) {
+								var depiction = value.object.value;
+								console.log(depiction);
+								avatar = depiction;
+								//$( "[about='"+ friend +"']" ).before('<img height="30" width="30" src="' + depiction + '">');
+								//$( "[about='"+ friend +"']" ).parent().insertAfter('#avatars');
+							});
+
+							var fr = {
+								avatar : avatar,
+								uri : 'chat.html?ldpc=' +encodeURIComponent(ldpc)+ hash + '/&webid='+encodeURIComponent(friend)+'&avatar='+encodeURIComponent(avatar)+'&name='+encodeURIComponent(name) + '&title=' + encodeURIComponent(webidname),
+							  text : 'chat.html?ldpc=' +encodeURIComponent(ldpc)+ hash + '/&webid='+encodeURIComponent(webid)+'&avatar='+encodeURIComponent(webidavatar)+'&name='+encodeURIComponent(webidname) + '&title=' +encodeURIComponent(name),
+								name : name || friend
+							}
+
+							if (template.users && template.users[friend] ) {
+								console.log('setting presence of ' + friend )
+								fr.status = template.users[friend].status;
+								fr.lastActive = template.users[friend].lastActive;
+							}
+
+							if (fr.status) {
+								template.friends.unshift( fr );
+							} else if (avatar){
+								var count = 0;
+						    for (var i=0; i<template.friends.length; i++) {
+									if (template.friends[i].status) count++;
+								}
+								template.friends.splice(count, 0, fr);
+							} else {
+								template.friends.push( fr );
+							}
+
+						});
+
+
+					});
+
+				}
+
+				setTimeout(addFriends, 1000);
+
+			});
+
+		}
+
+
+		// Listen to WebIDAuth events
+		window.addEventListener('WebIDAuth',function(e) {
+			console.log(e.detail);
+			if (e.detail.success === true) {
+				console.log("Auth successful! WebID: "+e.detail.user);
+				renderwebid(e.detail.user);
+			} else {
+				console.log("Auth failed!");
+				console.log(e.detail);
+			}
+		},false);
+
+
+
+	});
+	</script>
+</body>
+</html>

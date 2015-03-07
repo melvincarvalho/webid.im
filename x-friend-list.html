@@ -7,7 +7,7 @@ A single user list with a username, avatar, and desc.
 
 -->
 <script src="bower_components/time-elements/time-elements.js"></script>
-<polymer-element name="x-friend-list" attributes="uri img avatar color username text status timestamp">
+<polymer-element name="x-friend-list" attributes="uri img avatar color username text status timestamp lastActive">
   <template>
 	<style>
 	:host {
@@ -112,6 +112,7 @@ Polymer('x-friend-list', {
 	status: '',
   img: '',
   uri: '',
+  lastActive: '',
 	timestamp: new Date().toISOString(),
 });
 </script>
