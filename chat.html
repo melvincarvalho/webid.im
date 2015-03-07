@@ -104,10 +104,25 @@
 				m.img = message;
 			}
 
-			if (viewer===webid) {
-				m.status = 'online';
-			} else {
-				m.status = 'offline';
+      // work out presence -- 1 hour means online
+      if (webid) {
+				if (!template.users[webid]) template.users[webid] = {};
+				var duration = 1;
+        var messagetime = new Date(time);
+				var now = new Date();
+				now.setHours(now.getHours() - duration);
+				console.log(now)
+				console.log(messagetime)
+
+				if (now < messagetime) {
+  				template.users[webid].status = 'online';
+				}
+			}
+
+      if (template.users && template.users[webid]) {
+        if (template.users[webid].status) {
+					m.status = template.users[webid].status;
+				}
 			}
 
 			var exists = false;
@@ -388,7 +403,7 @@
 
 			var template = document.querySelector('template[is=auto-binding]');
 
-			template.channel = 'polymer-chat';
+			template.channel = null;
 			template.name = name;
 			template.avatar = avatar;
 			template.color = color;
@@ -397,11 +412,14 @@
 			template.like = false;
 			template.title = title || 'WebID IM';
 			template.messages = [];
+			template.users = {};
 
-			if(!webid) {
-				template.show = false;
-			} else {
+			if(webid) {
 				template.show = true;
+				template.users[webid] = { status : 'online' };
+				console.log("Presnce: setting "+ webid + " to " + template.users[webid].status)
+			} else {
+				template.show = false;
 			}
 
 			template.checkKey = function(e) {
