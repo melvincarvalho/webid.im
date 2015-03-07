@@ -104,6 +104,9 @@
 				m.img = message;
 			}
 
+			var status;
+
+
       // work out presence -- 1 hour means online
       if (webid) {
 				if (!template.users[webid]) template.users[webid] = {};
@@ -112,24 +115,29 @@
         var messagetime = new Date(time);
 				var prevdate1 = new Date();
 				var prevdate2 = new Date();
-				var now = new Date();
 				var prevdate1 = new Date(prevdate1.setHours(prevdate1.getHours() - duration1));
 				var prevdate2 = new Date(prevdate2.setHours(prevdate2.getHours() - duration2));
 
 				if (messagetime.getTime() > prevdate1.getTime()) {
-					console.log('online')
-  				template.users[webid].status = 'online';
-				} else if (messagetime > prevdate2) {
-					console.log('away')
-  				template.users[webid].status = 'away';
+					status = 'online';
+					for (var i=0; i<template.messages.length; i++) {
+						if (template.messages[i].webid === webid) {
+							template.messages[i].status = status;
+							template.users[webid].status = status;
+						}
+					}
+				} else if (messagetime.getTime() > prevdate2.getTime()) {
+					status = 'away';
+					for (var i=0; i<template.messages.length; i++) {
+						if (template.messages[i].webid === webid) {
+							template.messages[i].status = status;
+							template.users[webid].status = status;
+						}
+					}
 				}
 			}
 
-      if (template.users && template.users[webid]) {
-        if (template.users[webid].status) {
-					m.status = template.users[webid].status;
-				}
-			}
+			m.status = status;
 
 			var exists = false;
 			for (var i=0; i<template.messages.length; i++) {
