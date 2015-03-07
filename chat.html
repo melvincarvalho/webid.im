@@ -3,8 +3,8 @@
 <head>
 	<meta charset="utf-8">
 	<meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1">
-	<meta name="description" content="Simple Chat Room">
-	<meta name="author" content="Tomomi Imura  @girlie_mac">
+	<meta name="description" content="Webid Instant Messeger">
+	<meta name="author" content="Melvin Carvalho">
 	<meta name="viewport" content="width=device-width, initial-scale=1.0">
 	<meta name="apple-mobile-web-app-capable" content="yes">
 	<meta name="mobile-web-app-capable" content="yes">
@@ -147,10 +147,6 @@
 
 		function renderdates(dateuri, today) {
 
-
-
-
-
 			//////////////////////////////////////////////
 
 			var g = $rdf.graph();
@@ -166,38 +162,25 @@
 
 			console.log('rendering dates');
 
-
 			console.log('dateuri : ' + dateuri);
 
 
-			// populate chat
+			// populate dates
 			f.nowOrWhenFetched( dateuri , undefined, function(ok, body) {
 				console.log('fetched');
 				console.log(body);
 
-
-
-
-
 				var LDP = $rdf.Namespace("http://www.w3.org/ns/ldp#");
 				var RDF = $rdf.Namespace("http://www.w3.org/1999/02/22-rdf-syntax-ns#");
 
-
 				var dates = g.statementsMatching(undefined, LDP('contains'), undefined);
-				//console.log('dates : ' + dates);
-
-				//$('#logs').empty();
-				//$('#logs').append(g.toString());
 
 				for (var i=dates.length-1; i>=0; i--) {
 					var date = dates[i];
-					//console.log(date);
 					if (date && date.object && date.object.value) {
 						var display = date.object.value.substr(-11,10)
 					}
-					console.log(' date : ' + display);
-
-					//template.items.push({ title : display });
+					//console.log(' date : ' + display);
 
 					$('#dates').append('<div id="'+ display +'" class="date">' + display + '</div><br>');
 
@@ -205,13 +188,11 @@
 
 				}
 
-
-
 			});
 
 			$('span').css('color', 'white');
 			if (today) {
-				setTimeout(function(){ $('#' + today).css('color', 'darkblue'); }, 500);
+				setTimeout(function(){ $('#' + today).css('color', 'darkblue'); }, 1000);
 			}
 		}
 
