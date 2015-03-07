@@ -202,12 +202,29 @@
 
 
 		function setPresence(webid, time) {
-			if (!template.uesrs) {
+			if (!template.users) {
 				template.users = {};
-				template.users[webid] = {status: 'online', lastActive: time};
 			}
+			var status = 'online';
+			if (template.users[webid] && template.users[webid].lastActive) {
+        if ( new Date(template.users[webid].lastActive) < new Date (time) ) {
+					template.users[webid] = {lastActive: time};
+				}
+			} else {
+  		  template.users[webid] = {lastActive: time};
+			}
+
+			if ( new Date().getTime() - new Date(template.users[webid].lastActive).getTime() < 3600000 ) {
+				status = 'online';
+			} else if ( new Date().getTime() - new Date(template.users[webid].lastActive).getTime() < 72000000 ) {
+				status = 'away';
+      } else {
+				status = 'offline';
+			}
+
+			template.users[webid].status = status;
 			for(var i=0; i<template.friends.length; i++) {
-				template.friends[i].statue = 'online';
+				template.friends[i].statue = status;
 				template.friends[i].lastActive = time;
 			}
 		}

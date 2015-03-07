@@ -41,6 +41,10 @@ A single user list with a username, avatar, and desc.
 		background-color: #7EDF25;
 		display: none;
 	}
+  .status.away {
+    display: block;
+    background-color: orange;
+  }
 	.status.online {
 		display: block;
 	}
@@ -56,6 +60,8 @@ A single user list with a username, avatar, and desc.
 	.timestamp {
 		font-size: 0.75em;
 		color: #919191;
+    top: 32px;
+    right: 3px;
 	}
 	.avatar {
     	border: solid 3px silver;
@@ -100,7 +106,13 @@ A single user list with a username, avatar, and desc.
 			<div class="username">{{username}}</div>
       <a target="_blank" href="{{text}}">Chat<a>
 		</div>
-		<a target="_blank" href="{{uri}}">Share<a>
+      <template if="{{lastActive}}">
+      <span class="timestamp">Last Seen : </span>
+      </template>
+      <time class="timestamp" is="relative-time" datetime="{{lastActive}}"></time>
+      <div>
+      &nbsp;<a style="text-align: right" target="_blank" href="{{uri}}">Share</a>
+      </div>
 	</section>
 </template>
 <script>
