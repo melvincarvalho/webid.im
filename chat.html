@@ -161,6 +161,81 @@
 			return results === null ? "" : decodeURIComponent(results[1].replace(/\+/g, " "));
 		}
 
+		function updatePresence(webid) {
+			var g = $rdf.graph();
+			var f = $rdf.fetcher(g);
+			// add CORS proxy
+			var PROXY = "https://data.fm/proxy?uri={uri}";
+			//var AUTH_PROXY = "https://rww.io/auth-proxy?uri=";
+			$rdf.Fetcher.crossSiteProxyTemplate=PROXY;
+
+			var kb = tabulator.kb;
+			var fetcher = tabulator.sf;
+
+
+			f.nowOrWhenFetched( presenceURI , undefined, function(ok, body) {
+				var USER = $rdf.Namespace("https://schema.rww.io/user#");
+
+				var turtle = 'DELETE DATA { ';
+
+				$.each(g.statementsMatching(undefined, USER('lastActive'), undefined), function(index, value) {
+					console.log('logins : ' + value.object);
+					if (webid === value.subject.value) {
+  					turtle += '<'+webid+'> <https://schema.rww.io/user#lastActive> "' + value.object.value + '" . ';
+					}
+					setPresence(value.subject.value, value.object.value);
+				});
+				turtle += " } ; \n";
+				console.log(turtle);
+
+				turtle += 'INSERT DATA { <'+(webid)+'> <https://schema.rww.io/user#lastActive>  "'+ new Date().toISOString() +'" . } ';
+
+				console.log(turtle);
+
+				$.ajax({
+					url: presenceURI,
+					contentType: "application/sparql-update",
+					type: 'PATCH',
+					data: turtle,
+					success: function(result) {
+					}
+				});
+
+
+			});
+
+		}
+
+		function setPresence(webid, time) {
+			if (!template.users) {
+				template.users = {};
+			}
+			var status = 'online';
+			if (template.users[webid] && template.users[webid].lastActive) {
+        if ( new Date(template.users[webid].lastActive) < new Date (time) ) {
+					template.users[webid] = {lastActive: time};
+				}
+			} else {
+  		  template.users[webid] = {lastActive: time};
+			}
+
+			if ( new Date().getTime() - new Date(template.users[webid].lastActive).getTime() < 3600000 ) {
+				status = 'online';
+			} else if ( new Date().getTime() - new Date(template.users[webid].lastActive).getTime() < 72000000 ) {
+				status = 'away';
+      } else {
+				status = 'offline';
+			}
+
+			template.users[webid].status = status;
+			for(var i=0; i<template.messages.length; i++) {
+				template.messages[i].statue = status;
+				template.messages[i].lastActive = time;
+			}
+		}
+
+
+
 		function showNewest() {
 			var chatDiv = document.querySelector('.chat-list');
 			if (chatDiv) {
@@ -392,6 +467,10 @@
 			var notify = false;
 			var wss = 'wss://' + ldpc.split('/')[2];
 			var soundURI = 'http://webid.im/pinglow.mp3';
+			var presenceURI = ldpc.split('/').splice(0,ldpc.split('/').length-2).join('/') + '/,presence'; // FYN to add
+
+			console.log('presenceURI : ' + presenceURI);
+
 			var webid = getWebid();
 			var today;
 			if (date) {
@@ -520,6 +599,8 @@
 					success: function(result) {
 					}
 				});
+
+				updatePresence(webid);
 
 				addMessage(avatar, message.text.trim(), webid, name, ldpc + today + '/' + id + '#this', new Date().toISOString(), false, message.viewer );
 				showNewest();
