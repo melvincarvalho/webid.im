@@ -153,12 +153,7 @@
 
 
 			f.nowOrWhenFetched( presenceURI , undefined, function(ok, body) {
-				var LDP = $rdf.Namespace("http://www.w3.org/ns/ldp#");
-				var RDF = $rdf.Namespace("http://www.w3.org/1999/02/22-rdf-syntax-ns#");
-				var FOAF = $rdf.Namespace("http://xmlns.com/foaf/0.1/");
-				var PIM = $rdf.Namespace("http://www.w3.org/ns/pim/space#");
 				var USER = $rdf.Namespace("https://schema.rww.io/user#");
-
 
 				var turtle = 'DELETE DATA { ';
 
@@ -169,20 +164,10 @@
 					}
 					setPresence(value.subject.value, value.object.value);
 				});
-				turtle += " } \n";
+				turtle += " } ; \n";
 				console.log(turtle);
 
-				$.ajax({
-					url: presenceURI,
-					contentType: "application/sparql-update",
-					type: 'PATCH',
-					data: turtle,
-					success: function(result) {
-					}
-				});
-
-
-				turtle = 'INSERT DATA { <'+(webid)+'> <https://schema.rww.io/user#lastActive>  "'+ new Date().toISOString() +'" . } ';
+				turtle += 'INSERT DATA { <'+(webid)+'> <https://schema.rww.io/user#lastActive>  "'+ new Date().toISOString() +'" . } ';
 
 				console.log(turtle);
 
