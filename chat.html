@@ -20,6 +20,7 @@
 	<script type="text/javascript" src="https://code.jquery.com/jquery-2.1.3.min.js"></script>
 	<script type="text/javascript" src="https://linkeddata.github.io/tabulator/js/mashup/mashlib.js"></script>
 	<script src="//cdnjs.cloudflare.com/ajax/libs/howler/1.1.25/howler.min.js"></script>
+	<script src="app/vendor/common.js"></script>
 
 
 	<link rel="import" href="bower_components/core-scaffold/core-scaffold.html">
@@ -87,7 +88,7 @@
 
       like = !!like;
 
-			var isImage =   (/\.(gif|jpg|jpeg|tiff|png|svg)$/i).test(message);
+			var isImage = (/\.(gif|jpg|jpeg|tiff|png|svg)$/i).test(message);
 			var m = {
 				name: name,
 				avatar: avatar,
@@ -107,18 +108,18 @@
 			var status;
 
 
-      // work out presence -- 1 hour means online
+      // work out presence
       if (webid) {
 				if (!template.users[webid]) template.users[webid] = {};
-				var duration1 = 1;
-				var duration2 = 12;
+				var onlinetime = 86400000;
+				var awaytime = 864000000;
         var messagetime = new Date(time);
-				var prevdate1 = new Date();
-				var prevdate2 = new Date();
-				var prevdate1 = new Date(prevdate1.setHours(prevdate1.getHours() - duration1));
-				var prevdate2 = new Date(prevdate2.setHours(prevdate2.getHours() - duration2));
+				if (template.users[webid].lastActive && new Date(template.users[webid].lastActive) > messagetime ) {
+					messagetime = new Date(template.users[webid].lastActive);
+				}
+				var now = new Date();
 
-				if (messagetime.getTime() > prevdate1.getTime()) {
+				if (now.getTime() - messagetime.getTime() < onlinetime) {
 					status = 'online';
 					for (var i=0; i<template.messages.length; i++) {
 						if (template.messages[i].webid === webid) {
@@ -126,7 +127,7 @@
 							template.users[webid].status = status;
 						}
 					}
-				} else if (messagetime.getTime() > prevdate2.getTime()) {
+				} else if (now.getTime() - messagetime.getTime() < awaytime) {
 					status = 'away';
 					for (var i=0; i<template.messages.length; i++) {
 						if (template.messages[i].webid === webid) {
@@ -152,14 +153,6 @@
 
 		}
 
-
-		/* get parameters */
-		function getParameterByName(name) {
-			name = name.replace(/[\[]/, "\\[").replace(/[\]]/, "\\]");
-			var regex = new RegExp("[\\?&]" + name + "=([^&#]*)"),
-			results = regex.exec(location.search);
-			return results === null ? "" : decodeURIComponent(results[1].replace(/\+/g, " "));
-		}
 
 		function updatePresence(webid) {
 			var g = $rdf.graph();
@@ -207,6 +200,9 @@
 		}
 
 		function setPresence(webid, time) {
+			var onlinetime = 86400000;
+			var awaytime = 864000000;
+
 			if (!template.users) {
 				template.users = {};
 			}
@@ -219,9 +215,9 @@
   		  template.users[webid] = {lastActive: time};
 			}
 
-			if ( new Date().getTime() - new Date(template.users[webid].lastActive).getTime() < 3600000 ) {
+			if ( new Date().getTime() - new Date(template.users[webid].lastActive).getTime() < onlinetime ) {
 				status = 'online';
-			} else if ( new Date().getTime() - new Date(template.users[webid].lastActive).getTime() < 72000000 ) {
+			} else if ( new Date().getTime() - new Date(template.users[webid].lastActive).getTime() < awaytime ) {
 				status = 'away';
       } else {
 				status = 'offline';
@@ -452,17 +448,17 @@
 			}
 
       function getWebid() {
-				var webid = getParameterByName('webid');
+				var webid = getParam('webid');
 				return webid;
 			}
 
 
 			// main
-			var ldpc = getParameterByName('ldpc');
-			var name = getParameterByName('name') || webid;
-			var avatar = getParameterByName('avatar');
-			var date = getParameterByName('date');
-			var title = getParameterByName('title');
+			var ldpc = getParam('ldpc');
+			var name = getParam('name') || webid;
+			var avatar = getParam('avatar');
+			var date = getParam('date');
+			var title = getParam('title');
 			var dateuri = ldpc;
 			var notify = false;
 			var wss = 'wss://' + ldpc.split('/')[2];
