@@ -310,7 +310,7 @@
 						$('#storage').append($('<select id="storagedropdown"></select>'));
 						$('#storage').append('<div><paper-button raised="true" type="button" id="diary" target="_blank">My Journal</paper-button></div>');
 						$('#diary').on('click', function() {
-							window.open('chat.html?ldpc='+ encodeURIComponent($('#storagedropdown').val()) +'chat/diary/&webid='+encodeURIComponent(webid) + '&name=' + encodeURIComponent(webidname) + '&avatar=' + encodeURIComponent(webidavatar) + '&title=Diary' );
+							window.open('chat.html?ldpc='+ encodeURIComponent($('#storagedropdown').val()) + encodeURIComponent('chat/diary/') +'&webid='+encodeURIComponent(webid) + '&name=' + encodeURIComponent(webidname) + '&avatar=' + encodeURIComponent(webidavatar) + '&title=Diary' );
 							return false;
 						});
 					}
