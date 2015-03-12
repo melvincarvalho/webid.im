@@ -98,22 +98,16 @@
 		// globals
 		'use strict';
 
+    // main
+		var template = document.querySelector('template[is=auto-binding]');
 
 
-		// main
 		var ldpc = 'https://klaranet.com/d/chat/'; // hard code for now until more websockets are there
 		var presenceURI = ldpc + ',presence'; // FYN to add
 		var webid = getParam('webid');
 		var name = getParam('name') || webid;
 		var avatar = getParam('avatar');
-
-
-
-
-		/* Polymer UI and UX */
-
-		var template = document.querySelector('template[is=auto-binding]');
-
+		var title = 'WebID Chat';
 		var color;
 
 		// Assign a name made of a random cat and a random color
@@ -121,15 +115,37 @@
 			var colors = ['navy', 'slate', 'olive', 'moss', 'chocolate', 'buttercup', 'maroon', 'cerise', 'plum', 'orchid'];
 			return colors[(Math.random() * colors.length) >>> 0];
 		};
-
 		color = randomColor();
 
+		template.init = {
+			ldpc : ldpc,
+			presenceURI : presenceURI,
+			webid : webid,
+			avatar : avatar,
+			color : color,
+			title : title
+		};
+		template.settings = {
+			ldpc : template.init.ldpc,
+			presenceURI : template.init.presenceURI,
+			webid : template.init.webid,
+			avatar : template.init.avatar,
+			color : template.init.color,
+			title : template.init.title,
+		};
+		if (!template.settings.name) {
+			template.settings.name = template.init.webid;
+		}
+		if (!template.settings.avatar) {
+			template.settings.avatar = '/images/generic_photo.png';
+		}
 
-		template.name = name;
-		template.avatar = avatar;
-		template.color = color;
+		template.name = template.settings.name;
+		template.avatar = template.settings.avatar;
+		template.color = template.settings.color;
+		template.title = template.settings.title;
+
 		template.friends = [];
-		template.title = 'WebID Chat';
 
 		function updatePresence(webid) {
 			var g = $rdf.graph();
@@ -319,7 +335,11 @@
 					}
 				}
 
-				template.avatar = webidavatar;
+        if (webidavatar) {
+  				template.avatar = webidavatar;
+				} else {
+					template.avatar = template.settings.avatar;
+				}
 				addStorage(storage);
 				if (seeAlso) {
 					//$('#profile').append('<div>See Also : <a target="_blank" href="'+seeAlso+'">'+seeAlso+'</a></div>')
