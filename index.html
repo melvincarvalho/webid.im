@@ -108,6 +108,7 @@
 		var name = getParam('name') || webid;
 		var avatar = getParam('avatar');
 		var title = 'WebID Chat';
+		var genericphoto = '/images/generic_photo.png';
 		var color;
 
 		// Assign a name made of a random cat and a random color
@@ -137,7 +138,7 @@
 			template.settings.name = template.init.webid;
 		}
 		if (!template.settings.avatar) {
-			template.settings.avatar = '/images/generic_photo.png';
+			template.settings.avatar = genericphoto;
 		}
 
 		template.name = template.settings.name;
@@ -146,6 +147,7 @@
 		template.title = template.settings.title;
 
 		template.friends = [];
+		template.users = {};
 
 		function updatePresence(webid) {
 			var g = $rdf.graph();
@@ -225,11 +227,7 @@
 
 		function renderwebid(webid) {
 
-
-
 			$('#webid-login').hide();
-
-			//////////////////////////////////////////////
 
 			var g = $rdf.graph();
 			var f = $rdf.fetcher(g);
@@ -241,9 +239,7 @@
 			var kb = tabulator.kb;
 			var fetcher = tabulator.sf;
 
-
 			updatePresence(webid);
-
 
 			console.log('rendering webid : ' + webid);
 
@@ -253,38 +249,6 @@
 			f.nowOrWhenFetched( profileuri , undefined, function(ok, body) {
 				console.log('webid fetched');
 
-
-
-
-
-				// TODO: cleanup
-				// TODO:   html
-				// TODO:   error check
-				// TODO: arch
-				// TODO:   webid -> workspace -> spaces -> channels -> posts
-				// TODO:   ChatChannel
-				// TODO: klaranet and haproxy
-				// TODO: ACLs
-				// TODO: favicon
-				// TODO: multiple channels
-				// TODO: presence
-				// TODO: payments
-				// TODO: emoticons
-				// TODO: notifications
-				// TODO:  title notifications (1) focus and favicon
-				// TODO: default avatar
-				// TODO: encryption
-				// TODO: set HEAD to klaranet
-				// TODO: come up with url for chat
-				// TODO:   individual URLs rooms
-				// TODO: expand links into content
-				// TODO: github integration
-				// TODO: snapchat 10 workflow
-				// TODO: highlight links
-				// TODO: mark
-				// TODO: facebook integration
-				// TODO: multi user integration
-				// TODO: add knowledgebase
 				var LDP = $rdf.Namespace("http://www.w3.org/ns/ldp#");
 				var RDF = $rdf.Namespace("http://www.w3.org/1999/02/22-rdf-syntax-ns#");
 				var FOAF = $rdf.Namespace("http://xmlns.com/foaf/0.1/");
@@ -335,11 +299,18 @@
 					}
 				}
 
-        if (webidavatar) {
+				if (webidavatar) {
   				template.avatar = webidavatar;
 				} else {
 					template.avatar = template.settings.avatar;
 				}
+				if (webidname) {
+  				template.name = webidname;
+				} else {
+					template.name = template.settings.name;
+				}
+
+
 				addStorage(storage);
 				if (seeAlso) {
 					//$('#profile').append('<div>See Also : <a target="_blank" href="'+seeAlso+'">'+seeAlso+'</a></div>')
@@ -351,13 +322,10 @@
 						});
 					});
 				}
-				template.name = webidname;
 
 				function addFriends() {
 					// friends
 					$.each(g.statementsMatching($rdf.sym(webid), FOAF('knows'), undefined), function(index, value) {
-
-
 
 						var friend = value.object.value;
 
@@ -365,9 +333,6 @@
 						users.sort();
 						users = users.join("\n");
 						var hash = CryptoJS.SHA256(users);
-						//console.log('hash ('+ users +') = ' + hash);
-
-						//$('#knows').append('<div>Start <a target="_blank" href="chat.html?ldpc=https://klaranet.com/d/chat/'+hash+'/&webid='+encodeURIComponent(webid)+'">Chat</a> or [<a href="chat.html?ldpc=https://klaranet.com/d/chat/'+hash+'/&webid='+encodeURIComponent(friend)+'" target="_blank">Share</a>] : <a about="'+ friend +'" href="'+ friend +'">'+ friend +'</a></div>')
 						console.log(friend);
 
 
@@ -379,41 +344,26 @@
 
 							$.each(g.statementsMatching($rdf.sym(friend), FOAF('name'), undefined), function(index, value) {
 								name = value.object.value;
+								/*
 								console.log(name);
 								var friendel = $( "[about='"+ friend +"']" );
 								friendel.text(name);
-
-								/*
-								friendel.parent().insertAfter('#names');
-								var sharehref = friendel.prev().attr('href');
-								var chathref = friendel.prev().prev().attr('href');
-
-								friendel.prev().attr('href', sharehref + '&name=' + encodeURIComponent(name) );
-								friendel.prev().prev().attr('href', chathref + '&name=' + encodeURIComponent(webidname) );
 								*/
 
-								//console.log('share  : ' + sharehref );
-								//console.log('chat : ' +  chathref);
-							});
-
-							$.each(g.statementsMatching($rdf.sym(friend), FOAF('img'), undefined), function(index, value) {
-								var img = value.object.value;
-								console.log(img);
-								avatar = img;
-								//$( "[about='"+ friend +"']" ).before('<img height="30" width="30" src="' + img + '">');
-								//$( "[about='"+ friend +"']" ).parent().insertAfter('#avatars');
 							});
 
 							$.each(g.statementsMatching($rdf.sym(friend), FOAF('depiction'), undefined), function(index, value) {
 								var depiction = value.object.value;
-								console.log(depiction);
 								avatar = depiction;
-								//$( "[about='"+ friend +"']" ).before('<img height="30" width="30" src="' + depiction + '">');
-								//$( "[about='"+ friend +"']" ).parent().insertAfter('#avatars');
+							});
+
+							$.each(g.statementsMatching($rdf.sym(friend), FOAF('img'), undefined), function(index, value) {
+								var img = value.object.value;
+								avatar = img;
 							});
 
 							var fr = {
-								avatar : avatar,
+								avatar : avatar || genericphoto,
 								uri : 'chat.html?ldpc=' +encodeURIComponent(ldpc)+ hash + '/&webid='+encodeURIComponent(friend)+'&avatar='+encodeURIComponent(avatar)+'&name='+encodeURIComponent(name) + '&title=' + encodeURIComponent(webidname),
 							  text : 'chat.html?ldpc=' +encodeURIComponent(ldpc)+ hash + '/&webid='+encodeURIComponent(webid)+'&avatar='+encodeURIComponent(webidavatar)+'&name='+encodeURIComponent(webidname) + '&title=' +encodeURIComponent(name),
 								name : name || friend
@@ -425,6 +375,7 @@
 								fr.lastActive = template.users[friend].lastActive;
 							}
 
+              // insert in right place
 							if (fr.status) {
 								template.friends.unshift( fr );
 							} else if (avatar){
