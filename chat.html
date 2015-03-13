@@ -105,6 +105,10 @@
 				m.img = message;
 			}
 
+			if (!m.avatar) {
+				m.avatar = genericphoto;
+			}
+
 			var status;
 
 
@@ -251,7 +255,7 @@
 			}).play();
 		}
 
-		function renderdates(dateuri, today) {
+		function rendersidebar(dateuri, today) {
 
 			//////////////////////////////////////////////
 
@@ -290,7 +294,7 @@
 
 					$('#dates').append('<div id="'+ display +'" class="date">' + display + '</div><br>');
 
-					$('#' + display).on('click', function () { template.messages = [] ; renderlogs(dateuri, $(this).html()); $('span').css('color', 'white'); $(this).css('color', 'darkblue') } );
+					$('#' + display).on('click', function () { template.messages = [] ; rendermain(dateuri, $(this).html()); $('span').css('color', 'white'); $(this).css('color', 'darkblue') } );
 
 				}
 
@@ -303,7 +307,7 @@
 		}
 
 
-		function renderlogs(dateuri, date) {
+		function rendermain(dateuri, date) {
 
 			if (!template.messages) template.messages = [];
 
@@ -396,8 +400,20 @@
 						avatar = depiction;
 					}
 
+          if (avatar.length === 0) {
+						avatar = null;
+					} else {
+						avatar = avatar[0].object.value
+					}
 
-					addMessage(avatar[0].object.value, text[0].object.value, url[0].object.value, name[0].object.value, post.subject.value, created[0].object.value, like, webid );
+					addMessage(avatar,
+						text[0].object.value,
+						url[0].object.value,
+						name[0].object.value,
+						post.subject.value,
+						created[0].object.value,
+						like,
+						webid );
 
 					// Set the name of the hidden property and the change event for visibility
 					var hidden, visibilityChange;
@@ -447,35 +463,23 @@
 
 			}
 
-      function getWebid() {
-				var webid = getParam('webid');
-				return webid;
-			}
-
-
 			// main
+			var template = document.querySelector('template[is=auto-binding]');
+
+
 			var ldpc = getParam('ldpc');
+			var webid = getParam('webid');
 			var name = getParam('name') || webid;
 			var avatar = getParam('avatar');
 			var date = getParam('date');
-			var title = getParam('title');
+			var title = getParam('title') || 'WebID Chat';
+			var genericphoto = '/images/generic_photo.png';
+			var soundURI = 'http://webid.im/pinglow.mp3';
+			var presenceURI = ldpc.split('/').splice(0,ldpc.split('/').length-2).join('/') + '/,presence'; // FYN to add
 			var dateuri = ldpc;
 			var notify = false;
 			var wss = 'wss://' + ldpc.split('/')[2];
-			var soundURI = 'http://webid.im/pinglow.mp3';
-			var presenceURI = ldpc.split('/').splice(0,ldpc.split('/').length-2).join('/') + '/,presence'; // FYN to add
-
-			console.log('presenceURI : ' + presenceURI);
-
-			var webid = getWebid();
 			var today;
-			if (date) {
-				today = date;
-			} else {
-			  today = new Date().toISOString().substr(0,10);
-			}
-			console.log('Today is : ' + today)
-
 
 			var color;
 
@@ -484,25 +488,64 @@
 				var colors = ['navy', 'slate', 'olive', 'moss', 'chocolate', 'buttercup', 'maroon', 'cerise', 'plum', 'orchid'];
 				return colors[(Math.random() * colors.length) >>> 0];
 			};
-
 			color = randomColor();
 
+			template.init = {
+				ldpc : ldpc,
+				presenceURI : presenceURI,
+				webid : webid,
+				avatar : avatar,
+				color : color,
+				title : title,
+				date : date,
+				notify : notify,
+				name : name,
+				wss : wss,
+				dateuri : dateuri
+			};
+			template.settings = {
+				ldpc : template.init.ldpc,
+				presenceURI : template.init.presenceURI,
+				webid : template.init.webid,
+				avatar : template.init.avatar,
+				color : template.init.color,
+				title : template.init.title,
+				date : template.init.date,
+				name : template.init.name,
+				notify : template.init.notify,
+				wss : template.init.wss,
+				dateuri : template.init.dateuri
+			};
+			if (!template.settings.name) {
+				template.settings.name = template.init.webid;
+			}
+			if (!template.settings.avatar) {
+				template.settings.avatar = genericphoto;
+			}
+			if (!template.settings.date) {
+				template.settings.date = new Date().toISOString().substr(0,10);
+			}
 
-			/* Polymer UI and UX */
 
-			var template = document.querySelector('template[is=auto-binding]');
+			template.name = template.settings.name;
+			template.avatar = template.settings.avatar;
+			template.color = template.settings.color;
+			template.title = template.settings.title;
+			template.viewer = template.settings.webid;
+			template.webid = template.settings.webid;
 
-			template.channel = null;
-			template.name = name;
-			template.avatar = avatar;
-			template.color = color;
-			template.viewer = webid;
-			template.webid = webid;
-			template.like = false;
-			template.title = title || 'WebID IM';
+
 			template.messages = [];
 			template.users = {};
 
+
+			if (date) {
+				today = date;
+			} else {
+			  today = new Date().toISOString().substr(0,10);
+			}
+
+      // show message box if webid
 			if(webid) {
 				template.show = true;
 				template.users[webid] = { status : 'online' };
@@ -511,6 +554,7 @@
 				template.show = false;
 			}
 
+      // message box triggers post
 			template.checkKey = function(e) {
 				if(e.keyCode === 13 || e.charCode === 13) {
 					template.publish();
@@ -525,20 +569,17 @@
 			template.publish = function() {
 				if(!template.input) return;
 
-				//template.$.pub.message = {
 				var message = {
-					name: name,
-					avatar: avatar,
-					color: color,
-					viewer: webid,
-					webid: webid,
+					name: template.settings.name,
+					avatar: template.settings.avatar,
+					color: template.settings.color,
+					viewer: template.settings.webid,
+					webid: template.settings.webid,
 					like: false,
 					text: template.input,
 					status: 'online',
 					timestamp: new Date().toISOString()
 				};
-				//template.$.pub.publish();
-				//template.messages.push(message);
 				template.input = '';
 
 				function putFile(file, data) {
@@ -549,11 +590,6 @@
 						type: 'PUT',
 						data: data,
 						success: function(result) {
-							// Do something with the result
-							//addMessage(avatar, message.text.trim(), webid, name, file, new Date().toISOString().substr(11,8));
-							//$('#chat-input').val('');
-							//$('#chat-input').attr('disabled', false);
-							//$('#chat-input').focus();
 							showNewest();
 
 						}
@@ -566,12 +602,12 @@
 				var turtle = '';
 				turtle += '<#author> ';
 				turtle += 'a <http://xmlns.com/foaf/0.1/#Person> ; ';
-				turtle += '   <http://www.w3.org/2002/07/owl#sameAs> <' + webid + '> ; ';
-				if (avatar) {
-  				turtle += '    <http://xmlns.com/foaf/0.1/img> <'+ avatar +'> ; ';
+				turtle += '   <http://www.w3.org/2002/07/owl#sameAs> <' + template.settings.webid + '> ; ';
+				if (template.init.avatar) {
+  				turtle += '    <http://xmlns.com/foaf/0.1/img> <'+ template.settings.avatar +'> ; ';
 	  		}
-				if (name) {
-				  turtle += '    <http://xmlns.com/foaf/0.1/name> "'+ name +'" . ';
+				if (template.init.name) {
+				  turtle += '    <http://xmlns.com/foaf/0.1/name> "'+ template.settings.name +'" . ';
 				}
 
 				turtle += '<#this> ';
@@ -596,12 +632,10 @@
 					}
 				});
 
-				updatePresence(webid);
+				updatePresence(template.settings.webid);
 
-				addMessage(avatar, message.text.trim(), webid, name, ldpc + today + '/' + id + '#this', new Date().toISOString(), false, message.viewer );
+				addMessage(template.init.avatar, message.text.trim(), template.settings.webid, template.init.name, template.settings.ldpc + today + '/' + id + '#this', new Date().toISOString(), false, template.settings.webid );
 				showNewest();
-
-
 
 			};
 
@@ -611,9 +645,9 @@
 
 
 			// render
-			renderdates(dateuri, today);
-			renderlogs(dateuri, today);
-			connectToSocket(wss);
+			rendersidebar(template.settings.dateuri, template.settings.date);
+			rendermain(template.settings.dateuri, template.settings.date);
+			connectToSocket(template.settings.wss);
 
 			function connectToSocket(socket) {
 
@@ -633,7 +667,7 @@
 					var today = new Date().toISOString().substr(0,10);
 
 					playSound(soundURI);
-					renderlogs(dateuri, today);
+					rendermain(dateuri, today);
 
 					Notification.requestPermission(function (permission) {
 						// If the user is okay, let's create a notification
@@ -643,8 +677,6 @@
 					});
 				}
 			}
-
-
 
 		});
 		</script>

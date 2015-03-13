@@ -365,15 +365,23 @@
 
 							var fr = {
 							  text : 'chat.html?ldpc=' +encodeURIComponent(ldpc)+ hash + '/&webid='+encodeURIComponent(webid)+'&avatar='+encodeURIComponent(webidavatar)+'&name='+encodeURIComponent(webidname) + '&title=' +encodeURIComponent(name),
-								uri : 'chat.html?ldpc=' +encodeURIComponent(ldpc)+ hash + '/&webid='+encodeURIComponent(friend)+'&name='+encodeURIComponent(name) + '&title=' + encodeURIComponent(webidname),
-								name : name || friend
+								uri : 'chat.html?ldpc=' +encodeURIComponent(ldpc)+ hash + '/&webid='+encodeURIComponent(friend) + '&title=' + encodeURIComponent(webidname)
 							}
 
+							// add avatar
               if (avatar) {
 								fr.avatar = avatar;
 								fr.uri += '&avatar='+encodeURIComponent(avatar);
    						} else {
 								fr.avatar = genericphoto;
+	  					}
+
+							// add name
+              if (name) {
+								fr.name = name;
+								fr.uri += '&name='+encodeURIComponent(name);
+   						} else {
+								fr.name = friend;
 	  					}
 
 							if (template.users && template.users[friend] ) {
