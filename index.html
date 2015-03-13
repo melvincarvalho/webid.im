@@ -364,8 +364,8 @@
 
 
 							var fr = {
-							  text : 'chat.html?ldpc=' +encodeURIComponent(ldpc)+ hash + '/&webid='+encodeURIComponent(webid)+'&avatar='+encodeURIComponent(webidavatar)+'&name='+encodeURIComponent(webidname) + '&title=' +encodeURIComponent(name),
-								uri : 'chat.html?ldpc=' +encodeURIComponent(ldpc)+ hash + '/&webid='+encodeURIComponent(friend) + '&title=' + encodeURIComponent(webidname)
+							  text : 'chat.html?ldpc=' +encodeURIComponent(ldpc)+ hash + '/&webid='+encodeURIComponent(webid)+'&avatar='+encodeURIComponent(webidavatar)+'&name='+encodeURIComponent(webidname) ,
+								uri : 'chat.html?ldpc=' +encodeURIComponent(ldpc)+ hash + '/&webid='+encodeURIComponent(friend)
 							}
 
 							// add avatar
@@ -383,6 +383,13 @@
    						} else {
 								fr.name = friend;
 	  					}
+
+							// add title
+              if (webidname) {
+								fr.uri += '&title=' + encodeURIComponent(webidname);
+	  					}
+
+
 
 							if (template.users && template.users[friend] ) {
 								console.log('setting presence of ' + friend )
