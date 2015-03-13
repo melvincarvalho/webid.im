@@ -362,12 +362,19 @@
 								avatar = img;
 							});
 
+
 							var fr = {
-								avatar : avatar || genericphoto,
-								uri : 'chat.html?ldpc=' +encodeURIComponent(ldpc)+ hash + '/&webid='+encodeURIComponent(friend)+'&avatar='+encodeURIComponent(avatar)+'&name='+encodeURIComponent(name) + '&title=' + encodeURIComponent(webidname),
 							  text : 'chat.html?ldpc=' +encodeURIComponent(ldpc)+ hash + '/&webid='+encodeURIComponent(webid)+'&avatar='+encodeURIComponent(webidavatar)+'&name='+encodeURIComponent(webidname) + '&title=' +encodeURIComponent(name),
+								uri : 'chat.html?ldpc=' +encodeURIComponent(ldpc)+ hash + '/&webid='+encodeURIComponent(friend)+'&name='+encodeURIComponent(name) + '&title=' + encodeURIComponent(webidname),
 								name : name || friend
 							}
+
+              if (avatar) {
+								fr.avatar = avatar;
+								fr.uri += '&avatar='+encodeURIComponent(avatar);
+   						} else {
+								fr.avatar = genericphoto;
+	  					}
 
 							if (template.users && template.users[friend] ) {
 								console.log('setting presence of ' + friend )
