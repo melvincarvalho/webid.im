@@ -95,12 +95,9 @@
 	<script>
 	jQuery(document).ready(function() {
 
-		// globals
+		// main
 		'use strict';
-
-    // main
 		var template = document.querySelector('template[is=auto-binding]');
-
 
 		var ldpc = 'https://klaranet.com/d/chat/'; // hard code for now until more websockets are there
 		var presenceURI = ldpc + ',presence'; // FYN to add
@@ -109,6 +106,7 @@
 		var avatar = getParam('avatar');
 		var title = 'WebID Chat';
 		var genericphoto = '/images/generic_photo.png';
+		var action = 'friends';
 		var color;
 
 		// Assign a name made of a random cat and a random color
@@ -124,7 +122,8 @@
 			webid : webid,
 			avatar : avatar,
 			color : color,
-			title : title
+			title : title,
+			action : action
 		};
 		template.settings = {
 			ldpc : template.init.ldpc,
@@ -133,6 +132,7 @@
 			avatar : template.init.avatar,
 			color : template.init.color,
 			title : template.init.title,
+			action : template.init.action
 		};
 		if (!template.settings.name) {
 			template.settings.name = template.init.webid;
@@ -189,7 +189,6 @@
 					}
 				});
 
-
 			});
 
 		}
@@ -225,7 +224,9 @@
 			}
 		}
 
-		function renderwebid(webid) {
+		function rendermain(webid) {
+
+      if (!webid) return;
 
 			$('#webid-login').hide();
 
@@ -255,34 +256,16 @@
 				var PIM = $rdf.Namespace("http://www.w3.org/ns/pim/space#");
 				var RDFS = $rdf.Namespace("http://www.w3.org/2000/01/rdf-schema#");
 
-
-
 				var webidname;
 				var webidavatar;
 				var storage;
 				var seeAlso;
 
-				$.each(g.statementsMatching($rdf.sym(webid), FOAF('img'), undefined), function(index, value) {
-					webidavatar = value.object.value;
-				});
-
-
-				$.each(g.statementsMatching($rdf.sym(webid), FOAF('depiction'), undefined), function(index, value) {
-					webidavatar = value.object.value;
-				});
-
-
-				$.each(g.statementsMatching($rdf.sym(webid), FOAF('name'), undefined), function(index, value) {
-					webidname = value.object.value;
-				});
-
-				$.each(g.statementsMatching($rdf.sym(webid), PIM('storage'), undefined), function(index, value) {
-					storage = value.object.value;
-				});
-
-				$.each(g.statementsMatching($rdf.sym(webid), RDFS('seeAlso'), undefined), function(index, value) {
-					seeAlso = value.object.value;
-				});
+				webidavatar = g.any(kb.sym(webid), FOAF('img'))
+				              || g.any(kb.sym(webid), FOAF('depiction'));
+				webidname = g.any(kb.sym(webid), FOAF('name'));
+				storage = g.any(kb.sym(webid), PIM('storage'));
+				seeAlso = g.any(kb.sym(webid), RDFS('seeAlso'));
 
 
 				function addStorage(storage) {
@@ -290,7 +273,9 @@
 						$('#storage').append($('<select id="storagedropdown"></select>'));
 						$('#storage').append('<div><paper-button raised="true" type="button" id="diary" target="_blank">My Journal</paper-button></div>');
 						$('#diary').on('click', function() {
-							window.open('chat.html?ldpc='+ encodeURIComponent($('#storagedropdown').val()) + encodeURIComponent('chat/diary/') +'&webid='+encodeURIComponent(webid) + '&name=' + encodeURIComponent(webidname) + '&avatar=' + encodeURIComponent(webidavatar) + '&title=Diary' );
+							window.open('chat.html?ldpc='+ encodeURIComponent($('#storagedropdown').val())
+							+ encodeURIComponent('chat/diary/') +'&webid='+encodeURIComponent(webid) + '&name='
+							+ encodeURIComponent(webidname.value) + '&avatar=' + encodeURIComponent(webidavatar.value) + '&title=Diary' );
 							return false;
 						});
 					}
@@ -300,25 +285,24 @@
 				}
 
 				if (webidavatar) {
-  				template.avatar = webidavatar;
+  				template.avatar = webidavatar.value;
 				} else {
 					template.avatar = template.settings.avatar;
 				}
 				if (webidname) {
-  				template.name = webidname;
+  				template.name = webidname.value;
 				} else {
 					template.name = template.settings.name;
 				}
 
+				addStorage(storage.value);
 
-				addStorage(storage);
 				if (seeAlso) {
 					//$('#profile').append('<div>See Also : <a target="_blank" href="'+seeAlso+'">'+seeAlso+'</a></div>')
-					f.nowOrWhenFetched( seeAlso , undefined, function(ok, body) {
+					f.nowOrWhenFetched( seeAlso.value , undefined, function(ok, body) {
 						console.log('seeAlso fetched ');
 						$.each(g.statementsMatching($rdf.sym(webid), PIM('storage'), undefined), function(index, value) {
-							var storage = value.object.value;
-							addStorage(storage);
+							addStorage(value.object.value);
 						});
 					});
 				}
@@ -341,15 +325,8 @@
 							var name;
 							var avatar;
 
-
 							$.each(g.statementsMatching($rdf.sym(friend), FOAF('name'), undefined), function(index, value) {
 								name = value.object.value;
-								/*
-								console.log(name);
-								var friendel = $( "[about='"+ friend +"']" );
-								friendel.text(name);
-								*/
-
 							});
 
 							$.each(g.statementsMatching($rdf.sym(friend), FOAF('depiction'), undefined), function(index, value) {
@@ -364,7 +341,10 @@
 
 
 							var fr = {
-							  text : 'chat.html?ldpc=' +encodeURIComponent(ldpc)+ hash + '/&webid='+encodeURIComponent(webid)+'&avatar='+encodeURIComponent(webidavatar)+'&name='+encodeURIComponent(webidname) ,
+							  text : 'chat.html?ldpc=' +encodeURIComponent(ldpc)+ hash
+								       + '/&webid='+encodeURIComponent(webid)+'&avatar='
+								       + encodeURIComponent(webidavatar.value)+'&name='
+								       + encodeURIComponent(webidname.value) ,
 								uri : 'chat.html?ldpc=' +encodeURIComponent(ldpc)+ hash + '/&webid='+encodeURIComponent(friend)
 							}
 
@@ -386,9 +366,8 @@
 
 							// add title
               if (webidname) {
-								fr.uri += '&title=' + encodeURIComponent(webidname);
+								fr.uri += '&title=' + encodeURIComponent(webidname.value);
 	  					}
-
 
 
 							if (template.users && template.users[friend] ) {
@@ -429,7 +408,7 @@
 			console.log(e.detail);
 			if (e.detail.success === true) {
 				console.log("Auth successful! WebID: "+e.detail.user);
-				renderwebid(e.detail.user);
+				rendermain(e.detail.user);
 			} else {
 				console.log("Auth failed!");
 				console.log(e.detail);
