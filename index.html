@@ -51,7 +51,6 @@
 				</core-toolbar>
 
 				<section layout vertical id="onlineList">
-					<h2>Diary</h2>
 					<div id="storage">
 					</div>
 
@@ -270,12 +269,19 @@
 
 				function addStorage(storage) {
 					if ( ! $('#storage').find('select').length ) {
+						$('#storage').append($('<div>storage</div>'));
+						$('#storage').append($('<hr>'));
 						$('#storage').append($('<select id="storagedropdown"></select>'));
+						$('#storage').append($('<hr>'));
 						$('#storage').append('<div><paper-button raised="true" type="button" id="diary" target="_blank">My Journal</paper-button></div>');
 						$('#diary').on('click', function() {
-							window.open('chat.html?ldpc='+ encodeURIComponent($('#storagedropdown').val())
+							var diaryURI = 'chat.html?ldpc='+ encodeURIComponent($('#storagedropdown').val())
 							+ encodeURIComponent('chat/diary/') +'&webid='+encodeURIComponent(webid) + '&name='
-							+ encodeURIComponent(webidname.value) + '&avatar=' + encodeURIComponent(webidavatar.value) + '&title=Diary' );
+							+ encodeURIComponent(webidname.value);
+							if (webidavatar) {
+								diaryURI += '&avatar=' + encodeURIComponent(webidavatar.value) + '&title=Diary';
+							}
+							window.open( diaryURI );
 							return false;
 						});
 					}
@@ -360,6 +366,7 @@
               if (name) {
 								fr.name = name;
 								fr.uri += '&name='+encodeURIComponent(name);
+								fr.text += '&title='+encodeURIComponent(name);
    						} else {
 								fr.name = friend;
 	  					}
@@ -396,7 +403,7 @@
 
 				}
 
-				setTimeout(addFriends, 1000);
+				setTimeout(addFriends, 1500);
 
 			});
 
