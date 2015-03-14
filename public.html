@@ -87,8 +87,11 @@
 		var genericphoto = 'http://webid.im/images/generic_photo.png';
 		var action = 'chat';
 		var title = 'Public Chat';
-		var color, avatar;
+		var color;
 		var room = 'Water Cooler';
+		var name = getParam('name');
+		var avatar = getParam('avatar');
+		var webid = getParam('webid');
 
 		// Assign a name made of a random cat and a random color
 		var randomColor = function() {
@@ -102,6 +105,8 @@
 			avatar : avatar,
 			color : color,
 			title : title,
+			name : name,
+			webid : webid,
 			action : action
 		};
 		template.settings = {
@@ -109,11 +114,10 @@
 			avatar : template.init.avatar,
 			color : template.init.color,
 			title : template.init.title,
+			name : template.init.name,
+			webid : template.init.webid,
 			action : template.init.action
 		};
-		if (!template.settings.name) {
-			template.settings.name = template.init.webid;
-		}
 		if (!template.settings.avatar) {
 			template.settings.avatar = genericphoto;
 		}
