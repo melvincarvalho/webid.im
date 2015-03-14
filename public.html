@@ -65,9 +65,9 @@
 			</div>
 
 			<section layout vertical fit id="chat">
-				<paper-input id="name" label="Your Name" value="{{name}}"></paper-input>
-				<paper-input id="webid (optional)" label="Your WebID" value="{{webid}}"></paper-input>
-				<paper-input id="avatar" label="Your Avatar" value="{{avatar}}"></paper-input>
+				<paper-input id="name" label="Your Name*" value="{{name}}"></paper-input>
+				<paper-input id="webid" label="Your WebID" value="{{webid}}"></paper-input>
+				<paper-input id="avatar" label="Your Avatar" value="{{formavatar}}"></paper-input>
 				<paper-input id="ldpc" label="Chat Room URI" value="{{ldpc}}"></paper-input>
 				<paper-button raised="true" type="button" id="go" class="colored" role="button" tabindex="0">Chat</paper-button>
 
@@ -142,8 +142,9 @@
 					return;
 				}
 				if (!template.webid) template.webid = 'urn:' + name;
+				if (!template.formavatar) template.formavatar = template.avatar;
 
-				var site = 'chat.html?action=chat&type=single&ldpc=' + encodeURIComponent(template.ldpc) + '&webid=' + encodeURIComponent(template.webid) + '&avatar=' + encodeURIComponent(template.avatar) + '&name=' + encodeURIComponent(template.name);
+				var site = 'chat.html?action=chat&type=single&ldpc=' + encodeURIComponent(template.ldpc) + '&webid=' + encodeURIComponent(template.webid) + '&avatar=' + encodeURIComponent(template.formavatar) + '&name=' + encodeURIComponent(template.name);
 
 	  		window.open(site);
 		  });
