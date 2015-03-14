@@ -88,6 +88,7 @@
 		var action = 'chat';
 		var title = 'Public Chat';
 		var color, avatar;
+		var room = 'Water Cooler';
 
 		// Assign a name made of a random cat and a random color
 		var randomColor = function() {
@@ -144,7 +145,12 @@
 				if (!template.webid) template.webid = 'urn:' + name;
 				if (!template.formavatar) template.formavatar = template.avatar;
 
-				var site = 'chat.html?action=chat&type=single&ldpc=' + encodeURIComponent(template.ldpc) + '&webid=' + encodeURIComponent(template.webid) + '&avatar=' + encodeURIComponent(template.formavatar) + '&name=' + encodeURIComponent(template.name);
+				var site = 'chat.html?action=chat&type=single&ldpc='
+				+ encodeURIComponent(template.ldpc) + '&webid='
+				+ encodeURIComponent(template.webid) + '&avatar='
+				+ encodeURIComponent(template.formavatar)
+				+ '&name=' + encodeURIComponent(template.name)
+				+ '&title=' + encodeURIComponent(room);
 
 	  		window.open(site);
 		  });
