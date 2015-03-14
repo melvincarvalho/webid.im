@@ -92,7 +92,7 @@
 				}
 			}
 			if (type==='daily') {
-				return ldpc + date;
+				return ldpc + date + '/';
 			}
 			return ldpc;
 		}
@@ -325,7 +325,7 @@
 			if (!template.messages) template.messages = [];
 
 
-			var fetchuri = channel + '/*';
+			var fetchuri = channel + '*';
 
 			console.log('rendering logs for : ' + fetchuri);
 
@@ -640,10 +640,10 @@
 				console.log(turtle);
 
 				var today = new Date().toISOString().substr(0,10);
-				putFile(getChannel(ldpc, template.settings.type, today) + '/' + id, turtle);
+				putFile(getChannel(ldpc, template.settings.type, today) + id, turtle);
 
 				$.ajax({
-					url: getChannel(ldpc, template.settings.type, today) + '/' + ',meta',
+					url: getChannel(ldpc, template.settings.type, today) + ',meta',
 					contentType: "text/turtle",
 					type: 'PUT',
 					data: '<> <http://www.w3.org/ns/posix/stat#mtime> "'+ Math.floor(Date.now() / 1000) +'" . ',
@@ -653,7 +653,9 @@
 
 				updatePresence(template.settings.webid);
 
-				addMessage(template.init.avatar, message.text.trim(), template.settings.webid, template.init.name, template.settings.ldpc + today + '/' + id + '#this', new Date().toISOString(), false, template.settings.webid );
+				addMessage(template.init.avatar, message.text.trim(), template.settings.webid, template.init.name,
+				           getChannel(template.settings.ldpc, template.settings.type,  today) + id + '#this',
+									 new Date().toISOString(), false, template.settings.webid );
 				showNewest();
 
 			};
@@ -679,7 +681,7 @@
 				socket.onopen = function(){
 					console.log(this);
 					var today = new Date().toISOString().substr(0,10);
-					var sub = 'sub ' + getChannel(ldpc, template.settings.type, today) +'/,meta';
+					var sub = 'sub ' + getChannel(ldpc, template.settings.type, today) +',meta';
 					console.log(sub);
 					this.send(sub);
 				}

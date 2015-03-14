@@ -1,0 +1,171 @@
+<!doctype html>
+<html lang="en">
+<head>
+	<meta charset="utf-8">
+	<meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1">
+	<meta name="description" content="WebID Instant Message">
+	<meta name="author" content="Melvin Carvalho">
+	<meta name="viewport" content="width=device-width, initial-scale=1.0">
+	<meta name="apple-mobile-web-app-capable" content="yes">
+	<meta name="mobile-web-app-capable" content="yes">
+	<title>WebID Chat</title>
+
+	<link rel="icon" sizes="192x192" href="images/app-icon-192.png">
+	<link rel="icon" sizes="128x128" href="images/app-icon-128.png">
+	<link rel="apple-touch-icon" sizes="128x128" href="images/app-icon-128.png">
+	<link rel="apple-touch-icon-precomposed" sizes="128x128" href="images/app-icon-128.png">
+
+	<!-- Polymer -->
+	<script src="http://crypto-js.googlecode.com/svn/tags/3.1.2/build/rollups/sha256.js"></script>
+	<script src="bower_components/webcomponentsjs/webcomponents.min.js"></script>
+	<script type="text/javascript" src="https://code.jquery.com/jquery-2.1.3.min.js"></script>
+	<script type="text/javascript" src="https://linkeddata.github.io/tabulator/js/mashup/mashlib.js"></script>
+	<script src="//cdnjs.cloudflare.com/ajax/libs/howler/1.1.25/howler.min.js"></script>
+	<script src="app/vendor/common.js"></script>
+
+
+	<link rel="import" href="bower_components/core-scaffold/core-scaffold.html">
+	<link rel="import" href="bower_components/core-item/core-item.html">
+	<link rel="import" href="bower_components/paper-input/paper-input.html">
+	<link rel="import" href="bower_components/paper-button/paper-button.html">
+	<link rel="import" href="bower_components/paper-fab/paper-fab.html">
+	<link rel="stylesheet" href="css/style.css">
+</head>
+
+<body unresolved fullbleed class="lite">
+
+	<div class="TabulatorOutline" id="DummyUUID">
+		<table id="outline"></table>
+	</div>
+
+
+	<template is="auto-binding">
+
+		<core-scaffold>
+			<core-header-panel navigation flex>
+				<core-toolbar id="navheader" class="tall">
+					<div class="middle avatar {{color}}" style="background-image: url({{avatar}})"></div>
+					<div class="bottom uuid">{{name}}</div>
+				</core-toolbar>
+
+				<section layout vertical id="onlineList">
+					<div>Public Rooms</div>
+					<div><hr></div>
+					<div>Water Cooler</div>
+
+				</section>
+
+			</core-header-panel>
+
+			<div tool layout horizontal flex>
+				<span flex>{{title}}</span>
+				<core-icon icon="account-circle"></core-icon><span>{{occupancy}}</span>
+
+
+			</div>
+
+			<section layout vertical fit id="chat">
+				<paper-input id="name" label="Your Name" value="{{name}}"></paper-input>
+				<paper-input id="webid (optional)" label="Your WebID" value="{{webid}}"></paper-input>
+				<paper-input id="avatar" label="Your Avatar" value="{{avatar}}"></paper-input>
+				<paper-input id="ldpc" label="Chat Room URI" value="{{ldpc}}"></paper-input>
+				<paper-button raised="true" type="button" id="go" class="colored" role="button" tabindex="0">Chat</paper-button>
+
+			</section>
+		</core-scaffold>
+
+	</template>
+
+	<script>
+	jQuery(document).ready(function() {
+
+		// main
+		'use strict';
+		var template = document.querySelector('template[is=auto-binding]');
+
+		var ldpc = 'https://klaranet.com/d/chat/watercooler/'; // hard code for now until more websockets are there
+		var genericphoto = 'http://webid.im/images/generic_photo.png';
+		var action = 'chat';
+		var title = 'Public Chat';
+		var color, avatar;
+
+		// Assign a name made of a random cat and a random color
+		var randomColor = function() {
+			var colors = ['navy', 'slate', 'olive', 'moss', 'chocolate', 'buttercup', 'maroon', 'cerise', 'plum', 'orchid'];
+			return colors[(Math.random() * colors.length) >>> 0];
+		};
+		color = randomColor();
+
+		template.init = {
+			ldpc : ldpc,
+			avatar : avatar,
+			color : color,
+			title : title,
+			action : action
+		};
+		template.settings = {
+			ldpc : template.init.ldpc,
+			avatar : template.init.avatar,
+			color : template.init.color,
+			title : template.init.title,
+			action : template.init.action
+		};
+		if (!template.settings.name) {
+			template.settings.name = template.init.webid;
+		}
+		if (!template.settings.avatar) {
+			template.settings.avatar = genericphoto;
+		}
+
+		template.name = template.settings.name;
+		template.ldpc = template.settings.ldpc;
+		template.avatar = template.settings.avatar;
+		template.color = template.settings.color;
+		template.title = template.settings.title;
+
+		template.friends = [];
+		template.users = {};
+
+
+		function rendermain(webid) {
+
+
+		}
+
+
+    function triggers() {
+			console.log('running');
+
+      $('#go').on('click', function() {
+				if (!template.name) {
+					alert('please enter a name');
+					return;
+				}
+				if (!template.webid) template.webid = 'urn:' + name;
+
+				var site = 'chat.html?action=chat&type=single&ldpc=' + encodeURIComponent(template.ldpc) + '&webid=' + encodeURIComponent(template.webid) + '&avatar=' + encodeURIComponent(template.avatar) + '&name=' + encodeURIComponent(template.name);
+
+	  		window.open(site);
+		  });
+    }
+
+		setTimeout(triggers, 100);
+
+		// Listen to WebIDAuth events
+		window.addEventListener('WebIDAuth',function(e) {
+			console.log(e.detail);
+			if (e.detail.success === true) {
+				console.log("Auth successful! WebID: "+e.detail.user);
+				rendermain(e.detail.user);
+			} else {
+				console.log("Auth failed!");
+				console.log(e.detail);
+			}
+		},false);
+
+
+
+	});
+	</script>
+</body>
+</html>
