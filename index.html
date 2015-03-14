@@ -313,6 +313,39 @@
 					});
 				}
 
+
+
+				function addPublicChannels() {
+
+					var ldpc = 'https://klaranet.com/d/chat/watercooler/';
+					var title = 'Water Cooler';
+					var name = 'Water Cooler';
+					var avatar = genericphoto;
+
+
+					var fr = {
+					  text : 'chat.html?actin=chat&type=single&ldpc=' +encodeURIComponent(ldpc)
+						       + '/&webid='+encodeURIComponent(webid)+'&name='
+						       + encodeURIComponent(webidname.value) ,
+						uri : '',
+						name : name,
+						avatar : avatar,
+						status : 'online'
+					}
+
+					if (webidavatar) {
+						fr.text += '&avatar=' + encodeURIComponent(webidavatar.value);
+					}
+
+					fr.text += '&title='+encodeURIComponent(title);
+
+          // insert in right place
+					template.friends.unshift( fr );
+
+				}
+
+
+
 				function addFriends() {
 					// friends
 					$.each(g.statementsMatching($rdf.sym(webid), FOAF('knows'), undefined), function(index, value) {
@@ -404,6 +437,7 @@
 				}
 
 				setTimeout(addFriends, 1500);
+				setTimeout(addPublicChannels, 4000);
 
 			});
 
