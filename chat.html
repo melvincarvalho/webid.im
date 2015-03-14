@@ -84,8 +84,15 @@
 		// globals
 		'use strict';
 		function getChannel(ldpc, type, date) {
+			if (!ldpc) {
+				return;
+			} else {
+				if (ldpc.slice(-1) !== '/') {
+					ldpc += '/';
+				}
+			}
 			if (type==='daily') {
-				return ldpc + '/' + date;
+				return ldpc + date;
 			}
 			return ldpc;
 		}
@@ -672,7 +679,9 @@
 				socket.onopen = function(){
 					console.log(this);
 					var today = new Date().toISOString().substr(0,10);
-					this.send('sub ' + getChannel(ldpc, template.settings.type, today) +'/,meta');
+					var sub = 'sub ' + getChannel(ldpc, template.settings.type, today) +'/,meta';
+					console.log(sub);
+					this.send(sub);
 				}
 
 				socket.onmessage = function(msg){
