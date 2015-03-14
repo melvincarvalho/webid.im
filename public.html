@@ -121,12 +121,16 @@
 		if (!template.settings.avatar) {
 			template.settings.avatar = genericphoto;
 		}
+		if (template.init.avatar) {
+			template.formavatar = template.init.avatar;
+		}
 
 		template.name = template.settings.name;
 		template.ldpc = template.settings.ldpc;
 		template.avatar = template.settings.avatar;
 		template.color = template.settings.color;
 		template.title = template.settings.title;
+		template.webid = template.settings.webid;
 
 		template.friends = [];
 		template.users = {};
