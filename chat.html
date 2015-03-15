@@ -48,7 +48,6 @@
 				</core-toolbar>
 
 				<section layout vertical id="onlineList">
-					<h2>Logs</h2>
 					<div id="dates"></div>
 				</section>
 
@@ -298,6 +297,9 @@
 
 				var dates = g.statementsMatching(undefined, LDP('contains'), undefined);
 
+				$('#dates').append($('<div>Logs</div>'));
+				$('#dates').append($('<hr>'));
+
 				for (var i=dates.length-1; i>=0; i--) {
 					var date = dates[i];
 					if (date && date.object && date.object.value) {
@@ -473,13 +475,13 @@
 
 				showNewest();
 
-
+`			`
 			}
 
 			// main
 			var template = document.querySelector('template[is=auto-binding]');
 
-
+			var action = getParam('action'); // show friends or chat
 			var ldpc = getParam('ldpc');
 			var webid = getParam('webid');
 			var name = getParam('name') || webid;
@@ -498,7 +500,7 @@
       if (type === 'daily') {
   			presenceURI = ldpc.split('/').splice(0,ldpc.split('/').length-2).join('/') + '/,presence'; // FYN to add
 			} else {
-				presenceURI = ldpc.split('/').splice(0,ldpc.split('/').length-1).join('/') + '/,presence'; // FYN to add				
+				presenceURI = ldpc.split('/').splice(0,ldpc.split('/').length-1).join('/') + '/,presence'; // FYN to add
 			}
 
 
@@ -512,6 +514,7 @@
 			color = randomColor();
 
 			template.init = {
+				action : action,
 				ldpc : ldpc,
 				presenceURI : presenceURI,
 				webid : webid,
@@ -526,6 +529,7 @@
 				type : type
 			};
 			template.settings = {
+				action : template.init.action,
 				ldpc : template.init.ldpc,
 				presenceURI : template.init.presenceURI,
 				webid : template.init.webid,
@@ -539,6 +543,10 @@
 				dateuri : template.init.dateuri,
 				type : template.init.type
 			};
+
+			if (!template.settings.action) {
+				template.settings.action = 'friends';
+			}
 			if (!template.settings.name) {
 				template.settings.name = template.init.webid;
 			}
