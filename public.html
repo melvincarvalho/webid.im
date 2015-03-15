@@ -150,7 +150,7 @@
 					alert('please enter a name');
 					return;
 				}
-				if (!template.webid) template.webid = 'urn:' + name;
+				if (!template.webid) template.webid = 'urn:' + template.name;
 				if (!template.formavatar) template.formavatar = template.avatar;
 
 				var site = 'chat.html?action=chat&type=single&ldpc='
