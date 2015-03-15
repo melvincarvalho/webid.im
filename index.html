@@ -71,19 +71,6 @@
 
 					<webid-login id="webid-login"></webid-login>
 
-					<div id="profile">
-					</div>
-
-					<div id="avatars">
-					</div>
-
-					<div id="names">
-					</div>
-
-					<div id="knows">
-					</div>
-
-
 				</div>
 
 			</section>
@@ -109,7 +96,6 @@
 		var webid       = getParam('webid');
 
 		var genericphoto = '/images/generic_photo.png';
-		var type = 'friendsdaily'; // workflows: single, daily, friends, friendsdaily
 
 		template.init = {
 			avatar      : avatar,
@@ -135,6 +121,7 @@
 			webid       : template.init.webid,
 		};
 
+    // init
 		if (!template.settings.avatar) {
 			template.settings.avatar = genericphoto;
 		}
@@ -171,6 +158,46 @@
 		template.friends = [];
 		template.users = {};
 
+    // functions
+
+    // getChannel
+		// 4 workflows
+		//
+		// single  : normal self contained ldpc
+		// daily   : one subdir per day
+		// friends : one subdir per friends hash
+		// friendsdaily : sudir by friends, then by day
+		function getChannel(ldpc, type, date, hash) {
+			if (!ldpc) {
+				return;
+			}
+
+			if (ldpc.slice(-1) !== '/') {
+				ldpc += '/';
+			}
+
+      if (type===single) {
+				return ldpc;
+			}
+
+			if (type==='daily') {
+				return ldpc + date + '/';
+			}
+
+			if (type==='friends') {
+				return ldpc + hash + '/';
+			}
+
+			if (type==='friendsdaily') {
+				return ldpc + hash + '/' + date + '/';
+			}
+
+			return ldpc;
+		}
+
+    // updatePresence
+		//
+		// deletes lastActive and updates it
 		function updatePresence(webid, presenceURI) {
 			var g = $rdf.graph();
 			var f = $rdf.fetcher(g);
@@ -183,13 +210,13 @@
 			var fetcher = tabulator.sf;
 
 
-			f.nowOrWhenFetched( template.settings.presenceURI , undefined, function(ok, body) {
+			f.nowOrWhenFetched( presenceURI , undefined, function(ok, body) {
 				var USER = $rdf.Namespace("https://schema.rww.io/user#");
 
 				var turtle = 'DELETE DATA { ';
 
 				$.each(g.statementsMatching(undefined, USER('lastActive'), undefined), function(index, value) {
-					console.log('logins : ' + value.object);
+					//console.log('logins : ' + value.object);
 					if (webid === value.subject.value) {
   					turtle += '<'+webid+'> <https://schema.rww.io/user#lastActive> "' + value.object.value + '" . ';
 					}
@@ -215,7 +242,9 @@
 
 		}
 
-
+    // setPresence
+		//
+		// sets presence in form to online away or offline
 		function setPresence(webid, time) {
 			var onlinetime = 86400000;
 			var awaytime = 864000000;
@@ -246,6 +275,9 @@
 			}
 		}
 
+    // rendermain
+		//
+		// renders the main area
 		function rendermain(webid) {
 
       if (!webid) return;
@@ -268,7 +300,7 @@
 
 			var profileuri = (webid.split('#'))[0];
 
-			// populate chat
+      // fetch webid
 			f.nowOrWhenFetched( profileuri , undefined, function(ok, body) {
 				console.log('webid fetched');
 
