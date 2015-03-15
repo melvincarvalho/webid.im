@@ -98,57 +98,80 @@
 		'use strict';
 		var template = document.querySelector('template[is=auto-binding]');
 
-		var ldpc = 'https://klaranet.com/d/chat/'; // hard code for now until more websockets are there
-		var presenceURI = ldpc + ',presence'; // FYN to add
-		var webid = getParam('webid');
-		var name = getParam('name') || webid;
-		var avatar = getParam('avatar');
-		var title = 'WebID Chat';
-		var genericphoto = '/images/generic_photo.png';
-		var action = 'friends';
-		var color;
+		var avatar      = getParam('avatar');
+		var action      = getParam('action'); // show friends or chat
+		var color       = getParam('color');
+		var ldpc        = getParam('ldpc');
+		var name        = getParam('name');
+		var presenceURI = getParam('presenceURI');
+		var title       = getParam('title');
+		var type        = getParam('type');
+		var webid       = getParam('webid');
 
+		var genericphoto = '/images/generic_photo.png';
+		var type = 'friendsdaily'; // workflows: single, daily, friends, friendsdaily
+
+		template.init = {
+			avatar      : avatar,
+			color       : color,
+			action      : action,
+			ldpc        : ldpc,
+			name        : name,
+			presenceURI : presenceURI,
+			title       : title,
+			type        : type,
+			webid       : webid,
+		};
+
+		template.settings = {
+			avatar      : template.init.avatar,
+			action      : template.init.action,
+			color       : template.init.color,
+			ldpc        : template.init.ldpc,
+			name        : template.init.name,
+			presenceURI : template.init.presenceURI,
+			title       : template.init.title,
+			type        : template.init.type,
+			webid       : template.init.webid,
+		};
+
+		if (!template.settings.avatar) {
+			template.settings.avatar = genericphoto;
+		}
+		if (!template.settings.action) {
+			template.settings.action = 'friends';
+		}
+		if (!template.settings.ldpc) {
+			template.settings.ldpc = 'https://klaranet.com/d/chat/'; // hard code for now until more websockets are there
+		}
+		if (!template.settings.name) {
+			template.settings.name = template.settings.webid;
+		}
+		if (!template.settings.title) {
+			template.settings.title = 'WebID Chat';
+		}
+		if (!template.settings.type) {
+			template.settings.type = 'friendsdaily';
+		}
+		if (!template.settings.presenceURI) {
+			template.settings.presenceURI = template.settings.ldpc + ',presence';
+		}
 		// Assign a name made of a random cat and a random color
 		var randomColor = function() {
 			var colors = ['navy', 'slate', 'olive', 'moss', 'chocolate', 'buttercup', 'maroon', 'cerise', 'plum', 'orchid'];
 			return colors[(Math.random() * colors.length) >>> 0];
 		};
-		color = randomColor();
+		template.settings.color = randomColor();
 
-		template.init = {
-			ldpc : ldpc,
-			presenceURI : presenceURI,
-			webid : webid,
-			avatar : avatar,
-			color : color,
-			title : title,
-			action : action
-		};
-		template.settings = {
-			ldpc : template.init.ldpc,
-			presenceURI : template.init.presenceURI,
-			webid : template.init.webid,
-			avatar : template.init.avatar,
-			color : template.init.color,
-			title : template.init.title,
-			action : template.init.action
-		};
-		if (!template.settings.name) {
-			template.settings.name = template.init.webid;
-		}
-		if (!template.settings.avatar) {
-			template.settings.avatar = genericphoto;
-		}
-
-		template.name = template.settings.name;
 		template.avatar = template.settings.avatar;
 		template.color = template.settings.color;
+		template.name = template.settings.name;
 		template.title = template.settings.title;
 
 		template.friends = [];
 		template.users = {};
 
-		function updatePresence(webid) {
+		function updatePresence(webid, presenceURI) {
 			var g = $rdf.graph();
 			var f = $rdf.fetcher(g);
 			// add CORS proxy
@@ -160,7 +183,7 @@
 			var fetcher = tabulator.sf;
 
 
-			f.nowOrWhenFetched( presenceURI , undefined, function(ok, body) {
+			f.nowOrWhenFetched( template.settings.presenceURI , undefined, function(ok, body) {
 				var USER = $rdf.Namespace("https://schema.rww.io/user#");
 
 				var turtle = 'DELETE DATA { ';
@@ -180,7 +203,7 @@
 				console.log(turtle);
 
 				$.ajax({
-					url: presenceURI,
+					url: template.settings.presenceURI,
 					contentType: "application/sparql-update",
 					type: 'PATCH',
 					data: turtle,
@@ -239,7 +262,7 @@
 			var kb = tabulator.kb;
 			var fetcher = tabulator.sf;
 
-			updatePresence(webid);
+			updatePresence(webid, template.settings.presenceURI);
 
 			console.log('rendering webid : ' + webid);
 
@@ -275,7 +298,7 @@
 						$('#storage').append($('<hr>'));
 						$('#storage').append('<div><paper-button raised="true" type="button" id="diary" target="_blank">My Journal</paper-button></div>');
 						$('#diary').on('click', function() {
-							var diaryURI = 'chat.html?ldpc='+ encodeURIComponent($('#storagedropdown').val())
+							var diaryURI = 'chat.html?action=chat&ldpc='+ encodeURIComponent($('#storagedropdown').val())
 							+ encodeURIComponent('chat/diary/') +'&webid='+encodeURIComponent(webid) + '&name='
 							+ encodeURIComponent(webidname.value);
 							if (webidavatar) {
@@ -380,11 +403,11 @@
 
 
 							var fr = {
-							  text : 'chat.html?ldpc=' +encodeURIComponent(ldpc)+ hash
+							  text : 'chat.html?action=chat&ldpc=' +encodeURIComponent(template.settings.ldpc)+ hash
 								       + '/&webid='+encodeURIComponent(webid)+'&avatar='
 								       + encodeURIComponent(webidavatar.value)+'&name='
 								       + encodeURIComponent(webidname.value) ,
-								uri : 'chat.html?ldpc=' +encodeURIComponent(ldpc)+ hash + '/&webid='+encodeURIComponent(friend)
+								uri : 'chat.html?action=chat&ldpc=' +encodeURIComponent(template.settings.ldpc)+ hash + '/&webid='+encodeURIComponent(friend)
 							}
 
 							// add avatar
