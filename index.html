@@ -419,20 +419,12 @@
 							var name;
 							var avatar;
 
-							$.each(g.statementsMatching($rdf.sym(friend), FOAF('name'), undefined), function(index, value) {
-								name = value.object.value;
-							});
+							avatar = g.any(kb.sym(friend), FOAF('img'))
+							              || g.any(kb.sym(friend), FOAF('depiction'));
+							name = g.any(kb.sym(friend), FOAF('name'));
 
-							$.each(g.statementsMatching($rdf.sym(friend), FOAF('depiction'), undefined), function(index, value) {
-								var depiction = value.object.value;
-								avatar = depiction;
-							});
-
-							$.each(g.statementsMatching($rdf.sym(friend), FOAF('img'), undefined), function(index, value) {
-								var img = value.object.value;
-								avatar = img;
-							});
-
+							if(avatar) avatar = avatar.value;
+							if(name) name = name.value;
 
 							var fr = {
 							  text : 'chat.html?action=chat&ldpc=' +encodeURIComponent(template.settings.ldpc)+ hash
@@ -483,6 +475,19 @@
 							} else {
 								template.friends.push( fr );
 							}
+
+							// sort
+							template.friends.sort(function(a, b) {
+								if (a.status && b.status) {
+									if (!a.lastActive) return -1;
+									if (!b.lastActive) return 1;
+									return new Date(b.lastActive).getTime() - new Date(a.lastActive).getTime();
+								}
+								if (a.status) return -1;
+
+								return 1;
+							});
+
 
 						});
 
