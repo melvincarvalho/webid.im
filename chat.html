@@ -489,11 +489,18 @@
 			var title = getParam('title') || 'WebID Chat';
 			var genericphoto = '/images/generic_photo.png';
 			var soundURI = 'http://webid.im/pinglow.mp3';
-			var presenceURI = ldpc.split('/').splice(0,ldpc.split('/').length-2).join('/') + '/,presence'; // FYN to add
 			var dateuri = ldpc;
 			var notify = false;
 			var wss = 'wss://' + ldpc.split('/')[2];
+			var presenceURI;
 			var today;
+
+      if (type === 'daily') {
+  			presenceURI = ldpc.split('/').splice(0,ldpc.split('/').length-2).join('/') + '/,presence'; // FYN to add
+			} else {
+				presenceURI = ldpc.split('/').splice(0,ldpc.split('/').length-1).join('/') + '/,presence'; // FYN to add				
+			}
+
 
 			var color;
 
