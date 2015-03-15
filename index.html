@@ -356,7 +356,9 @@
 					template.name = template.settings.name;
 				}
 
-				addStorage(storage.value);
+        if (storage) {
+  				addStorage(storage.value);
+				}
 
 				if (seeAlso) {
 					//$('#profile').append('<div>See Also : <a target="_blank" href="'+seeAlso+'">'+seeAlso+'</a></div>')
