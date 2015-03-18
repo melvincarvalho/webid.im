@@ -55,6 +55,7 @@ A single user list with a username, avatar, and desc.
     overflow: hidden;
     white-space: nowrap;
     color: #919191;
+    text-decoration: none;
   }
   .like{
     color: #6D84B4;
@@ -67,6 +68,7 @@ A single user list with a username, avatar, and desc.
   .timestamp {
     font-size: 0.75em;
     color: #919191;
+    text-decoration: none;
   }
   .avatar {
     border: solid 3px silver;
@@ -119,7 +121,7 @@ A single user list with a username, avatar, and desc.
       <div class="status {{status}}"></div>
     </div>
     <div flex>
-      <div flex class="username"><a target="_blank" href="{{webid}}">{{username}}</a></div>
+      <div flex class="username"><a class="username" target="_blank" href="{{webid}}">{{username}}</a></div>
       <div class="text">{{text}}</div>
       <core-icon-button
       id="favicon"
@@ -130,7 +132,7 @@ A single user list with a username, avatar, and desc.
         <img class="img" src="{{img}}"/>
       </template>
   </div>
-  <div><a target="_blank" href="{{uri}}"><time class="timestamp" is="relative-time" datetime="{{timestamp}}"></time></a></div>
+  <div><a class="timestamp" target="_blank" href="{{uri}}"><time class="timestamp" is="relative-time" datetime="{{timestamp}}"></time></a></div>
 </section>
 </template>
 <script>
