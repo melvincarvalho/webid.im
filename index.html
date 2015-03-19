@@ -26,12 +26,28 @@
 
 	<link rel="import" href="bower_components/core-scaffold/core-scaffold.html">
 	<link rel="import" href="bower_components/core-item/core-item.html">
+	<link href="bower_components/core-collapse/core-collapse.html" rel="import">
+	<link href="bower_components/paper-icon-button/paper-icon-button.html" rel="import">
 	<link rel="import" href="bower_components/paper-input/paper-input.html">
 	<link rel="import" href="bower_components/paper-fab/paper-fab.html">
 	<link rel="import" href="x-chat-list.html">
 	<link rel="import" href="x-friend-list.html">
 	<link rel="import" href="login.html">
 	<link rel="stylesheet" href="css/style.css">
+
+<style>
+.heading {
+	padding: 10px 15px;
+	background-color: #f3f3f3;
+	border: 1px solid #dedede;
+	border-top-left-radius: 5px;
+	border-top-right-radius: 5px;
+	font-size: 18px;
+	cursor: pointer;
+	-webkit-tap-highlight-color: rgba(0,0,0,0);
+}
+</style>
+
 </head>
 
 <body unresolved fullbleed class="lite">
@@ -52,12 +68,20 @@
 
 				<section layout vertical id="onlineList">
 					<template if={{ui.friends}}>
-						<div id="storage">
-						</div>
+
+						<div class="heading" onclick="document.getElementById('storage').toggle()"><core-icon icon="folder"></core-icon>Storage</div>
+						<core-collapse id="storage">
+
+			      </core-collapse>
+
+
+
 					</template>
 					<template if={{chat}}>
 						<section layout vertical id="logList">
-							<div id="dates"></div>
+							<div class="heading" onclick="document.getElementById('dates').toggle()"><core-icon icon="view-list"></core-icon>Logs</div>
+							<core-collapse id="dates">
+				      </core-collapse>
 						</section>
 					</template>
 				</section>
@@ -69,7 +93,7 @@
 					<core-icon id="back" icon="arrow-back"></core-icon>
 				</template>
 				<span id="title" flex>{{title}}</span>
-				<core-icon icon="account-circle"></core-icon><span>{{occupancy}}</span>
+				<core-icon icon="settings"></core-icon></span>
 			</div>
 
 			<section layout vertical fit id="friends">
@@ -828,7 +852,6 @@
 				function renderSidebar() {
 					if (template.settings.action === 'friends') {
 						if ( ! $('#storage').find('select').length ) {
-							$('#storage').append($('<div>storage</div>'));
 							$('#storage').append($('<hr>'));
 							$('#storage').append($('<select id="storagedropdown"></select>'));
 							$('#storage').append($('<hr>'));
@@ -863,8 +886,6 @@
 							if (template.settings.type === 'single') return;
 
 							$('#dates').empty();
-							$('#dates').append($('<div>Logs</div>'));
-							$('#dates').append($('<hr>'));
 							var display;
 
 							for (var i=dates.length-1; i>=0; i--) {

@@ -104,11 +104,8 @@ A single user list with a username, avatar, and desc.
 		</div>
 		<div flex>
 			<div class="username">{{username}}</div>
+                        <time class="timestamp" is="relative-time" datetime="{{lastActive}}"></time>
 		</div>
-      <template if="{{lastActive}}">
-      <span class="timestamp">Last Seen : </span>
-      </template>
-      <time class="timestamp" is="relative-time" datetime="{{lastActive}}"></time>
 	</section>
 </template>
 <script>
