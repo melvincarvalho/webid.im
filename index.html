@@ -29,24 +29,25 @@
 	<link href="bower_components/core-collapse/core-collapse.html" rel="import">
 	<link href="bower_components/paper-icon-button/paper-icon-button.html" rel="import">
 	<link rel="import" href="bower_components/paper-input/paper-input.html">
+	<link rel="import" href="bower_components/paper-dropdown/paper-dropdown.html">
 	<link rel="import" href="bower_components/paper-fab/paper-fab.html">
 	<link rel="import" href="x-chat-list.html">
 	<link rel="import" href="x-friend-list.html">
 	<link rel="import" href="login.html">
 	<link rel="stylesheet" href="css/style.css">
 
-<style>
-.heading {
-	padding: 10px 15px;
-	background-color: #f3f3f3;
-	border: 1px solid #dedede;
-	border-top-left-radius: 5px;
-	border-top-right-radius: 5px;
-	font-size: 18px;
-	cursor: pointer;
-	-webkit-tap-highlight-color: rgba(0,0,0,0);
-}
-</style>
+	<style>
+	.heading {
+		padding: 10px 15px;
+		background-color: #f3f3f3;
+		border: 1px solid #dedede;
+		border-top-left-radius: 5px;
+		border-top-right-radius: 5px;
+		font-size: 18px;
+		cursor: pointer;
+		-webkit-tap-highlight-color: rgba(0,0,0,0);
+	}
+	</style>
 
 </head>
 
@@ -60,40 +61,68 @@
 	<template is="auto-binding">
 
 		<core-scaffold>
+
+			<!-- sidebar -->
 			<core-header-panel navigation flex>
+
+				<!-- avatar -->
 				<core-toolbar id="navheader" class="tall">
 					<div class="middle avatar {{color}}" style="background-image: url({{avatar}})"></div>
 					<div class="bottom uuid">{{name}}</div>
 				</core-toolbar>
+				<!-- end avatar -->
 
+
+				<!-- sidebar content -->
 				<section layout vertical id="onlineList">
+
 					<template if={{ui.friends}}>
-
-						<div class="heading" onclick="document.getElementById('storage').toggle()"><core-icon icon="folder"></core-icon>Storage</div>
 						<core-collapse id="storage">
-
-			      </core-collapse>
-
-
-
+						</core-collapse>
 					</template>
+
+
 					<template if={{chat}}>
-						<section layout vertical id="logList">
-							<div class="heading" onclick="document.getElementById('dates').toggle()"><core-icon icon="view-list"></core-icon>Logs</div>
-							<core-collapse id="dates">
-				      </core-collapse>
-						</section>
+						<template if={{ui.chat}}>
+							<section layout vertical>
+								<core-collapse opened="true" id="roster">
+									<template repeat="{{friend in friends}}">
+										<x-friend-list webid="{{friend.webid}}" type="{{friend.type}}" ldpc="{{friend.ldpc}}" lastActive="{{friend.lastActive}}" uri="{{friend.uri}}" img="{{friend.img}}" color="{{friend.color}}" avatar="{{friend.avatar}}" username="{{friend.name}}" text="{{friend.text}}"  status="{{friend.status}}" timestamp="{{friend.timestamp}}"></x-friend-list>
+									</template>
+								</core-collapse>
+							</section>
+							<section layout vertical>
+								<core-collapse id="dates">
+								</core-collapse>
+							</section>
+						</template>
 					</template>
+
 				</section>
+				<!-- end sidebar content -->
 
 			</core-header-panel>
+			<!-- end sidebar -->
 
+			<!-- main -->
 			<div tool layout horizontal flex>
 				<template if={{chat}}>
-					<core-icon id="back" icon="arrow-back"></core-icon>
+					<core-icon id="back" icon="chevron-left"></core-icon>
 				</template>
 				<span id="title" flex>{{title}}</span>
-				<core-icon icon="settings"></core-icon></span>
+
+				<template if={{chat}}>
+  				<core-icon onclick="document.getElementById('dates').toggle() ; document.getElementById('roster').toggle() " icon="view-list"></core-icon>
+			  </template>
+
+				<template if={{ui.friends}}>
+  				<core-icon onclick="document.getElementById('storage').toggle()" icon="folder"></core-icon>
+				</template>
+
+				<core-icon onclick="alert(JSON.stringify(template.settings))" icon="settings"></core-icon></span>
+
+
+
 			</div>
 
 			<section layout vertical fit id="friends">
@@ -103,10 +132,10 @@
 						<template repeat="{{friend in friends}}">
 							<x-friend-list webid="{{friend.webid}}" type="{{friend.type}}" ldpc="{{friend.ldpc}}" lastActive="{{friend.lastActive}}" uri="{{friend.uri}}" img="{{friend.img}}" color="{{friend.color}}" avatar="{{friend.avatar}}" username="{{friend.name}}" text="{{friend.text}}"  status="{{friend.status}}" timestamp="{{friend.timestamp}}"></x-friend-list>
 						</template>
-						<template if={{new}}>
-							<webid-login id="webid-login"></webid-login>
-						</template>
 					</div>
+					<template if={{new}}>
+						<webid-login id="webid-login"></webid-login>
+					</template>
 				</template>
 
 
@@ -140,6 +169,7 @@
 		// main
 		'use strict';
 		var template = document.querySelector('template[is=auto-binding]');
+		document.template = template;
 
 		var action      = getParam('action'); // show friends or chat
 		var avatar      = getParam('avatar');
@@ -203,6 +233,7 @@
 		// init
 		template.ui = {};
 		template.ui.friends = true;
+		template.ui.chat = true;
 
 		if (!template.settings.action) {
 			template.settings.action = 'friends';
@@ -254,7 +285,7 @@
 		template.users = {};
 		template.posts = [];
 
-    // localstorage
+		// localstorage
 		template.new = true;
 		if (localStorage.getItem('webid')) {
 			template.new = false;
@@ -632,7 +663,7 @@
 
 
 				// populate chat
-        if(refresh) {
+				if(refresh) {
 					f.requestURI( fetchuri, undefined, true, renderPosts);
 				} else {
 					f.nowOrWhenFetched( fetchuri , undefined, renderPosts );
@@ -643,7 +674,7 @@
 					console.log('fetched posts');
 					console.log(body);
 
-          template.posts = [];
+					template.posts = [];
 
 
 
@@ -687,8 +718,8 @@
 						var img = g.statementsMatching(author[0].object, FOAF('img'), undefined);
 						var like = g.statementsMatching($rdf.sym(webid), LIKE('likes'), subject);
 
-            console.log('fetch uri is '+ fetchuri);
-            if (post.why.uri != fetchuri) continue;
+						console.log('fetch uri is '+ fetchuri);
+						if (post.why.uri != fetchuri) continue;
 						if (!created) continue;
 						//var d = date.split('-');
 						//var d1 = new Date(created[0].object.value).toISOString().substr(0,10);
@@ -920,8 +951,8 @@
 				function fetchPublicChannels() {
 
 					var ldpc = 'https://klaranet.com/d/chat/watercooler/';
-					var title = 'Water Cooler (help room)';
-					var name = 'Water Cooler (help room)';
+					var title = 'Get Help';
+					var name = 'Get Help';
 					var avatar = genericphoto;
 
 
@@ -1001,7 +1032,7 @@
 							var hash = CryptoJS.SHA256(users);
 							console.log(friend + ' ' + f.getState(friend));
 							console.log(template.settings.ldpc);
-              console.log('setting ldpc of ' + friend + ' to ' + getChannel(template.settings.ldpc, 'friends', null, hash));
+							console.log('setting ldpc of ' + friend + ' to ' + getChannel(template.settings.ldpc, 'friends', null, hash));
 
 							var fr = {
 								text : 'chat.html?action=chat&'
@@ -1149,26 +1180,28 @@
 					connectToSocket(template.settings.wss,
 						getChannel(template.settings.ldpc,
 							template.settings.type, today) +',meta', template.settings.subs);
-				}
+						}
 
-				// Listen to WebIDAuth events
-				window.addEventListener('WebIDAuth',function(e) {
-					console.log(e.detail);
-					if (e.detail.success === true) {
-						console.log("Auth successful! WebID: "+e.detail.user);
-						localStorage.setItem('webid', e.detail.user);
-						rendermain(e.detail.user);
-						// presence
-						updatePresence(e.detail.user, template.settings.presenceURI);
-					} else {
-						console.log("Auth failed!");
-						console.log(e.detail);
-					}
-				},false);
+						// Listen to WebIDAuth events
+						window.addEventListener('WebIDAuth',function(e) {
+							console.log(e.detail);
+							if (e.detail.success === true) {
+								console.log("Auth successful! WebID: "+e.detail.user);
+								localStorage.setItem('webid', e.detail.user);
+								rendermain(e.detail.user);
+								// presence
+								updatePresence(e.detail.user, template.settings.presenceURI);
+							} else {
+								console.log("Auth failed!");
+								console.log(e.detail);
+							}
+						},false);
 
 
 
-			});
-			</script>
-		</body>
-		</html>
+					});
+
+
+					</script>
+				</body>
+				</html>
