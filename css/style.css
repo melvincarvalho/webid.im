@@ -56,7 +56,6 @@ paper-fab[icon=send] {
 
 #onlineList {
     margin: 16px;
-    text-transform: capitalize;
 }
 
 ::content > .avatar {
