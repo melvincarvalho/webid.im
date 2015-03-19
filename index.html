@@ -1007,6 +1007,9 @@
 
 				function fetchFriends(webid) {
 
+          if (!webid) webid = template.settings.webid;
+					if (!webid) return;
+
 					console.log('fetching friends of ' + webid);
 
 					// friends
@@ -1035,7 +1038,15 @@
 							var hash = CryptoJS.SHA256(users);
 							console.log(friend + ' ' + f.getState(friend));
 							console.log(template.settings.ldpc);
-							console.log('setting ldpc of ' + friend + ' to ' + getChannel(template.settings.ldpc, 'friends', null, hash));
+
+							var l;
+
+							if (template.settings.type === 'friendsdaily') {
+								l = template.settings.ldpc;
+							} else if (template.settings.type === 'daily') {
+								l = template.settings.ldpc.split('/').splice(0, template.settings.ldpc.split('/').length-2).join('/') + '/';
+							}
+							console.log('setting ldpc of ' + friend + ' to ' + getChannel(l, 'friends', null, hash));
 
 							var fr = {
 								text : 'chat.html?action=chat&'
@@ -1043,7 +1054,7 @@
 								+ encodeURIComponent(template.settings.avatar)+'&name='
 								+ encodeURIComponent(template.settings.name) ,
 								uri : 'chat.html?action=chat&ldpc=' +encodeURIComponent(template.settings.ldpc)+ hash + '%2F&webid='+encodeURIComponent(friend),
-								ldpc : getChannel(template.settings.ldpc, 'friends', null, hash),
+								ldpc : getChannel(l, 'friends', null, hash),
 								webid : template.settings.webid,
 								type : 'daily'
 							}
@@ -1154,6 +1165,7 @@
 					template.settings.ldpc = detail.ldpc;
 					template.show = true;
 					rendermain(template.settings.webid);
+					fetchFriends();
 					renderSidebar();
 					var today = new Date().toISOString().substr(0,10);
 					connectToSocket(template.settings.wss, getChannel(template.settings.ldpc, template.settings.type, today) +',meta', template.settings.subs);
@@ -1174,7 +1186,7 @@
 					template.ui.friends = true;
 					template.chat = false;
 					template.settings.action  = 'friends';
-					template.settings.type = 'daily';
+					template.settings.type = 'friendsdaily';
 					template.settings.ldpc = defaultLdpc;
 					template.title = 'WebID Chat';
 					rendermain(template.settings.webid);
