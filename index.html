@@ -643,10 +643,10 @@
 
 			console.log('rendering main screen for : ' + webid);
 
+			fetchWebid(webid);
 			if (template.settings.action === 'friends') {
 				$('.post-list').hide();
 				$('.chat-list').show();
-				fetchWebid(webid);
 				$('#title').text(template.settings.title); // bug in polymer?
 
 			} else if ( template.settings.action === 'chat' ){
@@ -659,8 +659,6 @@
 				//template.settings.ldpc = getParam('ldpc');
 				//if (!date) date = new Date().toISOString().substr(0,10);
 				var fetchuri = getChannel(template.settings.ldpc, template.settings.type, date) + '*';
-
-				console.log('rendering logs for : ' + fetchuri);
 
 
 
