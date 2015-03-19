@@ -7,7 +7,7 @@ A single user list with a username, avatar, and desc.
 
 -->
 <script src="bower_components/time-elements/time-elements.js"></script>
-<polymer-element name="x-friend-list" attributes="uri img avatar color username text status timestamp lastActive">
+<polymer-element name="x-friend-list" attributes="uri img avatar color username text status timestamp lastActive ldpc webid type">
   <template>
 	<style>
 	:host {
@@ -98,21 +98,17 @@ A single user list with a username, avatar, and desc.
 	}
 	</style>
 
-	<section class="user-list" layout horizontal>
+	<section on-tap="{{tap}}" class="user-list" layout horizontal>
 		<div class="avatar {{color}}" style="background-image: url({{avatar}})">
 			<div class="status {{status}}"></div>
 		</div>
 		<div flex>
 			<div class="username">{{username}}</div>
-      <a target="_blank" href="{{text}}">Chat<a>
 		</div>
       <template if="{{lastActive}}">
       <span class="timestamp">Last Seen : </span>
       </template>
       <time class="timestamp" is="relative-time" datetime="{{lastActive}}"></time>
-      <div>
-      &nbsp;<a style="text-align: right" target="_blank" href="{{uri}}">Share</a>
-      </div>
 	</section>
 </template>
 <script>
@@ -125,7 +121,17 @@ Polymer('x-friend-list', {
   img: '',
   uri: '',
   lastActive: '',
+  ldpc: '',
+  webid: '',
+  type: '',
 	timestamp: new Date().toISOString(),
+  tap: function() {
+
+    this.fire('action-changed',  {webid: this.webid, avatar : this.avatar,
+      title : this.username, action : 'chat', name : this.avatar,
+      ldpc : this.ldpc, type : this.type} );
+
+  }
 });
 </script>
 </polymer-element>
