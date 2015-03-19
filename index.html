@@ -106,6 +106,8 @@
 
 			<!-- main -->
 			<div tool layout horizontal flex>
+
+				<!-- header -->
 				<template if={{chat}}>
 					<core-icon id="back" icon="chevron-left"></core-icon>
 				</template>
@@ -120,11 +122,12 @@
 				</template>
 
 				<core-icon onclick="alert(JSON.stringify(template.settings))" icon="settings"></core-icon></span>
-
+        <!-- end header -->
 
 
 			</div>
 
+      <!-- body -->
 			<section layout vertical fit id="friends">
 
 				<template if={{ui.friends}}>
@@ -140,16 +143,15 @@
 
 
 				<template if={{chat}}>
-					<div flex class="post-list">
+					<div flex two class="post-list">
 						<template repeat="{{post in posts}}">
 							<x-chat-list on-like-tap="handleLike" viewer="{{post.viewer}}" webid="{{post.webid}}" like="{{post.like}}" uri="{{post.uri}}" img="{{post.img}}" color="{{post.color}}" avatar="{{post.avatar}}" username="{{post.name}}" text="{{post.text}}"  status="{{post.status}}" timestamp="{{post.timestamp}}"></x-chat-list>
 						</template>
 					</div>
 
 					<template if={{show}}>
-						<div class="shim"></div>
-						<div class="send-message" layout horizontal>
-							<paper-input style="position:fixed, width: 100%" flex label="Type message..." id="input" value="{{input}}" on-keyup="{{checkKey}}"></paper-input>
+						<div flex style="position:fixed; bottom: 0; width: 100%"  end-justified class="send-message" layout horizontal>
+							<paper-input flex label="Type message..." id="input" value="{{input}}" on-keyup="{{checkKey}}"></paper-input>
 							<paper-fab icon="send" id="sendButton" on-tap="{{sendMyMessage}}"></paper-fab>
 						</div>
 					</template>
@@ -157,6 +159,7 @@
 
 
 			</section>
+			<!-- end body -->
 
 
 		</core-scaffold>
@@ -581,6 +584,8 @@
 					for (var i=0; i<template.posts.length; i++) {
 						if (template.posts[i].webid === template.settings.webid) {
 							template.posts[i].status = status;
+							if (!template.users) template.users = {};
+							if (!template.users[webid]) template.users[webid] = {};
 							template.users[webid].status = status;
 						}
 					}
