@@ -53,9 +53,6 @@
 
 <body unresolved fullbleed class="lite">
 
-	<div class="TabulatorOutline" id="DummyUUID">
-		<table id="outline"></table>
-	</div>
 
 
 	<template is="auto-binding">
@@ -143,10 +140,14 @@
 
 
 				<template if={{chat}}>
-					<div flex two class="post-list">
+					<section flex two class="post-list">
+					<div>
 						<template repeat="{{post in posts}}">
 							<x-chat-list on-like-tap="handleLike" viewer="{{post.viewer}}" webid="{{post.webid}}" like="{{post.like}}" uri="{{post.uri}}" img="{{post.img}}" color="{{post.color}}" avatar="{{post.avatar}}" username="{{post.name}}" text="{{post.text}}"  status="{{post.status}}" timestamp="{{post.timestamp}}"></x-chat-list>
 						</template>
+						<br>
+						<br>
+						<br>
 					</div>
 
 					<template if={{show}}>
@@ -155,6 +156,7 @@
 							<paper-fab icon="send" id="sendButton" on-tap="{{sendMyMessage}}"></paper-fab>
 						</div>
 					</template>
+					<section>
 				</template>
 
 
@@ -165,6 +167,11 @@
 		</core-scaffold>
 
 	</template>
+
+	<span style="hidden" class="TabulatorOutline" id="DummyUUID">
+		<span id="outline"></span>
+	</span>
+
 
 	<script>
 	jQuery(document).ready(function() {
@@ -886,10 +893,12 @@
 				function renderSidebar() {
 					if (template.settings.action === 'friends') {
 						if ( ! $('#storage').find('select').length ) {
+							$('#storage').append($('<div>Storage</div>'));
 							$('#storage').append($('<hr>'));
 							$('#storage').append($('<select id="storagedropdown"></select>'));
 							$('#storage').append($('<hr>'));
 							$('#storage').append('<div><paper-button raised="true" type="button" id="diary" target="_blank">My Journal</paper-button></div>');
+							$('#storage').append($('<br>'));
 							$('#diary').on('click', function() {
 								var diaryURI = 'chat.html?action=chat&ldpc='+ encodeURIComponent($('#storagedropdown').val())
 								+ encodeURIComponent('chat/diary/') +'&webid='+encodeURIComponent(template.settings.webid) + '&name='
@@ -954,8 +963,8 @@
 				function fetchPublicChannels() {
 
 					var ldpc = 'https://klaranet.com/d/chat/watercooler/';
-					var title = 'Get Help';
-					var name = 'Get Help';
+					var title = 'Help Center';
+					var name = 'Help Center';
 					var avatar = genericphoto;
 
 
