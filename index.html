@@ -140,8 +140,8 @@
 
 
 				<template if={{chat}}>
-					<section>
-					<div flex two class="post-list">
+					<section class="post-list">
+					<div id="scroll" flex two >
 						<template repeat="{{post in posts}}">
 							<x-chat-list on-like-tap="handleLike" viewer="{{post.viewer}}" webid="{{post.webid}}" like="{{post.like}}" uri="{{post.uri}}" img="{{post.img}}" color="{{post.color}}" avatar="{{post.avatar}}" username="{{post.name}}" text="{{post.text}}"  status="{{post.status}}" timestamp="{{post.timestamp}}"></x-chat-list>
 						</template>
@@ -162,6 +162,8 @@
 
 			</section>
 			<!-- end body -->
+
+
 
 
 		</core-scaffold>
@@ -582,7 +584,9 @@
 				var awaytime = 864000000;
 				var messagetime = new Date(time);
 				if (template.users[template.settings.webid].lastActive && new Date(template.users[template.settings.webid].lastActive) > messagetime ) {
-					messagetime = new Date(template.users[webid].lastActive);
+					if (template.users[webid]) {
+						messagetime = new Date(template.users[webid].lastActive);						
+					}
 				}
 				var now = new Date();
 
