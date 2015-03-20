@@ -140,8 +140,8 @@
 
 
 				<template if={{chat}}>
-					<section flex two class="post-list">
-					<div>
+					<section>
+					<div flex two class="post-list">
 						<template repeat="{{post in posts}}">
 							<x-chat-list on-like-tap="handleLike" viewer="{{post.viewer}}" webid="{{post.webid}}" like="{{post.like}}" uri="{{post.uri}}" img="{{post.img}}" color="{{post.color}}" avatar="{{post.avatar}}" username="{{post.name}}" text="{{post.text}}"  status="{{post.status}}" timestamp="{{post.timestamp}}"></x-chat-list>
 						</template>
@@ -177,7 +177,7 @@
 	jQuery(document).ready(function() {
 
 		// main
-		'use strict';
+		//'use strict';
 		var template = document.querySelector('template[is=auto-binding]');
 		document.template = template;
 
@@ -963,8 +963,8 @@
 				function fetchPublicChannels() {
 
 					var ldpc = 'https://klaranet.com/d/chat/watercooler/';
-					var title = 'Help Center';
-					var name = 'Help Center';
+					var title = 'Help Room';
+					var name = 'Help Room';
 					var avatar = genericphoto;
 
 
