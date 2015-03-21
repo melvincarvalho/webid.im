@@ -301,9 +301,10 @@
 		template.new = true;
 		if (localStorage.getItem('webid')) {
 			template.new = false;
-			rendermain(localStorage.getItem('webid'));
+			rendermain(localStorage.getItem('webid'), template.settings.date);
 			renderSidebar();
 			updatePresence(localStorage.getItem('webid'), template.settings.presenceURI);
+			connectToSocket(template.settings.wss, getChannel(template.settings.ldpc, template.settings.type, template.settings.date) +',meta', template.settings.subs);
 		}
 
 		setTimeout( function () { $('#back').one('click', function() { window.location.href = '/'; } ) }, 1500 );
@@ -456,6 +457,9 @@
 			if (!ldpc) ldpc = template.settings.ldpc;
 			if (!type) hash = template.settings.hash;
 
+			var today = new Date().toISOString().substr(0,10);
+			if (!date) date = today;
+
 			if (ldpc.slice(-1) !== '/') {
 				ldpc += '/';
 			}
@@ -585,7 +589,7 @@
 				var messagetime = new Date(time);
 				if (template.users[template.settings.webid].lastActive && new Date(template.users[template.settings.webid].lastActive) > messagetime ) {
 					if (template.users[webid]) {
-						messagetime = new Date(template.users[webid].lastActive);						
+						messagetime = new Date(template.users[webid].lastActive);
 					}
 				}
 				var now = new Date();
@@ -732,7 +736,7 @@
 						var img = g.statementsMatching(author[0].object, FOAF('img'), undefined);
 						var like = g.statementsMatching($rdf.sym(webid), LIKE('likes'), subject);
 
-						console.log('fetch uri is '+ fetchuri);
+						//console.log('fetch uri is '+ fetchuri);
 						if (post.why.uri != fetchuri) continue;
 						if (!created) continue;
 						//var d = date.split('-');
