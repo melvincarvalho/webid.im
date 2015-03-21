@@ -90,6 +90,9 @@
 							</section>
 							<section layout vertical>
 								<core-collapse id="dates">
+									<template repeat="{{date in dates}}">
+										<div id="{{date}}" class="date">{{date}}</div>
+									</template>
 								</core-collapse>
 							</section>
 						</template>
@@ -296,13 +299,14 @@
 		template.friends = [];
 		template.users = {};
 		template.posts = [];
+		template.dates = [];
 
 		// localstorage
 		template.new = true;
 		if (localStorage.getItem('webid')) {
 			template.new = false;
-			rendermain(localStorage.getItem('webid'), template.settings.date);
 			renderSidebar();
+			rendermain(localStorage.getItem('webid'), template.settings.date);
 			updatePresence(localStorage.getItem('webid'), template.settings.presenceURI);
 			connectToSocket(template.settings.wss, getChannel(template.settings.ldpc, template.settings.type, template.settings.date) +',meta', template.settings.subs);
 		}
@@ -670,19 +674,21 @@
 				$('.post-list').show();
 
 				if (!template.posts) template.posts = [];
+				if (!template.dates) template.dates = [];
+
+				if (template.settings.type === 'daily' && template.dates.length === 0) return;
+
+				if ( template.settings.type === 'daily' && template.dates.indexOf(date) === -1) {
+					date = template.dates[0];
+				}
 
 				//template.settings.ldpc = getParam('ldpc');
 				//if (!date) date = new Date().toISOString().substr(0,10);
 				var fetchuri = getChannel(template.settings.ldpc, template.settings.type, date) + '*';
 
-
-
-				//////////////////////////////////////////////
-
-
 				// populate chat
 				if(refresh) {
-					f.requestURI( fetchuri, undefined, true, renderPosts);
+					f.requestURI( fetchuri, undefined, true, renderPosts );
 				} else {
 					f.nowOrWhenFetched( fetchuri , undefined, renderPosts );
 				}
@@ -690,11 +696,8 @@
 
 				function renderPosts(ok, body) {
 					console.log('fetched posts');
-					console.log(body);
 
 					template.posts = [];
-
-
 
 					var SIOC = $rdf.Namespace("http://rdfs.org/sioc/ns#");
 					var RDF = $rdf.Namespace("http://www.w3.org/1999/02/22-rdf-syntax-ns#");
@@ -703,9 +706,14 @@
 					var OWL = $rdf.Namespace("http://www.w3.org/2002/07/owl#");
 					var LIKE = $rdf.Namespace("http://ontologi.es/like#");
 
+					var posts = g.statementsMatching(undefined, undefined, SIOC('Post'), $rdf.sym(fetchuri));
 
-
-					var posts = g.statementsMatching(undefined, undefined, SIOC('Post'));
+          /*
+          if (posts.length === 0 && template.dates.length > 0) {
+						rendermain(webid, template.dates[0]);
+						return;
+					}
+					*/
 
 					//console.log('posts : ' + posts);
 					$('#logs').empty();
@@ -894,7 +902,7 @@
 					if (!exists) {
 						template.settings.storage.push(storage);
 					}
-					renderSidebar();
+					//renderSidebar();
 				}
 
 
@@ -925,31 +933,30 @@
 							}
 						}
 					} else if (template.settings.action === 'chat') {
+
 						// populate dates
+						//$('#dates').empty();
+						template.dates = [];
+						if (template.settings.type === 'single') return;
+
 						f.nowOrWhenFetched( template.settings.ldpc , undefined, function(ok, body) {
+							var display;
+
 							console.log('fetched dates in ' + template.settings.ldpc);
-							console.log(body);
 
 							var LDP = $rdf.Namespace("http://www.w3.org/ns/ldp#");
-							var RDF = $rdf.Namespace("http://www.w3.org/1999/02/22-rdf-syntax-ns#");
+							var dates = g.statementsMatching(undefined, LDP('contains'), undefined, $rdf.sym(template.settings.ldpc));
 
-							var dates = g.statementsMatching(undefined, LDP('contains'), undefined);
-							if (template.settings.type === 'single') return;
-
-							$('#dates').empty();
-							var display;
 
 							for (var i=dates.length-1; i>=0; i--) {
 								var date = dates[i];
 								if (date && date.object && date.object.value) {
-									display = date.object.value.substr(-11,10)
+									display = date.object.value.substr(-11,10);
 								}
-								if (date.why.uri !== template.settings.ldpc) continue;
 								if (! (/[0-9]+-[0-9]+-[0-9]+$/i).test(display) ) continue;
-								console.log(' date : ' + display);
+								template.dates.push(display);
 
-								$('#dates').append('<div id="'+ display +'" class="date">' + display + '</div><br>');
-
+								//$('#dates').append('<div id="'+ display +'" class="date">' + display + '</div><br>');
 								$('#' + display).on('click', function () {
 									var display = $(this).text();
 									console.log(' date : ' + display);
@@ -960,12 +967,16 @@
 
 							}
 
+							if (template.dates.length > 0 && template.posts.length === 0) {
+								rendermain(template.settings.webid);
+							}
+
+
 						});
 
 					}
 
 				}
-
 
 
 				function fetchPublicChannels() {
@@ -1176,15 +1187,17 @@
 
 					template.ui.friends = false;
 					template.chat = true;
-					template.settings.action  = 'chat';
+					template.settings.action = 'chat';
 					template.show = true;
 					template.settings.type = detail.type;
 					template.title = detail.title;
 					$('#title').text(detail.title); // bug in polymer?
 					template.settings.ldpc = detail.ldpc;
 					template.show = true;
-					rendermain(template.settings.webid);
+					template.dates = [];
+					template.posts = [];
 					fetchFriends();
+					rendermain();
 					renderSidebar();
 					var today = new Date().toISOString().substr(0,10);
 					connectToSocket(template.settings.wss, getChannel(template.settings.ldpc, template.settings.type, today) +',meta', template.settings.subs);
@@ -1231,10 +1244,7 @@
 							}
 						},false);
 
-
-
 					});
-
 
 					</script>
 				</body>
