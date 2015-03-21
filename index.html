@@ -746,6 +746,12 @@
 						//console.log('fetch uri is '+ fetchuri);
 						if (post.why.uri != fetchuri) continue;
 						if (!created) continue;
+						if (!name.length) {
+							name = url[0].object.value;
+						} else {
+							name = name[0].object.value;
+						}
+
 						//var d = date.split('-');
 						//var d1 = new Date(created[0].object.value).toISOString().substr(0,10);
 						//var d2 = new Date(d[0], d[1]-1, d[2]).toISOString().substr(0,10);
@@ -771,7 +777,7 @@
 						addPost(avatar,
 							text[0].object.value,
 							url[0].object.value,
-							name[0].object.value,
+							name,
 							post.subject.value,
 							created[0].object.value,
 							like,
