@@ -305,9 +305,10 @@
 		template.new = true;
 		if (localStorage.getItem('webid')) {
 			template.new = false;
+			template.settings.webid = localStorage.getItem('webid');
 			renderSidebar();
-			rendermain(localStorage.getItem('webid'), template.settings.date);
-			updatePresence(localStorage.getItem('webid'), template.settings.presenceURI);
+			rendermain(template.settings.webid, template.settings.date);
+			updatePresence(template.settings.webid, template.settings.presenceURI);
 			connectToSocket(template.settings.wss, getChannel(template.settings.ldpc, template.settings.type, template.settings.date) +',meta', template.settings.subs);
 		}
 
@@ -647,9 +648,7 @@
 		function rendermain(webid, date, refresh) {
 
 			if (!webid) {
-				return;
-			} else {
-				template.settings.webid = webid;
+				webid = template.settings.webid;
 			}
 
 			if (!date) {
