@@ -150,18 +150,17 @@
 					<template repeat="{{post in posts}}">
 						<x-chat-list on-like-tap="handleLike" viewer="{{post.viewer}}" webid="{{post.webid}}" like="{{post.like}}" uri="{{post.uri}}" img="{{post.img}}" color="{{post.color}}" avatar="{{post.avatar}}" username="{{post.name}}" text="{{post.text}}"  status="{{post.status}}" timestamp="{{post.timestamp}}"></x-chat-list>
 					</template>
-					<br>
-					<br>
-					<br>
 				</div>
 
 				<template if={{show}}>
-					<div flex style="position:fixed; bottom: 0; width: 100%"  end-justified class="send-message" layout horizontal>
+					<!-- <div class="shim"></div> -->
+					<div class="send-message" layout horizontal>
 						<paper-input flex label="Type message..." id="input" value="{{input}}" on-keyup="{{checkKey}}"></paper-input>
 						<paper-fab icon="send" id="sendButton" on-tap="{{sendMyMessage}}"></paper-fab>
 					</div>
 				</template>
-				<section>
+        </section>
+
 				</template>
 
 
@@ -923,7 +922,7 @@
 						$('#storage').append('<div><paper-button raised="true" type="button" id="diary" target="_blank">My Journal</paper-button></div>');
 						$('#storage').append($('<br>'));
 						$('#diary').on('click', function() {
-							var diaryURI = 'chat.html?action=chat&ldpc='+ encodeURIComponent($('#storagedropdown').val())
+							var diaryURI = 'chat.html?action=chat&type=daily&ldpc='+ encodeURIComponent($('#storagedropdown').val())
 							+ encodeURIComponent('chat/diary/') +'&webid='+encodeURIComponent(template.settings.webid) + '&name='
 							+ encodeURIComponent(template.settings.name);
 							if (template.settings.avatar) {
