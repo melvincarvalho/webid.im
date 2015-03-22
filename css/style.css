@@ -34,6 +34,14 @@ paper-fab[icon=send] {
     overflow-y: scroll;
     padding-bottom: 16px;
 }
+.post-list {
+    overflow-y: scroll;
+    padding-bottom: 16px;
+}
+.friend-list {
+    overflow-y: scroll;
+    padding-bottom: 16px;
+}
 .send-message {
     padding: 0 16px 6px 16px;
 }
