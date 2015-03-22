@@ -90,76 +90,78 @@
 							</section>
 							<section layout vertical>
 								<core-collapse id="dates">
+									<!--
 									<template repeat="{{date in dates}}">
-										<div id="{{date}}" class="date">{{date}}</div>
-									</template>
-								</core-collapse>
-							</section>
-						</template>
-					</template>
-
-				</section>
-				<!-- end sidebar content -->
-
-			</core-header-panel>
-			<!-- end sidebar -->
-
-			<!-- main -->
-			<div tool layout horizontal flex>
-
-				<!-- header -->
-				<template if={{chat}}>
-					<core-icon id="back" icon="chevron-left"></core-icon>
+									<div id="{{date}}" class="date">{{date}}</div>
+								</template>
+							-->
+						</core-collapse>
+					</section>
 				</template>
-				<span id="title" flex>{{title}}</span>
+			</template>
 
-				<template if={{chat}}>
-  				<core-icon onclick="document.getElementById('dates').toggle() ; document.getElementById('roster').toggle() " icon="view-list"></core-icon>
-			  </template>
+		</section>
+		<!-- end sidebar content -->
 
-				<template if={{ui.friends}}>
-  				<core-icon onclick="document.getElementById('storage').toggle()" icon="folder"></core-icon>
+	</core-header-panel>
+	<!-- end sidebar -->
+
+	<!-- main -->
+	<div tool layout horizontal flex>
+
+		<!-- header -->
+		<template if={{chat}}>
+			<core-icon id="back" icon="chevron-left"></core-icon>
+		</template>
+		<span id="title" flex>{{title}}</span>
+
+		<template if={{chat}}>
+			<core-icon onclick="document.getElementById('dates').toggle() ; document.getElementById('roster').toggle() " icon="view-list"></core-icon>
+		</template>
+
+		<template if={{ui.friends}}>
+			<core-icon onclick="document.getElementById('storage').toggle()" icon="folder"></core-icon>
+		</template>
+
+		<core-icon onclick="alert(JSON.stringify(template.settings))" icon="settings"></core-icon></span>
+		<!-- end header -->
+
+
+	</div>
+
+	<!-- body -->
+	<section layout vertical fit id="friends">
+
+		<template if={{ui.friends}}>
+			<div flex class="chat-list">
+				<template repeat="{{friend in friends}}">
+					<x-friend-list webid="{{friend.webid}}" type="{{friend.type}}" ldpc="{{friend.ldpc}}" lastActive="{{friend.lastActive}}" uri="{{friend.uri}}" img="{{friend.img}}" color="{{friend.color}}" avatar="{{friend.avatar}}" username="{{friend.name}}" text="{{friend.text}}"  status="{{friend.status}}" timestamp="{{friend.timestamp}}"></x-friend-list>
 				</template>
-
-				<core-icon onclick="alert(JSON.stringify(template.settings))" icon="settings"></core-icon></span>
-        <!-- end header -->
-
-
 			</div>
+			<template if={{new}}>
+				<webid-login id="webid-login"></webid-login>
+			</template>
+		</template>
 
-      <!-- body -->
-			<section layout vertical fit id="friends">
 
-				<template if={{ui.friends}}>
-					<div flex class="chat-list">
-						<template repeat="{{friend in friends}}">
-							<x-friend-list webid="{{friend.webid}}" type="{{friend.type}}" ldpc="{{friend.ldpc}}" lastActive="{{friend.lastActive}}" uri="{{friend.uri}}" img="{{friend.img}}" color="{{friend.color}}" avatar="{{friend.avatar}}" username="{{friend.name}}" text="{{friend.text}}"  status="{{friend.status}}" timestamp="{{friend.timestamp}}"></x-friend-list>
-						</template>
-					</div>
-					<template if={{new}}>
-						<webid-login id="webid-login"></webid-login>
+		<template if={{chat}}>
+			<section class="post-list">
+				<div id="scroll" flex two >
+					<template repeat="{{post in posts}}">
+						<x-chat-list on-like-tap="handleLike" viewer="{{post.viewer}}" webid="{{post.webid}}" like="{{post.like}}" uri="{{post.uri}}" img="{{post.img}}" color="{{post.color}}" avatar="{{post.avatar}}" username="{{post.name}}" text="{{post.text}}"  status="{{post.status}}" timestamp="{{post.timestamp}}"></x-chat-list>
 					</template>
+					<br>
+					<br>
+					<br>
+				</div>
+
+				<template if={{show}}>
+					<div flex style="position:fixed; bottom: 0; width: 100%"  end-justified class="send-message" layout horizontal>
+						<paper-input flex label="Type message..." id="input" value="{{input}}" on-keyup="{{checkKey}}"></paper-input>
+						<paper-fab icon="send" id="sendButton" on-tap="{{sendMyMessage}}"></paper-fab>
+					</div>
 				</template>
-
-
-				<template if={{chat}}>
-					<section class="post-list">
-					<div id="scroll" flex two >
-						<template repeat="{{post in posts}}">
-							<x-chat-list on-like-tap="handleLike" viewer="{{post.viewer}}" webid="{{post.webid}}" like="{{post.like}}" uri="{{post.uri}}" img="{{post.img}}" color="{{post.color}}" avatar="{{post.avatar}}" username="{{post.name}}" text="{{post.text}}"  status="{{post.status}}" timestamp="{{post.timestamp}}"></x-chat-list>
-						</template>
-						<br>
-						<br>
-						<br>
-					</div>
-
-					<template if={{show}}>
-						<div flex style="position:fixed; bottom: 0; width: 100%"  end-justified class="send-message" layout horizontal>
-							<paper-input flex label="Type message..." id="input" value="{{input}}" on-keyup="{{checkKey}}"></paper-input>
-							<paper-fab icon="send" id="sendButton" on-tap="{{sendMyMessage}}"></paper-fab>
-						</div>
-					</template>
-					<section>
+				<section>
 				</template>
 
 
@@ -707,550 +709,548 @@
 
 					var posts = g.statementsMatching(undefined, undefined, SIOC('Post'), $rdf.sym(fetchuri));
 
-          /*
-          if (posts.length === 0 && template.dates.length > 0) {
-						rendermain(webid, template.dates[0]);
-						return;
+					/*
+					if (posts.length === 0 && template.dates.length > 0) {
+					rendermain(webid, template.dates[0]);
+					return;
+				}
+				*/
+
+				//console.log('posts : ' + posts);
+				$('#logs').empty();
+				//$('#logs').append(g.toString());
+
+				// sort by date
+				if (posts && posts.length > 0) {
+					posts.sort(function(a, b) {
+						var subjecta = a.subject;
+						var subjectb = b.subject;
+						var createda = g.statementsMatching(subjecta, DCT('created'), undefined);
+						var createdb = g.statementsMatching(subjectb, DCT('created'), undefined);
+						a = new Date(createda[0].object.value);
+						b = new Date(createdb[0].object.value);
+						return a>b ? 1 : a<b ? -1 : 0;
+					});
+				}
+				for (var i=0; i<posts.length; i++) {
+					var post = posts[i];
+					var subject = post.subject;
+					var details = g.statementsMatching(subject, undefined, undefined);
+					var author = g.statementsMatching(subject, DCT('creator'), undefined);
+					var created = g.statementsMatching(subject, DCT('created'), undefined);
+					var text = g.statementsMatching(subject, SIOC('content'), undefined);
+					var name = g.statementsMatching(author[0].object, FOAF('name'), undefined);
+					var url = g.statementsMatching(author[0].object, OWL('sameAs'), undefined);
+					var depiction = g.statementsMatching(author[0].object, FOAF('depiction'), undefined);
+					var img = g.statementsMatching(author[0].object, FOAF('img'), undefined);
+					var like = g.statementsMatching($rdf.sym(webid), LIKE('likes'), subject);
+
+					//console.log('fetch uri is '+ fetchuri);
+					if (post.why.uri != fetchuri) continue;
+					if (!created) continue;
+					if (!name.length) {
+						name = url[0].object.value;
+					} else {
+						name = name[0].object.value;
 					}
-					*/
 
-					//console.log('posts : ' + posts);
-					$('#logs').empty();
-					//$('#logs').append(g.toString());
+					//var d = date.split('-');
+					//var d1 = new Date(created[0].object.value).toISOString().substr(0,10);
+					//var d2 = new Date(d[0], d[1]-1, d[2]).toISOString().substr(0,10);
+					//if ( date !== new Date(created[0].object.value).toISOString().substr(0,10) ) continue;
 
-					// sort by date
-					if (posts && posts.length > 0) {
-						posts.sort(function(a, b) {
-							var subjecta = a.subject;
-							var subjectb = b.subject;
-							var createda = g.statementsMatching(subjecta, DCT('created'), undefined);
-							var createdb = g.statementsMatching(subjectb, DCT('created'), undefined);
-							a = new Date(createda[0].object.value);
-							b = new Date(createdb[0].object.value);
-							return a>b ? 1 : a<b ? -1 : 0;
-						});
+					if ( like.length === 0 ) {
+						like = false;
+					} else {
+						like = true;
+						console.log(like);
 					}
-					for (var i=0; i<posts.length; i++) {
-						var post = posts[i];
-						var subject = post.subject;
-						var details = g.statementsMatching(subject, undefined, undefined);
-						var author = g.statementsMatching(subject, DCT('creator'), undefined);
-						var created = g.statementsMatching(subject, DCT('created'), undefined);
-						var text = g.statementsMatching(subject, SIOC('content'), undefined);
-						var name = g.statementsMatching(author[0].object, FOAF('name'), undefined);
-						var url = g.statementsMatching(author[0].object, OWL('sameAs'), undefined);
-						var depiction = g.statementsMatching(author[0].object, FOAF('depiction'), undefined);
-						var img = g.statementsMatching(author[0].object, FOAF('img'), undefined);
-						var like = g.statementsMatching($rdf.sym(webid), LIKE('likes'), subject);
 
-						//console.log('fetch uri is '+ fetchuri);
-						if (post.why.uri != fetchuri) continue;
-						if (!created) continue;
-						if (!name.length) {
-							name = url[0].object.value;
-						} else {
-							name = name[0].object.value;
+					var avatar = img;
+					if(img.length === 0) {
+						avatar = depiction;
+					}
+
+					if (avatar.length === 0) {
+						avatar = null;
+					} else {
+						avatar = avatar[0].object.value
+					}
+					addPost(avatar,
+						text[0].object.value,
+						url[0].object.value,
+						name,
+						post.subject.value,
+						created[0].object.value,
+						like,
+						webid );
+
+						// Set the name of the hidden property and the change event for visibility
+						var hidden, visibilityChange;
+						if (typeof document.hidden !== "undefined") { // Opera 12.10 and Firefox 18 and later support
+							hidden = "hidden";
+							visibilityChange = "visibilitychange";
+						} else if (typeof document.mozHidden !== "undefined") {
+							hidden = "mozHidden";
+							visibilityChange = "mozvisibilitychange";
+						} else if (typeof document.msHidden !== "undefined") {
+							hidden = "msHidden";
+							visibilityChange = "msvisibilitychange";
+						} else if (typeof document.webkitHidden !== "undefined") {
+							hidden = "webkitHidden";
+							visibilityChange = "webkitvisibilitychange";
 						}
 
-						//var d = date.split('-');
-						//var d1 = new Date(created[0].object.value).toISOString().substr(0,10);
-						//var d2 = new Date(d[0], d[1]-1, d[2]).toISOString().substr(0,10);
-						//if ( date !== new Date(created[0].object.value).toISOString().substr(0,10) ) continue;
+						if(notify && i === posts.length-1 &&  url[0].object.value != webid && hidden ){
+							var notification = new Notification(name[0].object.value,
+								{'icon': "https://cdn1.iconfinder.com/data/icons/app-tab-bar-icons-for-ios/30/User_login.png",
+								"body" : text[0].object.value });
+								notify = false;
 
-						if ( like.length === 0 ) {
-							like = false;
-						} else {
-							like = true;
-							console.log(like);
-						}
+								notification.onclick = function(x) {
+									try {
+										window.focus();
+										this.cancel();
+									}
+									catch (ex) {
+									}
+								};
 
-						var avatar = img;
-						if(img.length === 0) {
-							avatar = depiction;
-						}
+								setTimeout(function(){
+									notification.close()
+								}, 10000);
 
-						if (avatar.length === 0) {
-							avatar = null;
-						} else {
-							avatar = avatar[0].object.value
-						}
-						addPost(avatar,
-							text[0].object.value,
-							url[0].object.value,
-							name,
-							post.subject.value,
-							created[0].object.value,
-							like,
-							webid );
-
-							// Set the name of the hidden property and the change event for visibility
-							var hidden, visibilityChange;
-							if (typeof document.hidden !== "undefined") { // Opera 12.10 and Firefox 18 and later support
-								hidden = "hidden";
-								visibilityChange = "visibilitychange";
-							} else if (typeof document.mozHidden !== "undefined") {
-								hidden = "mozHidden";
-								visibilityChange = "mozvisibilitychange";
-							} else if (typeof document.msHidden !== "undefined") {
-								hidden = "msHidden";
-								visibilityChange = "msvisibilitychange";
-							} else if (typeof document.webkitHidden !== "undefined") {
-								hidden = "webkitHidden";
-								visibilityChange = "webkitvisibilitychange";
 							}
 
-							if(notify && i === posts.length-1 &&  url[0].object.value != webid && hidden ){
-								var notification = new Notification(name[0].object.value,
-									{'icon': "https://cdn1.iconfinder.com/data/icons/app-tab-bar-icons-for-ios/30/User_login.png",
-									"body" : text[0].object.value });
-									notify = false;
-
-									notification.onclick = function(x) {
-										try {
-											window.focus();
-											this.cancel();
-										}
-										catch (ex) {
-										}
-									};
-
-									setTimeout(function(){
-										notification.close()
-									}, 10000);
-
-								}
-
-							}
-
-
-
 						}
-
-						showNewest();
-
 
 
 
 					}
+
+					showNewest();
+
+
 
 
 				}
 
-				function fetchWebid(webid) {
-					// fetch webid
-					f.nowOrWhenFetched( webid.split('#')[0] , undefined, function(ok, body) {
-						console.log('webid fetched');
+
+			}
+
+			function fetchWebid(webid) {
+				// fetch webid
+				f.nowOrWhenFetched( webid.split('#')[0] , undefined, function(ok, body) {
+					console.log('webid fetched');
+
+					var LDP = $rdf.Namespace("http://www.w3.org/ns/ldp#");
+					var RDF = $rdf.Namespace("http://www.w3.org/1999/02/22-rdf-syntax-ns#");
+					var FOAF = $rdf.Namespace("http://xmlns.com/foaf/0.1/");
+					var PIM = $rdf.Namespace("http://www.w3.org/ns/pim/space#");
+					var RDFS = $rdf.Namespace("http://www.w3.org/2000/01/rdf-schema#");
+
+					var webidname;
+					var webidavatar;
+					var storage;
+					var seeAlso;
+
+					webidavatar = g.any(kb.sym(webid), FOAF('img'))
+					|| g.any(kb.sym(webid), FOAF('depiction'));
+					webidname = g.any(kb.sym(webid), FOAF('name'));
+					storage = g.any(kb.sym(webid), PIM('storage'));
+					seeAlso = g.any(kb.sym(webid), RDFS('seeAlso'));
+
+
+					if (webidavatar) {
+						template.avatar = webidavatar.value;
+						template.settings.avatar = webidavatar.value;
+					} else {
+						template.avatar = genericphoto;
+					}
+					if (webidname) {
+						template.name = webidname.value;
+						template.settings.name = webidname.value;
+					} else {
+						template.name = template.settings.name;
+					}
+
+					if (storage) {
+						addStorage(storage.value);
+					}
+
+					if (seeAlso) {
+						fetchSeeAlso(seeAlso.value);
+					}
+
+					setTimeout(function() { fetchFriends(webid); }, 1500);
+					setTimeout(fetchPublicChannels, 500);
+
+				});
+
+			}
+
+			function fetchSeeAlso(seeAlso) {
+				var PIM = $rdf.Namespace("http://www.w3.org/ns/pim/space#");
+				f.nowOrWhenFetched( seeAlso, undefined, function(ok, body) {
+					console.log('seeAlso fetched ');
+					$.each(g.statementsMatching($rdf.sym(template.settings.webid), PIM('storage'), undefined), function(index, value) {
+						addStorage(value.object.value);
+					});
+				});
+			}
+
+			function addStorage(storage) {
+				var exists = false;
+				for (var i=0; i<template.settings.storage.length; i++) {
+					if (template.settings.storage[i] == storage) {
+						exists = true;
+					}
+				}
+				if (!exists) {
+					template.settings.storage.push(storage);
+				}
+				//renderSidebar();
+			}
+
+
+			function renderSidebar() {
+				if (template.settings.action === 'friends') {
+					if ( ! $('#storage').find('select').length ) {
+						$('#storage').append($('<div>Storage</div>'));
+						$('#storage').append($('<hr>'));
+						$('#storage').append($('<select id="storagedropdown"></select>'));
+						$('#storage').append($('<hr>'));
+						$('#storage').append('<div><paper-button raised="true" type="button" id="diary" target="_blank">My Journal</paper-button></div>');
+						$('#storage').append($('<br>'));
+						$('#diary').on('click', function() {
+							var diaryURI = 'chat.html?action=chat&ldpc='+ encodeURIComponent($('#storagedropdown').val())
+							+ encodeURIComponent('chat/diary/') +'&webid='+encodeURIComponent(template.settings.webid) + '&name='
+							+ encodeURIComponent(template.settings.name);
+							if (template.settings.avatar) {
+								diaryURI += '&avatar=' + encodeURIComponent(template.settings.avatar) + '&title=Diary';
+							}
+							window.open( diaryURI );
+							return false;
+						});
+					}
+					for (var i=0; i<template.settings.storage.length; i++) {
+						var storage = template.settings.storage[i];
+						if (! $('#storagedropdown option[value="'+storage+'"]').length) {
+							$('#storagedropdown').append( new Option(storage, storage) );
+						}
+					}
+				} else if (template.settings.action === 'chat') {
+
+					// populate dates
+					$('#dates').empty();
+					template.dates = [];
+					if (template.settings.type === 'single') return;
+
+					f.nowOrWhenFetched( template.settings.ldpc , undefined, function(ok, body) {
+
+						console.log('fetched dates in ' + template.settings.ldpc);
 
 						var LDP = $rdf.Namespace("http://www.w3.org/ns/ldp#");
-						var RDF = $rdf.Namespace("http://www.w3.org/1999/02/22-rdf-syntax-ns#");
-						var FOAF = $rdf.Namespace("http://xmlns.com/foaf/0.1/");
-						var PIM = $rdf.Namespace("http://www.w3.org/ns/pim/space#");
-						var RDFS = $rdf.Namespace("http://www.w3.org/2000/01/rdf-schema#");
-
-						var webidname;
-						var webidavatar;
-						var storage;
-						var seeAlso;
-
-						webidavatar = g.any(kb.sym(webid), FOAF('img'))
-						|| g.any(kb.sym(webid), FOAF('depiction'));
-						webidname = g.any(kb.sym(webid), FOAF('name'));
-						storage = g.any(kb.sym(webid), PIM('storage'));
-						seeAlso = g.any(kb.sym(webid), RDFS('seeAlso'));
+						var dates = g.statementsMatching(undefined, LDP('contains'), undefined, $rdf.sym(template.settings.ldpc));
 
 
-						if (webidavatar) {
-							template.avatar = webidavatar.value;
-							template.settings.avatar = webidavatar.value;
-						} else {
-							template.avatar = genericphoto;
-						}
-						if (webidname) {
-							template.name = webidname.value;
-							template.settings.name = webidname.value;
-						} else {
-							template.name = template.settings.name;
-						}
-
-						if (storage) {
-							addStorage(storage.value);
-						}
-
-						if (seeAlso) {
-							fetchSeeAlso(seeAlso.value);
-						}
-
-						setTimeout(function() { fetchFriends(webid); }, 1500);
-						setTimeout(fetchPublicChannels, 500);
-
-					});
-
-				}
-
-				function fetchSeeAlso(seeAlso) {
-					var PIM = $rdf.Namespace("http://www.w3.org/ns/pim/space#");
-					f.nowOrWhenFetched( seeAlso, undefined, function(ok, body) {
-						console.log('seeAlso fetched ');
-						$.each(g.statementsMatching($rdf.sym(template.settings.webid), PIM('storage'), undefined), function(index, value) {
-							addStorage(value.object.value);
-						});
-					});
-				}
-
-				function addStorage(storage) {
-					var exists = false;
-					for (var i=0; i<template.settings.storage.length; i++) {
-						if (template.settings.storage[i] == storage) {
-							exists = true;
-						}
-					}
-					if (!exists) {
-						template.settings.storage.push(storage);
-					}
-					//renderSidebar();
-				}
-
-
-				function renderSidebar() {
-					if (template.settings.action === 'friends') {
-						if ( ! $('#storage').find('select').length ) {
-							$('#storage').append($('<div>Storage</div>'));
-							$('#storage').append($('<hr>'));
-							$('#storage').append($('<select id="storagedropdown"></select>'));
-							$('#storage').append($('<hr>'));
-							$('#storage').append('<div><paper-button raised="true" type="button" id="diary" target="_blank">My Journal</paper-button></div>');
-							$('#storage').append($('<br>'));
-							$('#diary').on('click', function() {
-								var diaryURI = 'chat.html?action=chat&ldpc='+ encodeURIComponent($('#storagedropdown').val())
-								+ encodeURIComponent('chat/diary/') +'&webid='+encodeURIComponent(template.settings.webid) + '&name='
-								+ encodeURIComponent(template.settings.name);
-								if (template.settings.avatar) {
-									diaryURI += '&avatar=' + encodeURIComponent(template.settings.avatar) + '&title=Diary';
-								}
-								window.open( diaryURI );
-								return false;
-							});
-						}
-						for (var i=0; i<template.settings.storage.length; i++) {
-							var storage = template.settings.storage[i];
-							if (! $('#storagedropdown option[value="'+storage+'"]').length) {
-								$('#storagedropdown').append( new Option(storage, storage) );
-							}
-						}
-					} else if (template.settings.action === 'chat') {
-
-						// populate dates
-						//$('#dates').empty();
-						template.dates = [];
-						if (template.settings.type === 'single') return;
-
-						f.nowOrWhenFetched( template.settings.ldpc , undefined, function(ok, body) {
+						for (var i=dates.length-1; i>=0; i--) {
 							var display;
-
-							console.log('fetched dates in ' + template.settings.ldpc);
-
-							var LDP = $rdf.Namespace("http://www.w3.org/ns/ldp#");
-							var dates = g.statementsMatching(undefined, LDP('contains'), undefined, $rdf.sym(template.settings.ldpc));
-
-
-							for (var i=dates.length-1; i>=0; i--) {
-								var date = dates[i];
-								if (date && date.object && date.object.value) {
-									display = date.object.value.substr(-11,10);
-								}
-								if (! (/[0-9]+-[0-9]+-[0-9]+$/i).test(display) ) continue;
-								template.dates.push(display);
-
-								//$('#dates').append('<div id="'+ display +'" class="date">' + display + '</div><br>');
-								$('#' + display).on('click', function () {
-									var display = $(this).text();
-									console.log(' date : ' + display);
-									template.posts = [] ;
-									rendermain( template.settings.webid, display );
-									$(this).css('color', 'darkblue')
-								});
-
+							var date = dates[i];
+							if (date && date.object && date.object.value) {
+								display = date.object.value.substr(-11,10);
 							}
+							if (! (/[0-9]+-[0-9]+-[0-9]+$/i).test(display) ) continue;
+							template.dates.push(display);
 
-							if (template.dates.length > 0 && template.posts.length === 0) {
-								rendermain(template.settings.webid);
-							}
-
-
-						});
-
-					}
-
-				}
-
-
-				function fetchPublicChannels() {
-
-					var ldpc = 'https://klaranet.com/d/chat/watercooler/';
-					var title = 'Help Room';
-					var name = 'Help Room';
-					var avatar = genericphoto;
-
-
-					var fr = {
-						text : 'chat.html?action=chat&type=single&ldpc=' + encodeURIComponent(ldpc)
-						+ '&webid='+encodeURIComponent(template.settings.webid),
-						uri : '',
-						name : name,
-						ldpc : ldpc,
-						type : 'single',
-						avatar : avatar,
-						status : 'online',
-						webid : template.settings.webid
-					}
-
-					if (template.settings.avatar) {
-						fr.text += '&avatar=' + encodeURIComponent(template.settings.avatar);
-					}
-
-					if (template.settings.name) {
-						fr.text += '&name=' + encodeURIComponent(template.settings.name);
-					}
-
-					fr.text += '&title='+encodeURIComponent(title);
-
-					var exists = false;
-					for (var i=0; i<template.friends.length; i++) {
-						if ( template.friends[i].name === fr.name ) {
-							exists = true;
-							template.friends.splice(i,1);
-						}
-					}
-
-					template.friends.unshift( fr );
-
-				}
-
-				function showNewest() {
-					var chatDiv = document.querySelector('.post-list');
-					if (chatDiv) {
-						chatDiv.scrollTop = chatDiv.scrollHeight;
-					}
-					setTimeout(function () { if (chatDiv) chatDiv.scrollTop = chatDiv.scrollHeight; }, 500);
-					setTimeout(function () { if (chatDiv) chatDiv.scrollTop = chatDiv.scrollHeight; }, 1000);
-					setTimeout(function () { if (chatDiv) chatDiv.scrollTop = chatDiv.scrollHeight; }, 2000);
-					setTimeout(function () { if (chatDiv) chatDiv.scrollTop = chatDiv.scrollHeight; }, 3000);
-				}
-
-
-				function fetchFriends(webid) {
-
-          if (!webid) webid = template.settings.webid;
-					if (!webid) return;
-
-					console.log('fetching friends of ' + webid);
-
-					// friends
-					console.log(kb);
-					$.each(g.statementsMatching(kb.sym(webid), FOAF('knows'), undefined), function(index, value) {
-
-						var friend = value.object.value;
-
-
-
-						var profileuri = (friend.split('#'))[0];
-						f.nowOrWhenFetched( profileuri , undefined, function(ok, body) {
-							var name;
-							var avatar;
-
-							avatar = g.any(kb.sym(friend), FOAF('img'))
-							|| g.any(kb.sym(friend), FOAF('depiction'));
-							name = g.any(kb.sym(friend), FOAF('name'));
-
-							if(avatar) avatar = avatar.value;
-							if(name) name = name.value;
-
-							var users = [template.settings.webid,friend];
-							users.sort();
-							users = users.join("\n");
-							var hash = CryptoJS.SHA256(users);
-							console.log(friend + ' ' + f.getState(friend));
-							console.log(template.settings.ldpc);
-
-							var l = template.settings.ldpc;
-
-							if (template.settings.type === 'friendsdaily') {
-								l = template.settings.ldpc;
-							} else if (template.settings.type === 'daily') {
-								l = template.settings.ldpc.split('/').splice(0, template.settings.ldpc.split('/').length-2).join('/') + '/';
-							} else if (template.settings.type === 'single') {
-								l = template.settings.ldpc.split('/').splice(0, template.settings.ldpc.split('/').length-2).join('/') + '/';
-							}
-							console.log('setting ldpc of ' + friend + ' to ' + getChannel(l, 'friends', null, hash));
-
-							var fr = {
-								text : 'chat.html?action=chat&'
-								+ '/&webid='+encodeURIComponent(template.settings.webid)+'&avatar='
-								+ encodeURIComponent(template.settings.avatar)+'&name='
-								+ encodeURIComponent(template.settings.name) ,
-								uri : 'chat.html?action=chat&ldpc=' +encodeURIComponent(template.settings.ldpc)+ hash + '%2F&webid='+encodeURIComponent(friend),
-								ldpc : getChannel(l, 'friends', null, hash),
-								webid : template.settings.webid,
-								type : 'daily'
-							}
-
-							// add avatar
-							if (avatar) {
-								fr.avatar = avatar;
-								fr.uri += '&avatar='+encodeURIComponent(avatar);
-							} else {
-								fr.avatar = genericphoto;
-							}
-
-							// add name
-							if (name) {
-								fr.name = name;
-								fr.uri += '&name='+encodeURIComponent(name);
-								fr.text += '&title='+encodeURIComponent(name);
-							} else {
-								fr.name = friend;
-							}
-
-							// add title
-							if (template.settings.name) {
-								fr.uri += '&title=' + encodeURIComponent(template.settings.name);
-							}
-
-
-							if (template.users && template.users[friend] ) {
-								console.log('setting presence of ' + friend )
-								fr.status = template.users[friend].status;
-								fr.lastActive = template.users[friend].lastActive;
-							}
-
-							// insert in right place
-							var exists = false;
-							for (var i=0; i<template.friends.length; i++) {
-								if ( template.friends[i].name === fr.name ) {
-									exists = true;
-									template.friends.splice(i,1);
-								}
-							}
-
-							if (fr.status) {
-								template.friends.unshift( fr );
-							} else if (avatar){
-								var count = 0;
-								for (var i=0; i<template.friends.length; i++) {
-									if (template.friends[i].status) count++;
-								}
-								template.friends.splice(count, 0, fr);
-							} else {
-								template.friends.push( fr );
-							}
-
-							// sort
-							template.friends.sort(function(a, b) {
-								if (a.status && b.status) {
-									if (!a.lastActive) return -1;
-									if (!b.lastActive) return 1;
-									return new Date(b.lastActive).getTime() - new Date(a.lastActive).getTime();
-								}
-								if (a.status) return -1;
-
-								return 1;
+							$('#dates').append('<div id="'+ display +'" class="date">' + display + '</div><br>');
+							$('#' + display).on('click', function () {
+								template.posts = [] ;
+								rendermain( template.settings.webid, $(this).text());
+								$(this).css('color', 'darkblue')
 							});
 
+						}
 
-						});
+						if (template.dates.length > 0 && template.posts.length === 0) {
+							rendermain(template.settings.webid);
+						}
 
 
 					});
 
-
-
 				}
 
+			}
 
-				function playSound(uri) {
-					var sound = new Howl({
-						urls: [uri],
-						volume: 0.9
-					}).play();
+
+			function fetchPublicChannels() {
+
+				var ldpc = 'https://klaranet.com/d/chat/watercooler/';
+				var title = 'Help Room';
+				var name = 'Help Room';
+				var avatar = genericphoto;
+
+
+				var fr = {
+					text : 'chat.html?action=chat&type=single&ldpc=' + encodeURIComponent(ldpc)
+					+ '&webid='+encodeURIComponent(template.settings.webid),
+					uri : '',
+					name : name,
+					ldpc : ldpc,
+					type : 'single',
+					avatar : avatar,
+					status : 'online',
+					webid : template.settings.webid
 				}
 
+				if (template.settings.avatar) {
+					fr.text += '&avatar=' + encodeURIComponent(template.settings.avatar);
+				}
+
+				if (template.settings.name) {
+					fr.text += '&name=' + encodeURIComponent(template.settings.name);
+				}
+
+				fr.text += '&title='+encodeURIComponent(title);
+
+				var exists = false;
+				for (var i=0; i<template.friends.length; i++) {
+					if ( template.friends[i].name === fr.name ) {
+						exists = true;
+						template.friends.splice(i,1);
+					}
+				}
+
+				template.friends.unshift( fr );
+
+			}
+
+			function showNewest() {
+				var chatDiv = document.querySelector('.post-list');
+				if (chatDiv) {
+					chatDiv.scrollTop = chatDiv.scrollHeight;
+				}
+				setTimeout(function () { if (chatDiv) chatDiv.scrollTop = chatDiv.scrollHeight; }, 500);
+				setTimeout(function () { if (chatDiv) chatDiv.scrollTop = chatDiv.scrollHeight; }, 1000);
+				setTimeout(function () { if (chatDiv) chatDiv.scrollTop = chatDiv.scrollHeight; }, 2000);
+				setTimeout(function () { if (chatDiv) chatDiv.scrollTop = chatDiv.scrollHeight; }, 3000);
+			}
 
 
-				window.addEventListener('action-changed', function(e) {
-					var detail = e.detail;
+			function fetchFriends(webid) {
 
-					var stateObject = { 'action' : 'chat' };
+				if (!webid) webid = template.settings.webid;
+				if (!webid) return;
 
-					window.history.pushState(stateObject, "",
-					'?action=chat&name=' + encodeURIComponent(template.settings.name)
-					+ '&avatar='         + encodeURIComponent(template.settings.avatar)
-					+ '&title='          + encodeURIComponent(detail.title)
-					+ '&ldpc='           + encodeURIComponent(detail.ldpc)
-					+ '&webid='          + encodeURIComponent(detail.webid)
-					+ '&type='           + encodeURIComponent(detail.type) );
+				console.log('fetching friends of ' + webid);
+
+				// friends
+				console.log(kb);
+				$.each(g.statementsMatching(kb.sym(webid), FOAF('knows'), undefined), function(index, value) {
+
+					var friend = value.object.value;
 
 
-					template.ui.friends = false;
-					template.chat = true;
-					template.settings.action = 'chat';
-					template.show = true;
-					template.settings.type = detail.type;
-					template.title = detail.title;
-					$('#title').text(detail.title); // bug in polymer?
-					template.settings.ldpc = detail.ldpc;
-					template.show = true;
-					template.dates = [];
-					template.posts = [];
-					fetchFriends();
-					rendermain();
-					renderSidebar();
-					var today = new Date().toISOString().substr(0,10);
-					connectToSocket(template.settings.wss, getChannel(template.settings.ldpc, template.settings.type, today) +',meta', template.settings.subs);
 
-					setTimeout( function () { $('#back').one('click', back ) }, 1000 );
+					var profileuri = (friend.split('#'))[0];
+					f.nowOrWhenFetched( profileuri , undefined, function(ok, body) {
+						var name;
+						var avatar;
+
+						avatar = g.any(kb.sym(friend), FOAF('img'))
+						|| g.any(kb.sym(friend), FOAF('depiction'));
+						name = g.any(kb.sym(friend), FOAF('name'));
+
+						if(avatar) avatar = avatar.value;
+						if(name) name = name.value;
+
+						var users = [template.settings.webid,friend];
+						users.sort();
+						users = users.join("\n");
+						var hash = CryptoJS.SHA256(users);
+						console.log(friend + ' ' + f.getState(friend));
+						console.log(template.settings.ldpc);
+
+						var l = template.settings.ldpc;
+
+						if (template.settings.type === 'friendsdaily') {
+							l = template.settings.ldpc;
+						} else if (template.settings.type === 'daily') {
+							l = template.settings.ldpc.split('/').splice(0, template.settings.ldpc.split('/').length-2).join('/') + '/';
+						} else if (template.settings.type === 'single') {
+							l = template.settings.ldpc.split('/').splice(0, template.settings.ldpc.split('/').length-2).join('/') + '/';
+						}
+						console.log('setting ldpc of ' + friend + ' to ' + getChannel(l, 'friends', null, hash));
+
+						var fr = {
+							text : 'chat.html?action=chat&'
+							+ '/&webid='+encodeURIComponent(template.settings.webid)+'&avatar='
+							+ encodeURIComponent(template.settings.avatar)+'&name='
+							+ encodeURIComponent(template.settings.name) ,
+							uri : 'chat.html?action=chat&ldpc=' +encodeURIComponent(template.settings.ldpc)+ hash + '%2F&webid='+encodeURIComponent(friend),
+							ldpc : getChannel(l, 'friends', null, hash),
+							webid : template.settings.webid,
+							type : 'daily'
+						}
+
+						// add avatar
+						if (avatar) {
+							fr.avatar = avatar;
+							fr.uri += '&avatar='+encodeURIComponent(avatar);
+						} else {
+							fr.avatar = genericphoto;
+						}
+
+						// add name
+						if (name) {
+							fr.name = name;
+							fr.uri += '&name='+encodeURIComponent(name);
+							fr.text += '&title='+encodeURIComponent(name);
+						} else {
+							fr.name = friend;
+						}
+
+						// add title
+						if (template.settings.name) {
+							fr.uri += '&title=' + encodeURIComponent(template.settings.name);
+						}
+
+
+						if (template.users && template.users[friend] ) {
+							console.log('setting presence of ' + friend )
+							fr.status = template.users[friend].status;
+							fr.lastActive = template.users[friend].lastActive;
+						}
+
+						// insert in right place
+						var exists = false;
+						for (var i=0; i<template.friends.length; i++) {
+							if ( template.friends[i].name === fr.name ) {
+								exists = true;
+								template.friends.splice(i,1);
+							}
+						}
+
+						if (fr.status) {
+							template.friends.unshift( fr );
+						} else if (avatar){
+							var count = 0;
+							for (var i=0; i<template.friends.length; i++) {
+								if (template.friends[i].status) count++;
+							}
+							template.friends.splice(count, 0, fr);
+						} else {
+							template.friends.push( fr );
+						}
+
+						// sort
+						template.friends.sort(function(a, b) {
+							if (a.status && b.status) {
+								if (!a.lastActive) return -1;
+								if (!b.lastActive) return 1;
+								return new Date(b.lastActive).getTime() - new Date(a.lastActive).getTime();
+							}
+							if (a.status) return -1;
+
+							return 1;
+						});
+
+
+					});
 
 
 				});
 
 
-				//$(window).bind("popstate", back);
 
-				function back() {
-					console.log('going back');
-					var stateObject = { 'action' : 'chat' };
-					window.history.pushState(stateObject, "","?action=friends");
+			}
 
-					template.ui.friends = true;
-					template.chat = false;
-					template.settings.action  = 'friends';
-					template.settings.type = 'friendsdaily';
-					template.settings.ldpc = defaultLdpc;
-					template.title = 'WebID Chat';
-					rendermain(template.settings.webid);
-					setTimeout(renderSidebar, 1000);
-					var today = new Date().toISOString().substr(0,10);
-					connectToSocket(template.settings.wss,
-						getChannel(template.settings.ldpc,
-							template.settings.type, today) +',meta', template.settings.subs);
-						}
 
-						// Listen to WebIDAuth events
-						window.addEventListener('WebIDAuth',function(e) {
+			function playSound(uri) {
+				var sound = new Howl({
+					urls: [uri],
+					volume: 0.9
+				}).play();
+			}
+
+
+
+			window.addEventListener('action-changed', function(e) {
+				var detail = e.detail;
+
+				var stateObject = { 'action' : 'chat' };
+
+				window.history.pushState(stateObject, "",
+				'?action=chat&name=' + encodeURIComponent(template.settings.name)
+				+ '&avatar='         + encodeURIComponent(template.settings.avatar)
+				+ '&title='          + encodeURIComponent(detail.title)
+				+ '&ldpc='           + encodeURIComponent(detail.ldpc)
+				+ '&webid='          + encodeURIComponent(detail.webid)
+				+ '&type='           + encodeURIComponent(detail.type) );
+
+
+				template.ui.friends = false;
+				template.chat = true;
+				template.settings.action = 'chat';
+				template.show = true;
+				template.settings.type = detail.type;
+				template.title = detail.title;
+				$('#title').text(detail.title); // bug in polymer?
+				template.settings.ldpc = detail.ldpc;
+				template.show = true;
+				template.dates = [];
+				template.posts = [];
+				fetchFriends();
+				rendermain();
+				renderSidebar();
+				var today = new Date().toISOString().substr(0,10);
+				connectToSocket(template.settings.wss, getChannel(template.settings.ldpc, template.settings.type, today) +',meta', template.settings.subs);
+
+				setTimeout( function () { $('#back').one('click', back ) }, 1000 );
+
+
+			});
+
+
+			//$(window).bind("popstate", back);
+
+			function back() {
+				console.log('going back');
+				var stateObject = { 'action' : 'chat' };
+				window.history.pushState(stateObject, "","?action=friends");
+
+				template.ui.friends = true;
+				template.chat = false;
+				template.settings.action  = 'friends';
+				template.settings.type = 'friendsdaily';
+				template.settings.ldpc = defaultLdpc;
+				template.title = 'WebID Chat';
+				rendermain(template.settings.webid);
+				setTimeout(renderSidebar, 1000);
+				var today = new Date().toISOString().substr(0,10);
+				connectToSocket(template.settings.wss,
+					getChannel(template.settings.ldpc,
+						template.settings.type, today) +',meta', template.settings.subs);
+					}
+
+					// Listen to WebIDAuth events
+					window.addEventListener('WebIDAuth',function(e) {
+						console.log(e.detail);
+						if (e.detail.success === true) {
+							console.log("Auth successful! WebID: "+e.detail.user);
+							localStorage.setItem('webid', e.detail.user);
+							rendermain(e.detail.user);
+							// presence
+							updatePresence(e.detail.user, template.settings.presenceURI);
+						} else {
+							console.log("Auth failed!");
 							console.log(e.detail);
-							if (e.detail.success === true) {
-								console.log("Auth successful! WebID: "+e.detail.user);
-								localStorage.setItem('webid', e.detail.user);
-								rendermain(e.detail.user);
-								// presence
-								updatePresence(e.detail.user, template.settings.presenceURI);
-							} else {
-								console.log("Auth failed!");
-								console.log(e.detail);
-							}
-						},false);
+						}
+					},false);
 
-					});
+				});
 
-					</script>
-				</body>
-				</html>
+				</script>
+			</body>
+			</html>
