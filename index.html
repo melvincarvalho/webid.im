@@ -257,7 +257,11 @@ jQuery(document).ready(function() {
 		template.settings.type = 'friendsdaily';
 	}
 	if (!template.settings.presenceURI) {
-		template.settings.presenceURI = template.settings.ldpc + ',presence';
+		if (template.settings.type === 'friendsdaily') {
+			template.settings.presenceURI = template.settings.ldpc + ',presence';
+		} else {
+			template.settings.presenceURI = template.settings.ldpc.split('/').splice(0, template.settings.ldpc.split('/').length-2).join('/') + '/' + ',presence';
+		}
 	}
 	if (!template.settings.wss) {
 		template.settings.wss = 'wss://' + template.settings.ldpc.split('/')[2];
