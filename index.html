@@ -575,8 +575,13 @@ jQuery(document).ready(function() {
 						var url = g.statementsMatching(author[0].object, SIOC('account_of'), undefined);
 					}
 					if (!url.length) continue;
-					var depiction = g.statementsMatching(author[0].object, FOAF('depiction'), undefined);
-					var img = g.statementsMatching(author[0].object, FOAF('img'), undefined);
+					var avatar = g.statementsMatching(author[0].object, FOAF('img'), undefined);
+					if (!avatar.length) {
+					  avatar = g.statementsMatching(author[0].object, FOAF('depiction'), undefined);
+				  }
+					if (!avatar.length) {
+					  avatar = g.statementsMatching(author[0].object, SIOC('avatar'), undefined);
+				  }
 					var like = g.statementsMatching($rdf.sym(webid), LIKE('likes'), subject);
 
 					//console.log('fetch uri is '+ fetchuri);
@@ -598,11 +603,6 @@ jQuery(document).ready(function() {
 					} else {
 						like = true;
 						console.log(like);
-					}
-
-					var avatar = img;
-					if(img.length === 0) {
-						avatar = depiction;
 					}
 
 					if (avatar.length === 0) {
