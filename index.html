@@ -195,9 +195,9 @@ jQuery(document).ready(function() {
 	var g = $rdf.graph();
 	var f = $rdf.fetcher(g);
 	// add CORS proxy
-	//var PROXY = "https://data.fm/proxy?uri={uri}";
-	//var AUTH_PROXY = "https://rww.io/auth-proxy?uri=";
-	//$rdf.Fetcher.crossSiteProxyTemplate=PROXY;
+	var PROXY = "https://data.fm/proxy?uri={uri}";
+	var AUTH_PROXY = "https://rww.io/auth-proxy?uri=";
+	$rdf.Fetcher.crossSiteProxyTemplate=PROXY;
 	var kb = $rdf.graph();
 	var fetcher = $rdf.fetcher(kb);
 	var FOAF = $rdf.Namespace("http://xmlns.com/foaf/0.1/");
@@ -298,11 +298,10 @@ jQuery(document).ready(function() {
 	// localstorage
 	template.new = true;
 	if (localStorage.getItem('webid')) {
-		template.new = false;
 		template.settings.webid = localStorage.getItem('webid');
-		for (var i=0; i<0; i++) {
-			template.posts.push(  {} );
-		}
+	}
+	if (template.settings.webid) {
+		template.new = false;
 		renderSidebar();
 		rendermain(template.settings.webid, template.settings.date);
 		updatePresence(template.settings.webid, template.settings.presenceURI);
@@ -685,6 +684,7 @@ jQuery(document).ready(function() {
 					var FOAF = $rdf.Namespace("http://xmlns.com/foaf/0.1/");
 					var PIM = $rdf.Namespace("http://www.w3.org/ns/pim/space#");
 					var RDFS = $rdf.Namespace("http://www.w3.org/2000/01/rdf-schema#");
+					var FACE = $rdf.Namespace("https://graph.facebook.com/schema/~/");
 
 					var webidname;
 					var webidavatar;
@@ -693,14 +693,23 @@ jQuery(document).ready(function() {
 
 					webidavatar = g.any(kb.sym(webid), FOAF('img'))
 					|| g.any(kb.sym(webid), FOAF('depiction'));
+					if (webidavatar) webidavatar = webidavatar.value;
 					webidname = g.any(kb.sym(webid), FOAF('name'));
 					storage = g.any(kb.sym(webid), PIM('storage'));
 					seeAlso = g.any(kb.sym(webid), RDFS('seeAlso'));
 
 
+					if (!webidname) {
+						webidname = g.any(kb.sym(webid), FACE('name'));
+					}
+
+					if (!webidavatar && (/graph.facebook.com/i).test(webid) ) {
+						webidavatar = webid.split('#')[0] + '/picture';
+					}
+
 					if (webidavatar) {
-						template.avatar = webidavatar.value;
-						template.settings.avatar = webidavatar.value;
+						template.avatar = webidavatar;
+						template.settings.avatar = webidavatar;
 					} else {
 						template.avatar = genericphoto;
 					}
