@@ -697,10 +697,8 @@ jQuery(document).ready(function() {
 					webidname = g.any(kb.sym(webid), FOAF('name'))  || g.any(kb.sym(webid), FACE('name')) ;
 					storage = g.any(kb.sym(webid), PIM('storage'));
 					seeAlso = g.any(kb.sym(webid), RDFS('seeAlso'));
-console.log(webidname);
 
 					if (webidname) webidname = webidname.value;
-console.log(webidname);
 
 					if (!webidavatar && (/graph.facebook.com/i).test(webid) ) {
 						webidavatar = webid.split('#')[0] + '/picture';
