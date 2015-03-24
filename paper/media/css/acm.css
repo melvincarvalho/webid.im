@@ -1,0 +1,774 @@
+/** ACM SIG
+ *
+ * Sarven Capadisli <info@csarven.ca> http://csarven.ca/#i
+ * http://www.apache.org/licenses/LICENSE-2.0.html Apache License, Version 2.0
+ * https://github.com/csarven/linked-research
+ */
+
+/*
+ACM SIG template styles http://www.acm.org/sigs/publications/sigguide-v2.2sp
+*/
+
+@media print {
+@page {
+margin:1.9cm 1.9cm 2.54cm 1.9cm;
+/*size:18cm 23.5cm;*/
+}
+
+body {
+font-size:9pt !important;
+padding:0 !important;
+margin:0 auto !important;
+width:18cm !important;
+height:19.06cm !important; /*US Letter - ACM Height */
+}
+
+h1 { font-size:18pt !important; }
+h2 { font-size:12pt !important; }
+h3 { font-size:12pt !important; }
+h4 { font-size:11pt !important; }
+/*h5 { font-size:10pt !important; }
+h6 { font-size:9pt !important; }*/
+h1 sup { font-size:9pt !important; }
+
+a {
+text-decoration:none;
+color:#000;
+}
+abbr { border-bottom: none; }
+audio { display:none; }
+iframe { display:none !important; }
+
+#references ol {
+font-family:"Times New Roman", serif;
+font-size:9pt;
+}
+
+#author-name,
+#author-email {
+font-size:12pt;
+}
+
+#author-org {
+font-size:10pt;
+}
+
+#content {
+-webkit-columns:8.45cm 2;
+-webkit-column-count:2;
+-webkit-column-width:8.45cm;
+-webkit-column-gap:0.83cm;
+-moz-columns:8.45cm 2;
+-moz-column-count:2;
+-moz-column-width:8.45cm;
+-moz-column-gap:0.83cm;
+columns:8.45cm 2;
+column-count:2;
+column-width:8.45cm;
+column-gap:0.83cm;
+}
+
+.blink {
+animation: none;
+-webkit-animation: none;
+}
+
+button {
+margin:0 !important;
+padding:0 !important;
+font-size:9pt;
+}
+}
+
+
+* { margin:0; padding:0; filter:none !important; }
+img { border:0; }
+
+h2, h3, h4, h5, h6, p, ul, ol, li, pre, figure {
+orphans: 2;
+widows: 2;
+}
+
+body {
+font-size:150%;
+font-family: "Times New Roman", serif;
+/*position:relative;*/
+counter-reset: section;
+counter-reset: sub-section;
+margin:0 auto;
+padding:2em 0;
+width:56.06em;
+-moz-hyphens:auto;
+-webkit-hyphens:auto;
+-ms-hyphens:auto;
+hyphens:auto;
+text-rendering:optimizeLegibility;
+}
+h1, #authors, #keywords, #categories-and-subject-descriptors, #general-terms, #references, pre, code, samp {
+-moz-hyphens:none;
+-webkit-hyphens:none;
+-ms-hyphens:none;
+hyphens:none;
+}
+
+table, img, object, figure, audio, video, canvas { page-break-inside: avoid; }
+object {
+width:100% !important;
+height:auto !important;
+min-height:240px !important;
+}
+img, video { max-width:100% !important; height:auto !important; }
+
+
+/*
+XXX: column-width doesn't seem to get applied in Firefox
+https://bugzilla.mozilla.org/show_bug.cgi?id=684062
+
+*/
+#content {
+clear:both;
+-webkit-column-count:2;
+-webkit-column-gap:1.9em;
+-moz-column-count:2;
+-moz-column-gap:1.9em;
+/*columns:2 8.45cm;*/
+column-count:2;
+column-gap:1.9em;
+}
+
+p, ol, ul, table, figure {
+margin-bottom:1em;
+}
+
+h1 {
+margin-top:0.75em;
+margin-bottom:1.25em;
+font-family:Arial, sans-serif;
+font-size:1.75em;
+text-align:center;
+}
+h1 sup,
+.entry-subtitle sup,
+#authors sup {
+font-weight:300;
+font-size:0.5715em;
+position:relative;
+top:-3px;
+}
+h2, h3,
+#document-identifier dt,
+#document-published dt,
+#document-modified dt,
+#document-appeared dt,
+#appendix dt {
+font-size:1.333em;
+}
+h4 {
+font-size:1.2226em;
+}
+h2, dt {
+font-weight:bold;
+text-transform:uppercase;
+}
+h3 {
+text-transform:capitalize;
+}
+h4 {
+font-weight:normal;
+font-style:italic;
+text-transform:capitalize;
+}
+
+.entry-subtitle {
+font-family:Arial, sans-serif;
+font-size:1.5em;
+text-align:center;
+}
+h2 {
+margin-top:1em;
+}
+
+
+h3, h4, h5, h6 {
+margin-top:1em;
+}
+
+section:not([id=abstract]):not([id=keywords]):not([id=references]):not([id=categories-and-subject-descriptors]):not([id=general-terms]):not([id=appendix]):not([id=contact-us]) {
+counter-increment: section;
+counter-reset: sub-section;
+}
+section:not([id=abstract]):not([id=keywords]):not([id=references]):not([id=categories-and-subject-descriptors]):not([id=general-terms]):not([id=appendix]):not([id=contact-us]) section {
+counter-increment: sub-section;
+counter-reset: sub-sub-section;
+}
+section:not([id=abstract]):not([id=keywords]):not([id=references]):not([id=categories-and-subject-descriptors]):not([id=general-terms]):not([id=appendix]):not([id=contact-us]) section section {
+counter-increment: sub-sub-section;
+}
+section:not([id=abstract]):not([id=keywords]):not([id=references]):not([id=categories-and-subject-descriptors]):not([id=general-terms]):not([id=appendix]):not([id=contact-us]) h2:before {
+content: counter(section) ".\00a0\00a0\00a0\00a0";
+}
+section h3:before {
+content: counter(section) "." counter(sub-section) "\00a0\00a0\00a0";
+}
+section h4:before {
+content: counter(section)"." counter(sub-section) "." counter(sub-sub-section) "\00a0\00a0\00a0";
+}
+
+
+
+li {
+list-style-position:inside;
+margin-bottom:0.25em;
+}
+
+code, samp {
+font-size:0.95em;
+font-family:"Courier New", monospace;
+word-wrap: break-word;
+}
+
+p + math, ul + math, ol + math, dl + math, dd > math, div + math, section + math {
+text-align:center;
+margin-top:1em;
+margin-bottom:1em;
+}
+p + math, ul + math, ol + math, dl + math, dd > math, div + math, section + math,
+figure math {
+display:block;
+font-size:0.95em;
+}
+figure {
+counter-increment:figure;
+}
+figure.listing {
+counter-increment:listing;
+}
+figure.equation {
+counter-increment:equation;
+}
+figure.equation:after {
+content: "(" counter(equation) ")";
+line-height:0;
+position: absolute;
+top:45%;
+right:0;
+}
+figure object,
+figure img,
+figure pre {
+margin-bottom:1em;
+}
+figcaption,
+caption {
+font-weight:bold;
+text-align:justify;
+}
+figcaption:before {
+content: "Figure " counter(figure) ": ";
+}
+figure.listing figcaption:before {
+content: "Listing " counter(listing) ": ";
+}
+table {
+counter-increment:table;
+}
+caption:before {
+content: "Table " counter(table) ": ";
+}
+
+
+
+.tex,
+.latex {
+text-transform: uppercase;
+}
+
+.tex > span,
+.latex > span {
+line-height: 0;
+text-transform: uppercase;
+}
+
+.latex > :first-child {
+margin-left: -0.36em;
+margin-right: -0.15em;
+vertical-align: 0.3em;
+font-size: 70%;
+}
+
+.tex > :last-child,
+.latex > :last-child {
+margin-left: -0.1667em;
+margin-right: -0.125em;
+vertical-align: -0.5ex;
+}
+
+
+dl.theorem,
+dl.definition {
+text-indent:1em;
+}
+dl.theorem dt {
+display:inline;
+font-variant:small-caps;
+font-weight:normal;
+text-transform:none;
+}
+dl.theorem dt:after {
+content:". ";
+}
+dl.theorem dd {
+display:inline;
+}
+dl.theorem dd span {
+display:inline;
+font-style:italic;
+}
+dl.definition dt {
+display:inline;
+font-weight:normal;
+text-transform:none;
+font-style:italic;
+}
+dl.definition dt:after {
+content:". ";
+}
+dl.definition dd {
+display:inline;
+}
+dl.definition dd span {
+display:inline;
+}
+dl.proof dt {
+display:inline;
+font-variant:small-caps;
+font-weight:normal;
+text-transform:none;
+}
+dl.proof dt:after {
+content:". ";
+}
+dl.proof dd {
+display:inline;
+}
+dl.proof dd span {
+display:inline;
+}
+dl.proof dd > *:last-child:after {
+content:"\00A0\00A0\25A1";
+font-size:1.5em;
+}
+
+dd {
+margin:0 0 0.5em 0;
+}
+
+math * {
+padding:0;
+}
+fieldset {
+padding:1em;
+}
+fieldset ul {
+list-style-type:none;
+}
+
+
+#authors {
+font-family:Arial, sans-serif;
+text-align:center;
+margin-bottom:1em;
+line-height:1;
+}
+
+#authors li,
+#categories-and-subject-descriptors li,
+#keywords li {
+list-style-type:none;
+}
+
+#authors li {
+display:inline-block;
+vertical-align:top;
+width:30%;
+margin-left:1%;
+}
+
+#author-name,
+#author-email {
+font-size:1.333em;
+}
+
+#author-org {
+font-size:1.0835em;
+}
+
+#author-email {
+font-family:Helvetica, Arial, sans-serif;
+}
+
+
+
+
+#authors {
+text-align:left;
+position:relative;
+height:7.5em;
+height:15em;
+}
+
+#author-name,
+#author-org,
+#author-email {
+position:static;
+}
+
+
+#authors dd:nth-of-type(1) {
+position:absolute;
+top:0;
+left:1%;
+}
+#authors dd:nth-of-type(2) {
+position:absolute;
+top:0;
+left:34%;
+}
+#authors dd:nth-of-type(3) {
+position:absolute;
+top:0;
+left:67%;
+}
+#authors dd:nth-of-type(4) {
+position:absolute;
+top:6em;
+left:1%;
+}
+#authors dd:nth-of-type(5) {
+position:absolute;
+top:6em;
+left:34%;
+}
+#authors dd:nth-of-type(6) {
+position:absolute;
+top:6em;
+left:67%;
+}
+
+#author-org li:nth-of-type(1) {
+position:absolute;
+top:1.275em;
+left:1%;
+}
+#author-org li:nth-of-type(2) {
+position:absolute;
+top:1.275em;
+left:34%;
+}
+#author-org li:nth-of-type(3) {
+position:absolute;
+top:1.275em;
+left:67%;
+}
+#author-org li:nth-of-type(4) {
+position:absolute;
+top:8.65em;
+left:1%;
+}
+#author-org li:nth-of-type(5) {
+position:absolute;
+top:8.65em;
+left:34%;
+}
+#author-org li:nth-of-type(6) {
+position:absolute;
+top:8.65em;
+left:67%;
+}
+
+
+
+#author-email li:nth-of-type(1) {
+position:absolute;
+top:3.5em;
+left:1%;
+}
+#author-email li:nth-of-type(2) {
+position:absolute;
+top:3.5em;
+left:34%;
+}
+#author-email li:nth-of-type(3) {
+position:absolute;
+top:3.5em;
+left:67%;
+}
+#author-email li:nth-of-type(4) {
+position:absolute;
+top:9.5em;
+left:1%;
+}
+#author-email li:nth-of-type(5) {
+position:absolute;
+top:9.5em;
+left:34%;
+}
+#author-email li:nth-of-type(6) {
+position:absolute;
+top:9.5em;
+left:67%;
+}
+
+
+#authors dt {
+display:none;
+}
+
+#authors dd,
+#authors li {
+width:32%;
+margin:0 auto;
+display:inline-block;
+text-align:center;
+}
+
+
+#general-terms li,
+#keywords li {
+display:inline;
+}
+#general-terms li:after,
+#categories-and-subject-descriptors li:after {
+content:"; ";
+}
+#general-terms li:after,
+#keywords li:after {
+content:",\00A0";
+}
+#general-terms li:last-child:after,
+#categories-and-subject-descriptors li:last-child:after,
+#keywords li:last-child:after {
+content:"";
+}
+
+#general-terms h2,
+#categories-and-subject-descriptors h2,
+#keywords h2 {
+text-transform:capitalize;
+}
+
+
+.entry-content p,
+.entry-content li {
+text-align:justify;
+}
+
+
+/*Bring these back to life*/
+#document-purpose,
+#document-published,
+#document-modified,
+#document-license {
+display:none;
+}
+
+#document-identifier dd,
+#document-published dd,
+#document-modified dd,
+#document-appeared dd {
+text-align:left;
+margin-left:0;
+}
+
+html {
+counter-reset: figure 0;
+}
+body {
+counter-reset: listing 0;
+}
+article {
+counter-reset: table 0;
+}
+figure,
+audio,
+video {
+margin-top:1em;
+margin-bottom:1em;
+position:relative;
+text-align:center;
+}
+figure pre {
+text-align:left;
+}
+
+figure.listing pre {
+border:1px solid #000;
+padding:0.5em;
+counter-reset: precode;
+}
+figure.listing pre code:before,
+figure.listing pre samp:before {
+position:absolute;
+left:-1.75em;
+text-align:right;
+content: counter(precode);
+counter-increment: precode;
+}
+
+
+table {
+border-collapse:collapse;
+
+/*-webkit-column-break-inside:avoid;*/
+/*-moz-column-break-inside:avoid;*/
+/*-o-column-break-inside:avoid;*/
+/*-ms-column-break-inside:avoid;*/
+/*column-break-inside:avoid;*/
+
+/*-webkit-column-break-before:avoid;*/
+/*-moz-column-break-before:avoid;*/
+/*-o-column-break-before:avoid;*/
+/*-ms-column-break-before:avoid;*/
+/*column-break-before:avoid;*/
+
+/*-webkit-column-break-after:avoid;*/
+/*-moz-column-break-after:avoid;*/
+/*-o-column-break-after:avoid;*/
+/*-ms-column-break-after:avoid;*/
+/*column-break-after:avoid;*/
+
+/*-webkit-break-inside:avoid-column;*/
+/*-moz-break-inside:avoid-column;*/
+/*-o-break-inside:avoid-column;*/
+/*-ms-break-inside:avoid-column;*/
+/*break-inside:avoid-column;*/
+
+/*-webkit-break-inside:avoid;*/
+/*-moz-break-inside:avoid;*/
+/*-o-break-inside:avoid;*/
+/*-ms-break-inside:avoid;*/
+/*break-inside:avoid;*/
+
+/*-webkit-column-break-before: always;*/
+/*-moz-column-break-before: always;*/
+/*-o-column-break-before: always;*/
+/*column-break-before: always;*/
+
+/*-webkit-column-break-before: column;*/
+/*-moz-column-break-before: column;*/
+/*-o-column-break-before: column;*/
+/*column-break-before: column;*/
+/*break-after: column;*/
+
+/*column-span: all;*/
+
+/*display: table;*/
+/*float: left;*/
+/*overflow: auto;*/
+/*display: inline-block;*/
+width:calc(100% - 2px);
+}
+table,
+th,
+td {
+border: 1px solid;
+}
+table thead td:first-child,
+table tfoot td:first-child {
+border:0;
+}
+th,
+td {
+padding:0.25em;
+text-align:left;
+}
+caption {
+padding:0.25em 0;
+}
+
+tbody th {
+text-align:left;
+}
+figcaption {
+margin-bottom:1em;
+}
+
+
+#references ol {
+counter-reset: list-order;
+}
+#references ol li {
+counter-increment: list-order;
+list-style-position:outside;
+list-style-type: none;
+margin-left: 1.85em;
+text-align:left;
+}
+#references ol li:before {
+content: "[" counter(list-order) "]\00A0\00A0\00A0";
+margin-left: -1.85em;
+}
+
+#appendix section:first-child h2 {
+margin-top:0;
+}
+
+#appendix section {
+counter-increment:appendix;
+counter-reset: sub-appendix;
+}
+#appendix section section {
+counter-increment:sub-appendix;
+counter-reset: sub-sub-appendix;
+}
+#appendix section section section {
+counter-increment:sub-sub-appendix;
+}
+#appendix section h2:before {
+content:counter(appendix, upper-latin) ".\00A0\00A0\00A0\00A0";
+}
+#appendix section section h3:before {
+content: counter(appendix, upper-latin) "." counter(sub-appendix) "\00a0\00a0\00a0";
+}
+#appendix section section section h4:before {
+content: counter(appendix, upper-latin) "." counter(sub-appendix)"." counter(sub-sub-appendix) "\00a0\00a0\00a0";
+}
+
+
+#header,
+#footer,
+dl.entry-author,
+dl.datetimestamp,
+dl.entry-replies,
+dl.article_labels * {
+display:none;
+}
+
+#document-purpose,
+#document-published,
+#document-modified,
+#document-license {
+display:none;
+}
+.on {
+display:block;
+}
+
+@media only screen 
+and (min-device-width : 320px)
+and (max-device-width : 568px) {
+body { font-size: 100%; }
+#content {
+-webkit-column-count:1;
+-moz-column-count:1;
+column-count:1;
+}
+}
+
+@media only screen 
+and (min-device-width : 768px) 
+and (max-device-width : 1024px) {
+body {
+font-size:100%;
+}
+}
