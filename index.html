@@ -694,14 +694,13 @@ jQuery(document).ready(function() {
 					webidavatar = g.any(kb.sym(webid), FOAF('img'))
 					|| g.any(kb.sym(webid), FOAF('depiction'));
 					if (webidavatar) webidavatar = webidavatar.value;
-					webidname = g.any(kb.sym(webid), FOAF('name'));
+					webidname = g.any(kb.sym(webid), FOAF('name'))  || g.any(kb.sym(webid), FACE('name')) ;
 					storage = g.any(kb.sym(webid), PIM('storage'));
 					seeAlso = g.any(kb.sym(webid), RDFS('seeAlso'));
+console.log(webidname);
 
-
-					if (!webidname) {
-						webidname = g.any(kb.sym(webid), FACE('name'));
-					}
+					if (webidname) webidname = webidname.value;
+console.log(webidname);
 
 					if (!webidavatar && (/graph.facebook.com/i).test(webid) ) {
 						webidavatar = webid.split('#')[0] + '/picture';
@@ -714,8 +713,8 @@ jQuery(document).ready(function() {
 						template.avatar = genericphoto;
 					}
 					if (webidname) {
-						template.name = webidname.value;
-						template.settings.name = webidname.value;
+						template.name = webidname;
+						template.settings.name = webidname;
 					} else {
 						template.name = template.settings.name;
 					}
