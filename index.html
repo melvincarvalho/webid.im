@@ -183,6 +183,7 @@ jQuery(document).ready(function() {
 	var ldpc        = getParam('ldpc');
 	var name        = getParam('name');
 	var presenceURI = getParam('presenceURI');
+	var seeAlso     = getParam('seeAlso')  || getParam('invite');
 	var title       = getParam('title');
 	var type        = getParam('type');
 	var webid       = getParam('webid');
@@ -211,6 +212,7 @@ jQuery(document).ready(function() {
 		ldpc        : ldpc,
 		name        : name,
 		presenceURI : presenceURI,
+		seeAlso     : seeAlso,
 		title       : title,
 		type        : type,
 		webid       : webid,
@@ -226,6 +228,7 @@ jQuery(document).ready(function() {
 		hash        : template.init.hash,
 		name        : template.init.name,
 		presenceURI : template.init.presenceURI,
+		seeAlso     : template.init.seeAlso,
 		title       : template.init.title,
 		type        : template.init.type,
 		webid       : template.init.webid,
@@ -725,6 +728,10 @@ jQuery(document).ready(function() {
 						fetchSeeAlso(seeAlso.value);
 					}
 
+					if (template.settings.seeAlso) {
+  					fetchSeeAlso(template.settings.seeAlso);
+	  			}
+
 					setTimeout(function() { fetchFriends(webid); }, 1500);
 					setTimeout(fetchPublicChannels, 500);
 
@@ -734,9 +741,9 @@ jQuery(document).ready(function() {
 
 			function fetchSeeAlso(seeAlso) {
 				var PIM = $rdf.Namespace("http://www.w3.org/ns/pim/space#");
-				f.nowOrWhenFetched( seeAlso, undefined, function(ok, body) {
+				f.nowOrWhenFetched( seeAlso.split('#')[0], undefined, function(ok, body) {
 					console.log('seeAlso fetched ' + seeAlso);
-					$.each(g.statementsMatching($rdf.sym(template.settings.webid), PIM('storage'), undefined), function(index, value) {
+					$.each(g.statementsMatching($rdf.sym(template.settings.webid), PIM('storage'), undefined, $rdf.sym(seeAlso)), function(index, value) {
 						addStorage(value.object.value);
 					});
 					if (template.settings.name === template.settings.webid) {
@@ -744,7 +751,6 @@ jQuery(document).ready(function() {
 						if (webidname.length > 0) {
 							template.settings.name = webidname.value;
 						}
-
 					}
 				});
 			}
@@ -806,6 +812,7 @@ jQuery(document).ready(function() {
 
 					var friend = value.object.value;
 
+					var FACE = $rdf.Namespace("https://graph.facebook.com/schema/~/");
 
 
 					var profileuri = (friend.split('#'))[0];
@@ -815,7 +822,7 @@ jQuery(document).ready(function() {
 
 						avatar = g.any(kb.sym(friend), FOAF('img'))
 						|| g.any(kb.sym(friend), FOAF('depiction'));
-						name = g.any(kb.sym(friend), FOAF('name'));
+						name = g.any(kb.sym(friend), FOAF('name'))  || g.any(kb.sym(friend), FACE('name')) ;
 
 						if(avatar) avatar = avatar.value;
 						if(name) name = name.value;
