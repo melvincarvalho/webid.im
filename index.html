@@ -413,7 +413,7 @@ jQuery(document).ready(function() {
 				$('#storage').append('<div><paper-button raised="true" type="button" id="diary" target="_blank">My Journal</paper-button></div>');
 				$('#storage').append($('<br>'));
 				$('#diary').on('click', function() {
-					var diaryURI = 'chat.html?action=chat&type=daily&ldpc='+ encodeURIComponent($('#storagedropdown').val())
+					var diaryURI = '?action=chat&type=daily&ldpc='+ encodeURIComponent($('#storagedropdown').val())
 					+ encodeURIComponent('chat/diary/') +'&webid='+encodeURIComponent(template.settings.webid) + '&name='
 					+ encodeURIComponent(template.settings.name);
 					if (template.settings.avatar) {
