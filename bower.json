@@ -37,6 +37,7 @@
     "paper-tabs": "Polymer/paper-tabs#^0.5.0",
     "core-ajax": "Polymer/core-ajax#^0.5.0",
     "paper-button": "Polymer/paper-button#~0.5.2",
+    "paper-dialog": "Polymer/paper-dialog#~0.5.2",
     "paper-spinner": "Polymer/paper-spinner#~0.5.2",
     "core-overlay": "Polymer/core-overlay#~0.5.2",
     "core-transition": "Polymer/core-transition#~0.5.2",

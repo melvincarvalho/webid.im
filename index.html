@@ -31,6 +31,8 @@
 	<link rel="import" href="bower_components/paper-input/paper-input.html">
 	<link rel="import" href="bower_components/paper-dropdown/paper-dropdown.html">
 	<link rel="import" href="bower_components/paper-fab/paper-fab.html">
+	<link rel="import" href="bower_components/paper-dialog/paper-dialog.html">
+	<link rel="import" href="bower_components/paper-action-dialog/paper-action-dialog.html">
 	<link rel="import" href="x-chat-list.html">
 	<link rel="import" href="x-friend-list.html">
 	<link rel="import" href="login.html">
@@ -113,7 +115,7 @@
 			<core-icon onclick="document.getElementById('storage').toggle()" icon="folder"></core-icon>
 		</template>
 
-		<core-icon onclick="alert(JSON.stringify(template.settings))" icon="settings"></core-icon></span>
+		<core-icon on-tap={{modal}} id="settings" icon="settings"></core-icon>
 		<!-- end header -->
 
 
@@ -156,6 +158,12 @@
 
 	</section>
 	<!-- end body -->
+
+	<paper-dialog id="modal" backdrop autoCloseDisabled layered="false">
+		<h3>Current Settings</h3>
+		<pre>{{printSettings()}}</pre>
+
+	</paper-dialog>
 
 
 
@@ -323,6 +331,16 @@ jQuery(document).ready(function() {
 	template.sendMyMessage = function(e) {
 		template.publish();
 	};
+
+
+	template.modal = function() {
+		console.info('toggling modal');
+		$('#modal').toggle();
+	}
+
+	template.printSettings = function() {
+		return JSON.stringify(template.settings, null, 2);
+	}
 
 
 	template.publish = function() {
@@ -1283,6 +1301,8 @@ jQuery(document).ready(function() {
 					},false);
 
 				});
+
+
 				</script>
 			</body>
 			</html>
