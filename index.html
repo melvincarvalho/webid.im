@@ -364,6 +364,35 @@ jQuery(document).ready(function() {
 		};
 		template.input = '';
 
+
+    // check for commands
+		var isCommand = (/^\/put.*$/i).test(message.text);
+		if (isCommand) {
+			var a = message.text.split(' ');
+
+			var command = a[0]
+			var dest    = a[1];
+			var ttl     = a.splice(2).join(' ');
+
+			console.log('Command : ' + command);
+			console.log('dest : ' + dest);
+			console.log('ttl : ' + ttl);
+
+			$.ajax({
+				url: dest,
+				contentType: "text/turtle",
+				type: 'PUT',
+				data: ttl,
+				success: function(result) {
+					console.log('command sent');
+				}
+			});
+
+
+			return;
+		}
+
+
 		function putFile(file, data) {
 
 			$.ajax({
@@ -628,6 +657,9 @@ jQuery(document).ready(function() {
 					} else {
 						avatar = avatar[0].object.value
 					}
+
+
+
 					addPost(avatar,
 						text[0].object.value,
 						url[0].object.value,
@@ -1024,7 +1056,6 @@ jQuery(document).ready(function() {
 				like = !!like;
 
 				var isImage   = (/\.(gif|jpg|jpeg|tiff|png|svg)$/i).test(message);
-				var isCommand = (/^\/put.*$/i).test(message);
 
 				var m = {
 					name: name,
@@ -1041,34 +1072,6 @@ jQuery(document).ready(function() {
 				if (isImage) {
 					m.img = message;
 				}
-
-				if (isCommand) {
-					message.split('')
-					var a = message.split(' ');
-
-					var command = a[0]
-					var dest    = a[1];
-					var ttl     = a.splice(2).join(' ');
-
-					console.log('Command : ' + command);
-					console.log('dest : ' + dest);
-					console.log('ttl : ' + ttl);
-
-					$.ajax({
-						url: dest,
-						contentType: "text/turtle",
-						type: 'PUT',
-						data: ttl,
-						success: function(result) {
-							console.log('command sent');
-						}
-					});
-
-
-					return;
-				}
-
-
 
 
 				if (!m.avatar) {
@@ -1120,7 +1123,7 @@ jQuery(document).ready(function() {
 						exists = true;
 					}
 				}
-				if (!exists && !isCommand) {
+				if (!exists) {
 					template.posts.push(m);
 					showNewest();
 				}
