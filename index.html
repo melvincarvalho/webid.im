@@ -178,6 +178,14 @@
 <script>
 jQuery(document).ready(function() {
 
+	var SIOC = $rdf.Namespace("http://rdfs.org/sioc/ns#");
+	var RDF = $rdf.Namespace("http://www.w3.org/1999/02/22-rdf-syntax-ns#");
+	var DCT = $rdf.Namespace("http://purl.org/dc/terms/");
+	var FOAF = $rdf.Namespace("http://xmlns.com/foaf/0.1/");
+	var OWL = $rdf.Namespace("http://www.w3.org/2002/07/owl#");
+	var LIKE = $rdf.Namespace("http://ontologi.es/like#");
+
+
 	// main
 	//'use strict';
 	var template = document.querySelector('template[is=auto-binding]');
@@ -545,13 +553,6 @@ jQuery(document).ready(function() {
 				console.log('fetched posts');
 
 				template.posts = [];
-
-				var SIOC = $rdf.Namespace("http://rdfs.org/sioc/ns#");
-				var RDF = $rdf.Namespace("http://www.w3.org/1999/02/22-rdf-syntax-ns#");
-				var DCT = $rdf.Namespace("http://purl.org/dc/terms/");
-				var FOAF = $rdf.Namespace("http://xmlns.com/foaf/0.1/");
-				var OWL = $rdf.Namespace("http://www.w3.org/2002/07/owl#");
-				var LIKE = $rdf.Namespace("http://ontologi.es/like#");
 
 				var posts = g.statementsMatching(undefined, undefined, SIOC('Post'), $rdf.sym(fetchuri));
 
@@ -1145,21 +1146,20 @@ jQuery(document).ready(function() {
 			function updatePresence(webid, presenceURI) {
 
 				f.nowOrWhenFetched( presenceURI , undefined, function(ok, body) {
-					var USER = $rdf.Namespace("https://schema.rww.io/user#");
 
 					var turtle = 'DELETE DATA { ';
 
-					$.each(g.statementsMatching(undefined, USER('lastActive'), undefined), function(index, value) {
+					$.each(g.statementsMatching(undefined, SIOC('last_activity_date'), undefined), function(index, value) {
 						//console.log('logins : ' + value.object);
 						if (webid === value.subject.value) {
-							turtle += '<'+webid+'> <https://schema.rww.io/user#lastActive> "' + value.object.value + '" . ';
+							turtle += '<'+webid+'> <http://rdfs.org/sioc/ns#last_activity_date> "' + value.object.value + '" . ';
 						}
 						setPresence(value.subject.value, value.object.value);
 					});
 					turtle += " } ; \n";
 					console.log(turtle);
 
-					turtle += 'INSERT DATA { <'+(webid)+'> <https://schema.rww.io/user#lastActive>  "'+ new Date().toISOString() +'" . } ';
+					turtle += 'INSERT DATA { <'+(webid)+'> <http://rdfs.org/sioc/ns#last_activity_date>  "'+ new Date().toISOString() +'" . } ';
 
 					console.log(turtle);
 
