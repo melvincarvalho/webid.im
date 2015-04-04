@@ -159,10 +159,10 @@
 	</section>
 	<!-- end body -->
 
-	<paper-dialog id="modal" backdrop autoCloseDisabled layered="false">
-		<h3>Current Settings</h3>
+	<paper-dialog id="modal">
+		<h3>Settings</h3>
 		<pre>{{printSettings}}</pre>
-
+		<paper-button on-tap={{modal}} affirmative autofocus>Close</paper-button>
 	</paper-dialog>
 
 
