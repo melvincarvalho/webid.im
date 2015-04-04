@@ -161,7 +161,7 @@
 
 	<paper-dialog id="modal" backdrop autoCloseDisabled layered="false">
 		<h3>Current Settings</h3>
-		<pre>{{printSettings()}}</pre>
+		<pre>{{printSettings}}</pre>
 
 	</paper-dialog>
 
@@ -335,11 +335,8 @@ jQuery(document).ready(function() {
 
 	template.modal = function() {
 		console.info('toggling modal');
+		template.printSettings = JSON.stringify(template.settings, null, 2);
 		$('#modal').toggle();
-	}
-
-	template.printSettings = function() {
-		return JSON.stringify(template.settings, null, 2);
 	}
 
 
