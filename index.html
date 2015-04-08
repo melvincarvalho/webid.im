@@ -139,7 +139,7 @@
 		<template if={{chat}}>
 			<div id="scroll" flex class="post-list">
 				<template repeat="{{post in posts}}">
-					<x-chat-list on-like-tap="handleLike" viewer="{{post.viewer}}" webid="{{post.webid}}" like="{{post.like}}" uri="{{post.uri}}" img="{{post.img}}" color="{{post.color}}" avatar="{{post.avatar}}" username="{{post.name}}" text="{{post.text}}"  status="{{post.status}}" timestamp="{{post.timestamp}}" video="{{post.video}}"></x-chat-list>
+					<x-chat-list on-like-tap="handleLike" viewer="{{post.viewer}}" webid="{{post.webid}}" like="{{post.like}}" uri="{{post.uri}}" img="{{post.img}}" color="{{post.color}}" avatar="{{post.avatar}}" username="{{post.name}}" text="{{post.text}}"  status="{{post.status}}" timestamp="{{post.timestamp}}" video="{{post.video}}" audio="{{post.audio}}"></x-chat-list>
 				</template>
 			</div>
 
@@ -1083,7 +1083,8 @@ jQuery(document).ready(function() {
 				like = !!like;
 
 				var isImage   = (/\.(gif|jpg|jpeg|tiff|png|svg)$/i).test(message);
-				var isVideo   = (/\.(mp4)$/i).test(message);
+				var isVideo   = (/\.(mp4|mov|avi)$/i).test(message);
+				var isAudio   = (/\.(mp3|wav)$/i).test(message);
 
 				var m = {
 					name: name,
@@ -1103,6 +1104,10 @@ jQuery(document).ready(function() {
 
 				if (isVideo) {
 					m.video = message;
+				}
+
+				if (isAudio) {
+					m.audio = message;
 				}
 
 

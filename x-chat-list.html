@@ -7,7 +7,7 @@ A single user list with a username, avatar, and desc.
 
 -->
 <script src="bower_components/time-elements/time-elements.js"></script>
-<polymer-element name="x-chat-list" attributes="uri webid video img avatar viewer color like username text status timestamp">
+<polymer-element name="x-chat-list" attributes="uri webid audio video img avatar viewer color like username text status timestamp">
   <template>
   <style>
   :host {
@@ -132,7 +132,10 @@ A single user list with a username, avatar, and desc.
         <img class="img" src="{{img}}"/>
       </template>
       <template if="{{video}}">
-        <video type="text/html" controls src="{{video}}"></video>
+        <video controls src="{{video}}"></video>
+      </template>
+      <template if="{{audio}}">
+        <audio controls src="{{audio}}"></audio>
       </template>
   </div>
   <div><a class="timestamp" target="_blank" href="{{uri}}"><time class="timestamp" is="relative-time" datetime="{{timestamp}}"></time></a></div>
