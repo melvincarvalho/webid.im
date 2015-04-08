@@ -132,7 +132,7 @@ A single user list with a username, avatar, and desc.
         <img class="img" src="{{img}}"/>
       </template>
       <template if="{{video}}">
-        <iframe width="420" height="325" src="{{video}}"></iframe>
+        <video type="text/html" controls src="{{video}}"></video>
       </template>
   </div>
   <div><a class="timestamp" target="_blank" href="{{uri}}"><time class="timestamp" is="relative-time" datetime="{{timestamp}}"></time></a></div>
