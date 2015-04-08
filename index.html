@@ -139,7 +139,7 @@
 		<template if={{chat}}>
 			<div id="scroll" flex class="post-list">
 				<template repeat="{{post in posts}}">
-					<x-chat-list on-like-tap="handleLike" viewer="{{post.viewer}}" webid="{{post.webid}}" like="{{post.like}}" uri="{{post.uri}}" img="{{post.img}}" color="{{post.color}}" avatar="{{post.avatar}}" username="{{post.name}}" text="{{post.text}}"  status="{{post.status}}" timestamp="{{post.timestamp}}"></x-chat-list>
+					<x-chat-list on-like-tap="handleLike" viewer="{{post.viewer}}" webid="{{post.webid}}" like="{{post.like}}" uri="{{post.uri}}" img="{{post.img}}" color="{{post.color}}" avatar="{{post.avatar}}" username="{{post.name}}" text="{{post.text}}"  status="{{post.status}}" timestamp="{{post.timestamp}}" video="{{post.video}}"></x-chat-list>
 				</template>
 			</div>
 
@@ -365,14 +365,14 @@ jQuery(document).ready(function() {
 		template.input = '';
 
 
-    // check for commands
-		var isCommand = (/^\/put.*$/i).test(message.text);
-		if (isCommand) {
+    // check for commands, switch eventually to unix style piping
+		var isPut = (/^\/put.*$/i).test(message.text);
+		if (isPut) {
 			var a = message.text.split(' ');
 
 			var command = a[0]
 			var dest    = a[1];
-			var ttl     = a.splice(2).join(' ');
+			var ttl     = a.splice(2).join('\n');
 
 			console.log('Command : ' + command);
 			console.log('dest : ' + dest);
@@ -382,6 +382,32 @@ jQuery(document).ready(function() {
 				url: dest,
 				contentType: "text/turtle",
 				type: 'PUT',
+				data: ttl,
+				success: function(result) {
+					console.log('command sent');
+				}
+			});
+
+
+			return;
+		}
+
+		var isPatch = (/^\/patch.*$/i).test(message.text);
+		if (isPatch) {
+			var a = message.text.split(' ');
+
+			var command = a[0]
+			var dest    = a[1];
+			var ttl     = a.splice(2).join('\n');
+
+			console.log('Command : ' + command);
+			console.log('dest : ' + dest);
+			console.log('ttl : ' + ttl);
+
+			$.ajax({
+				url: dest,
+				contentType: "text/turtle",
+				type: 'PATCH',
 				data: ttl,
 				success: function(result) {
 					console.log('command sent');
@@ -659,9 +685,10 @@ jQuery(document).ready(function() {
 					}
 
 
+          text = text[text.length-1].object.value;
 
 					addPost(avatar,
-						text[0].object.value,
+						text,
 						url[0].object.value,
 						name,
 						post.subject.value,
@@ -1056,6 +1083,7 @@ jQuery(document).ready(function() {
 				like = !!like;
 
 				var isImage   = (/\.(gif|jpg|jpeg|tiff|png|svg)$/i).test(message);
+				var isVideo   = (/youtube/i).test(message);
 
 				var m = {
 					name: name,
@@ -1071,6 +1099,10 @@ jQuery(document).ready(function() {
 
 				if (isImage) {
 					m.img = message;
+				}
+
+				if (isVideo) {
+					m.video = message;
 				}
 
 
@@ -1117,10 +1149,15 @@ jQuery(document).ready(function() {
 
 				m.status = status;
 
+        // check if exists
 				var exists = false;
+				var index;
 				for (var i=0; i<template.posts.length; i++) {
 					if (template.posts[i].uri === m.uri) {
 						exists = true;
+						if (template.posts[i].message != m.message) {
+							template.posts[i].message = m.message;
+						}
 					}
 				}
 				if (!exists) {
