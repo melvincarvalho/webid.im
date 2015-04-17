@@ -11,7 +11,7 @@ body {
     -moz-box-sizing: border-box; -webkit-box-sizing: border-box; box-sizing: border-box;
 }
 core-scaffold::shadow core-toolbar {
-    background-color: #ce1126;
+    background-color: #3A5795;
     color: #fff;
 }
 core-icon[icon=account-circle] {
@@ -24,7 +24,7 @@ paper-input /deep/ .focused-underline {
     background-color: #ce1126;
 }
 paper-fab[icon=send] {
-    background: #ce1126;
+    background: #3A5795;
     bottom: 9px;
 }
 #chat {
