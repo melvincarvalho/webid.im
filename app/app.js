@@ -1,181 +1,3 @@
-<!doctype html>
-<html lang="en">
-<head>
-	<meta charset="utf-8">
-	<meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1">
-	<meta name="description" content="WebID Instant Message">
-	<meta name="author" content="Melvin Carvalho">
-	<meta name="viewport" content="width=device-width, initial-scale=1.0">
-	<meta name="apple-mobile-web-app-capable" content="yes">
-	<meta name="mobile-web-app-capable" content="yes">
-	<title>WebID Chat</title>
-
-	<link rel="icon" sizes="192x192" href="images/app-icon-192.png">
-	<link rel="icon" sizes="128x128" href="images/app-icon-128.png">
-	<link rel="apple-touch-icon" sizes="128x128" href="images/app-icon-128.png">
-	<link rel="apple-touch-icon-precomposed" sizes="128x128" href="images/app-icon-128.png">
-
-	<!-- Polymer -->
-	<script src="bower_components/webcomponentsjs/webcomponents.min.js"></script>
-	<script src="app/vendor/sha256.js"></script>
-	<script src="app/vendor/jquery-2.1.3.min.js"></script>
-	<script src="app/vendor/rdflib.js/rdflib.js"></script>
-	<script src="app/vendor/howler.min.js"></script>
-	<script src="app/vendor/common.js"></script>
-
-
-	<link rel="import" href="bower_components/core-scaffold/core-scaffold.html">
-	<link rel="import" href="bower_components/core-item/core-item.html">
-	<link href="bower_components/core-collapse/core-collapse.html" rel="import">
-	<link href="bower_components/paper-icon-button/paper-icon-button.html" rel="import">
-	<link rel="import" href="bower_components/paper-input/paper-input.html">
-	<link rel="import" href="bower_components/paper-dropdown/paper-dropdown.html">
-	<link rel="import" href="bower_components/paper-fab/paper-fab.html">
-	<link rel="import" href="bower_components/paper-dialog/paper-dialog.html">
-	<link rel="import" href="bower_components/paper-action-dialog/paper-action-dialog.html">
-	<link rel="import" href="x-chat-list.html">
-	<link rel="import" href="x-friend-list.html">
-	<link rel="import" href="login.html">
-	<link rel="stylesheet" href="css/style.css">
-
-
-</head>
-
-<body unresolved fullbleed class="lite">
-
-
-
-	<template is="auto-binding">
-
-
-
-		<core-scaffold>
-
-			<!-- sidebar -->
-			<core-header-panel navigation flex>
-
-				<!-- avatar -->
-				<core-toolbar id="navheader" class="tall">
-					<div class="middle avatar {{color}}" style="background-image: url({{avatar}})"></div>
-					<div class="bottom uuid">{{name}}</div>
-				</core-toolbar>
-				<!-- end avatar -->
-
-
-				<!-- sidebar content -->
-				<section layout vertical id="onlineList">
-
-					<template if={{ui.friends}}>
-						<core-collapse id="storage">
-						</core-collapse>
-					</template>
-
-
-					<template if={{chat}}>
-						<template if={{ui.chat}}>
-							<section layout vertical>
-								<core-collapse opened="true" id="roster">
-									<template repeat="{{friend in friends}}">
-										<x-friend-list webid="{{friend.webid}}" type="{{friend.type}}" ldpc="{{friend.ldpc}}" lastActive="{{friend.lastActive}}" uri="{{friend.uri}}" img="{{friend.img}}" color="{{friend.color}}" avatar="{{friend.avatar}}" username="{{friend.name}}" text="{{friend.text}}"  status="{{friend.status}}" timestamp="{{friend.timestamp}}"></x-friend-list>
-									</template>
-								</core-collapse>
-							</section>
-							<section layout vertical>
-								<core-collapse id="dates">
-									<!--
-									<template repeat="{{date in dates}}">
-									<div id="{{date}}" class="date">{{date}}</div>
-								</template>
-							-->
-						</core-collapse>
-					</section>
-				</template>
-			</template>
-
-		</section>
-		<!-- end sidebar content -->
-
-	</core-header-panel>
-	<!-- end sidebar -->
-
-	<!-- main -->
-	<div tool layout horizontal flex>
-
-		<!-- header -->
-		<template if={{chat}}>
-			<core-icon id="back" icon="chevron-left"></core-icon>
-		</template>
-		<span id="title" flex>{{title}}</span>
-
-		<template if={{chat}}>
-			<core-icon onclick="document.getElementById('dates').toggle() ; document.getElementById('roster').toggle() " icon="view-list"></core-icon>
-		</template>
-
-		<template if={{ui.friends}}>
-			<core-icon onclick="document.getElementById('storage').toggle()" icon="folder"></core-icon>
-		</template>
-
-		<core-icon on-tap={{modal}} id="settings" icon="settings"></core-icon>
-		<!-- end header -->
-
-
-	</div>
-
-	<!-- body -->
-	<section layout vertical fit id="friends">
-
-		<template if={{ui.friends}}>
-			<div flex class="chat-list">
-				<template repeat="{{friend in friends}}">
-					<x-friend-list webid="{{friend.webid}}" type="{{friend.type}}" ldpc="{{friend.ldpc}}" lastActive="{{friend.lastActive}}" uri="{{friend.uri}}" img="{{friend.img}}" color="{{friend.color}}" avatar="{{friend.avatar}}" username="{{friend.name}}" text="{{friend.text}}"  status="{{friend.status}}" timestamp="{{friend.timestamp}}"></x-friend-list>
-				</template>
-			</div>
-			<template if={{new}}>
-				<webid-login id="webid-login"></webid-login>
-			</template>
-		</template>
-
-
-		<template if={{chat}}>
-			<div id="scroll" flex class="post-list">
-				<template repeat="{{post in posts}}">
-					<x-chat-list on-like-tap="handleLike" viewer="{{post.viewer}}" webid="{{post.webid}}" like="{{post.like}}" uri="{{post.uri}}" img="{{post.img}}" color="{{post.color}}" avatar="{{post.avatar}}" username="{{post.name}}" text="{{post.text}}"  status="{{post.status}}" timestamp="{{post.timestamp}}" video="{{post.video}}" audio="{{post.audio}}"></x-chat-list>
-				</template>
-			</div>
-
-			<template if={{show}}>
-				<div class="shim"></div>
-				<div class="send-message" layout horizontal>
-					<paper-input flex label="Type message..." id="input" value="{{input}}" on-keyup="{{checkKey}}"></paper-input>
-					<paper-fab icon="send" id="sendButton" on-tap="{{sendMyMessage}}"></paper-fab>
-				</div>
-			</template>
-
-
-
-		</template>
-
-
-	</section>
-	<!-- end body -->
-
-	<paper-dialog id="modal">
-		<h3>Settings</h3>
-		<pre>{{printSettings}}</pre>
-		<paper-button on-tap={{modal}} affirmative autofocus>Close</paper-button>
-	</paper-dialog>
-
-
-
-
-</core-scaffold>
-
-</template>
-
-
-
-
-<script>
 jQuery(document).ready(function() {
 
 	var SIOC = $rdf.Namespace("http://rdfs.org/sioc/ns#");
@@ -365,7 +187,7 @@ jQuery(document).ready(function() {
 		template.input = '';
 
 
-    // check for commands, switch eventually to unix style piping
+		// check for commands, switch eventually to unix style piping
 		var isPut = (/^\/put.*$/i).test(message.text);
 		if (isPut) {
 			var a = message.text.split(' ');
@@ -650,11 +472,11 @@ jQuery(document).ready(function() {
 					if (!url.length) continue;
 					var avatar = g.statementsMatching(author[0].object, FOAF('img'), undefined);
 					if (!avatar.length) {
-					  avatar = g.statementsMatching(author[0].object, FOAF('depiction'), undefined);
-				  }
+						avatar = g.statementsMatching(author[0].object, FOAF('depiction'), undefined);
+					}
 					if (!avatar.length) {
-					  avatar = g.statementsMatching(author[0].object, SIOC('avatar'), undefined);
-				  }
+						avatar = g.statementsMatching(author[0].object, SIOC('avatar'), undefined);
+					}
 					var like = g.statementsMatching($rdf.sym(webid), LIKE('likes'), subject);
 
 					//console.log('fetch uri is '+ fetchuri);
@@ -685,7 +507,7 @@ jQuery(document).ready(function() {
 					}
 
 
-          text = text[text.length-1].object.value;
+					text = text[text.length-1].object.value;
 
 					addPost(avatar,
 						text,
@@ -805,8 +627,8 @@ jQuery(document).ready(function() {
 					}
 
 					if (template.settings.seeAlso) {
-  					fetchSeeAlso(template.settings.seeAlso);
-	  			}
+						fetchSeeAlso(template.settings.seeAlso);
+					}
 
 					setTimeout(function() { fetchFriends(webid); }, 1500);
 					setTimeout(fetchPublicChannels, 500);
@@ -1154,7 +976,7 @@ jQuery(document).ready(function() {
 
 				m.status = status;
 
-        // check if exists
+				// check if exists
 				var exists = false;
 				var index;
 				for (var i=0; i<template.posts.length; i++) {
@@ -1376,8 +1198,3 @@ jQuery(document).ready(function() {
 					},false);
 
 				});
-
-
-				</script>
-			</body>
-			</html>
