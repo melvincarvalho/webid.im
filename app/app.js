@@ -39,7 +39,6 @@ jQuery(document).ready(function() {
 	$rdf.Fetcher.crossSiteProxyTemplate=PROXY;
 	var kb = $rdf.graph();
 	var fetcher = $rdf.fetcher(kb);
-	var FOAF = $rdf.Namespace("http://xmlns.com/foaf/0.1/");
 
 	template.init = {
 		action      : action,
@@ -149,7 +148,7 @@ jQuery(document).ready(function() {
 		connectToSocket(template.settings.wss, getChannel(template.settings.ldpc, template.settings.type, template.settings.date) +',meta', template.settings.subs);
 	}
 
-	setTimeout( function () { $('#back').one('click', function() { window.location.href = '/'; } ) }, 1500 );
+	setTimeout( function () { $('#back').one('click', function() { window.location.href = '/'; } ); }, 1500 );
 
 	// message box triggers post
 	template.checkKey = function(e) {
@@ -167,7 +166,7 @@ jQuery(document).ready(function() {
 		console.info('toggling modal');
 		template.printSettings = JSON.stringify(template.settings, null, 2);
 		$('#modal').toggle();
-	}
+	};
 
 
 	template.publish = function() {
@@ -192,7 +191,7 @@ jQuery(document).ready(function() {
 		if (isPut) {
 			var a = message.text.split(' ');
 
-			var command = a[0]
+			var command = a[0];
 			var dest    = a[1];
 			var ttl     = a.splice(2).join('\n');
 
@@ -357,7 +356,7 @@ jQuery(document).ready(function() {
 					$('#' + display).on('click', function () {
 						template.posts = [] ;
 						rendermain( template.settings.webid, $(this).text());
-						$(this).css('color', 'darkblue')
+						$(this).css('color', 'darkblue');
 					});
 
 				}
@@ -467,7 +466,7 @@ jQuery(document).ready(function() {
 					var name = g.statementsMatching(author[0].object, FOAF('name'), undefined);
 					var url = g.statementsMatching(author[0].object, OWL('sameAs'), undefined);
 					if (!url.length) {
-						var url = g.statementsMatching(author[0].object, SIOC('account_of'), undefined);
+						url = g.statementsMatching(author[0].object, SIOC('account_of'), undefined);
 					}
 					if (!url.length) continue;
 					var avatar = g.statementsMatching(author[0].object, FOAF('img'), undefined);
@@ -503,7 +502,7 @@ jQuery(document).ready(function() {
 					if (avatar.length === 0) {
 						avatar = null;
 					} else {
-						avatar = avatar[0].object.value
+						avatar = avatar[0].object.value;
 					}
 
 
@@ -550,7 +549,7 @@ jQuery(document).ready(function() {
 								};
 
 								setTimeout(function(){
-									notification.close()
+									notification.close();
 								}, 10000);
 
 							}
@@ -672,7 +671,7 @@ jQuery(document).ready(function() {
 					avatar : avatar,
 					status : 'online',
 					webid : template.settings.webid
-				}
+				};
 
 				if (template.settings.avatar) {
 					fr.text += '&avatar=' + encodeURIComponent(template.settings.avatar);
@@ -752,7 +751,7 @@ jQuery(document).ready(function() {
 							ldpc : getChannel(l, 'friends', null, hash),
 							webid : template.settings.webid,
 							type : 'daily'
-						}
+						};
 
 						// add avatar
 						if (avatar) {
@@ -778,7 +777,7 @@ jQuery(document).ready(function() {
 
 
 						if (template.users && template.users[friend] ) {
-							console.log('setting presence of ' + friend )
+							console.log('setting presence of ' + friend );
 							fr.status = template.users[friend].status;
 							fr.lastActive = template.users[friend].lastActive;
 						}
