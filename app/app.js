@@ -188,7 +188,10 @@ jQuery(document).ready(function() {
 
 		// check for commands, switch eventually to unix style piping
 		var isPut = (/^\/put.*$/i).test(message.text);
-		if (isPut) {
+		var isPatch = (/^\/patch.*$/i).test(message.text);
+		if (isPut || isPatch) {
+			var verb = 'PUT';
+			if (isPatch) verb = 'PATCH';
 			var a = message.text.split(' ');
 
 			var command = a[0];
@@ -202,33 +205,7 @@ jQuery(document).ready(function() {
 			$.ajax({
 				url: dest,
 				contentType: "text/turtle",
-				type: 'PUT',
-				data: ttl,
-				success: function(result) {
-					console.log('command sent');
-				}
-			});
-
-
-			return;
-		}
-
-		var isPatch = (/^\/patch.*$/i).test(message.text);
-		if (isPatch) {
-			var a = message.text.split(' ');
-
-			var command = a[0]
-			var dest    = a[1];
-			var ttl     = a.splice(2).join('\n');
-
-			console.log('Command : ' + command);
-			console.log('dest : ' + dest);
-			console.log('ttl : ' + ttl);
-
-			$.ajax({
-				url: dest,
-				contentType: "text/turtle",
-				type: 'PATCH',
+				type: verb,
 				data: ttl,
 				success: function(result) {
 					console.log('command sent');
