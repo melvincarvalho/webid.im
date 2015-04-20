@@ -289,9 +289,9 @@ jQuery(document).ready(function() {
 				$('#storage').append('<div><paper-button raised="true" type="button" id="diary" target="_blank">My Journal</paper-button></div>');
 				$('#storage').append($('<br>'));
 				$('#diary').on('click', function() {
-					var diaryURI = '?action=chat&type=daily&ldpc='+ encodeURIComponent($('#storagedropdown').val())
-					+ encodeURIComponent('chat/diary/') +'&webid='+encodeURIComponent(template.settings.webid) + '&name='
-					+ encodeURIComponent(template.settings.name);
+					var diaryURI = '?action=chat&type=daily&ldpc='+ encodeURIComponent($('#storagedropdown').val()) +
+					               encodeURIComponent('chat/diary/') +'&webid='+encodeURIComponent(template.settings.webid) + '&name=' +
+					               encodeURIComponent(template.settings.name);
 					if (template.settings.avatar) {
 						diaryURI += '&avatar=' + encodeURIComponent(template.settings.avatar) + '&title=Diary';
 					}
@@ -567,8 +567,8 @@ jQuery(document).ready(function() {
 					var storage;
 					var seeAlso;
 
-					webidavatar = g.any(kb.sym(webid), FOAF('img'))
-					|| g.any(kb.sym(webid), FOAF('depiction'));
+					webidavatar = g.any(kb.sym(webid), FOAF('img')) ||
+					              g.any(kb.sym(webid), FOAF('depiction'));
 					if (webidavatar) webidavatar = webidavatar.value;
 					webidname = g.any(kb.sym(webid), FOAF('name'))  || g.any(kb.sym(webid), FACE('name')) ;
 					storage = g.any(kb.sym(webid), PIM('storage'));
@@ -639,8 +639,8 @@ jQuery(document).ready(function() {
 
 
 				var fr = {
-					text : 'chat.html?action=chat&type=single&ldpc=' + encodeURIComponent(ldpc)
-					+ '&webid='+encodeURIComponent(template.settings.webid),
+					text : 'chat.html?action=chat&type=single&ldpc=' + encodeURIComponent(ldpc) +
+					       '&webid='+encodeURIComponent(template.settings.webid),
 					uri : '',
 					name : name,
 					ldpc : ldpc,
@@ -720,10 +720,10 @@ jQuery(document).ready(function() {
 						console.log('setting ldpc of ' + friend + ' to ' + getChannel(l, 'friends', null, hash));
 
 						var fr = {
-							text : 'chat.html?action=chat&'
-							+ '/&webid='+encodeURIComponent(template.settings.webid)+'&avatar='
-							+ encodeURIComponent(template.settings.avatar)+'&name='
-							+ encodeURIComponent(template.settings.name) ,
+							text : 'chat.html?action=chat&' +
+							       '/&webid='+encodeURIComponent(template.settings.webid)+'&avatar=' +
+							       encodeURIComponent(template.settings.avatar)+'&name=' +
+							        encodeURIComponent(template.settings.name) ,
 							uri : 'chat.html?action=chat&ldpc=' +encodeURIComponent(template.settings.ldpc)+ hash + '%2F&webid='+encodeURIComponent(friend),
 							ldpc : getChannel(l, 'friends', null, hash),
 							webid : template.settings.webid,
@@ -992,7 +992,7 @@ jQuery(document).ready(function() {
 						//var sub = 'sub ' + getChannel(template.settings.ldpc, template.settings.type, today) +',meta';
 						console.log(sub);
 						this.send('sub ' + sub);
-					}
+					};
 
 					socket.onmessage = function(msg){
 						console.log('Incoming message : ');
@@ -1008,7 +1008,8 @@ jQuery(document).ready(function() {
 								notify = true;
 							}
 						});
-					}
+					};
+
 				}
 			}
 
@@ -1106,12 +1107,12 @@ jQuery(document).ready(function() {
 				var stateObject = { 'action' : 'chat' };
 
 				window.history.pushState(stateObject, "",
-				'?action=chat&name=' + encodeURIComponent(template.settings.name)
-				+ '&avatar='         + encodeURIComponent(template.settings.avatar)
-				+ '&title='          + encodeURIComponent(detail.title)
-				+ '&ldpc='           + encodeURIComponent(detail.ldpc)
-				+ '&webid='          + encodeURIComponent(detail.webid)
-				+ '&type='           + encodeURIComponent(detail.type) );
+				'?action=chat&name=' + encodeURIComponent(template.settings.name) +
+				  '&avatar='         + encodeURIComponent(template.settings.avatar) +
+				  '&title='          + encodeURIComponent(detail.title) +
+				  '&ldpc='           + encodeURIComponent(detail.ldpc) +
+				  '&webid='          + encodeURIComponent(detail.webid) +
+				  '&type='           + encodeURIComponent(detail.type) );
 
 
 				template.ui.friends = false;
