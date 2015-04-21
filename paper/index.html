@@ -149,6 +149,19 @@ xml:lang="en" lang="en">
           are added to a roster by following FOAF : knows relations in the WebID.  Facebook open graph protocol is also leveraged when appropriate.  The chat system can also perform basic commands such
           as PUT and PATCH to a URI.</p>
 
+          <section id="presence" about="[this:#solid]" rel="dcterms:hasPart" resource="[this:#presence]">
+            <h3 about="[this:#presence]" property="dcterms:title">Presence</h3>
+            <div about="[this:#presence]" property="dcterms:description">
+              <p>Presence is recoreded and retrieved from the query string variable, presenceURI.  The format of presence is:
+
+                <p><code>:me http://rdfs.org/sioc/ns#last_activity_date "date" .</code></p>
+
+                If the presenceURI is not set a default is guessed by placing it at the top of the LDPC in a file "/,presence".  This system was
+                a simple system designed for proof-of-concept, a more robust presence system is future work.</p>
+            </div>
+          </section>
+
+
         </div>
       </section>
 
