@@ -97,25 +97,45 @@ xml:lang="en" lang="en">
           <section id="requirements" about="http://webid.im/paper/" rel="dcterms:hasPart" resource="[this:#requirements]">
             <h2 about="[this:#requirements]" property="dcterms:title">Non-Functional Requirements</h2>
             <div about="[this:#requirements]" property="dcterms:description">
-              <p>TBA</p>
 
-              <section id="accessibility" about="[this:requirements]" rel="dcterms:hasPart" resource="[this:#accessibility]">
-                <h3 about="[this:#accessibility]" property="dcterms:title">Accessibility</h3>
-                <div about="[this:#accessibility]" property="dcterms:description">
-                  <p>TBA</p>
+              <section id="decentralization" about="[this:requirements]" rel="dcterms:hasPart" resource="[this:#decentralization]">
+                <h3 about="[this:#decentralization]" property="dcterms:title">Decentralization</h3>
+                <div about="[this:#decentralization]" property="dcterms:description">
+                  <p>As much of the system as possible should be decentralized.  This includes, identity, accounts, payment providers, wallets and messaging.  This
+                    is achieved by giving anything of note a URI.  That allows any domain to host any aspect of the system.  The app is 100% client side and only relies
+                    on commodoty storage as a backend, via linked data platform.</p>
+                  </div>
+                </section>
+
+                <section id="accessibility" about="[this:requirements]" rel="dcterms:hasPart" resource="[this:#accessibility]">
+                  <h3 about="[this:#accessibility]" property="dcterms:title">Accessibility</h3>
+                  <div about="[this:#accessibility]" property="dcterms:description">
+                    <p>Accessiblity and ARIA guidelines are a goal of the project, so that as many people and possible can use wallets</p>
+                  </div>
+                </section>
 
 
-                  <!--
-                  <aside class="note" id="joe-clark">
-                  <p>While there are accessibility guidelines for PDF, Joe Clark, an expert in Web accessibility summarizes a report with the leading point: "most PDFs on the Web should be HTML"<span rel="dcterms:reference" href="http://alistapart.com/article/pdf_accessibility">Facts and Opinions About PDF Accessibility</a>.</p>
-                </aside>
-              -->
-            </div>
-          </section>
+                <section id="standards" about="[this:requirements]" rel="dcterms:hasPart" resource="[this:#standards]">
+                  <h3 about="[this:#standards]" property="dcterms:title">Web Standards</h3>
+                  <div about="[this:#standards]" property="dcterms:description">
+                    <p>As far as possible this project aims to reuse web standards and work done by the W3C.  The main items followed are W3C Design Issues, WebID, Linked Data, Linked Data Platform,
+                      HTML5, RESTful principles and Websockets.</p>
+
+                    </div>
+                  </section>
 
 
-        </div>
-      </section>
+                  <section id="security" about="[this:requirements]" rel="dcterms:hasPart" resource="[this:#security]">
+                    <h3 about="[this:#security]" property="dcterms:title">Security</h3>
+                    <div about="[this:#security]" property="dcterms:description">
+                      <p>Work is done on security, in particular the tools used are Web Access Control, and TLS.  More tools will be added over time.</p>
+
+                    </div>
+                  </section>
+
+
+                </div>
+              </section>
 
 
       <section id="conceptual-design" about="http://webid.im/paper/" rel="dcterms:hasPart" resource="[this:#conceptual-design]">
@@ -127,19 +147,39 @@ xml:lang="en" lang="en">
       </section>
 
 
+
+
       <section id="components" about="http://webid.im/paper/" rel="dcterms:hasPart" resource="[this:#components]">
         <h2 about="[this:#components]" property="dcterms:title">Components</h2>
         <div about="[this:#components]" property="dcterms:description">
-          <p>TBA</p>
+          <p>As far as possible this project aims to reuse web standards and work done by the W3C.  The main items followed are <cite><a href="https://linkeddata.github.io/SoLiD/">SoLiD</a></cite>, W3C Design Issues, WebID, Linked Data, Linked Data Platform,
+            HTML5, RESTful principles and Websockets</p>
 
-          <section id="authoring-tool" about="[this:#challenges]" rel="dcterms:hasPart" resource="[this:#authoring-tool]">
-            <h3 about="[this:#authoring-tool]" property="dcterms:title">WebID</h3>
-            <div about="[this:#authoring-tool]" property="dcterms:description">
-              <p>WebID will be used for Identity.</p>
+              <section id="solid" about="[this:#solid]" rel="dcterms:hasPart" resource="[this:#solid]">
+                <h3 about="[this:#solid]" property="dcterms:title">SoLiD</h3>
+                <div about="[this:#solid]" property="dcterms:description">
+                  <p><cite><a href="https://linkeddata.github.io/SoLiD/">SoLiD</a></cite> is the social linked data platform.  SoLiD was designed from the ground up to be modular and openly extensible. It relies as much as possible on existing W3C standards.
+                    RDF, LDP, Websockets, WebID, WebID-TLS, WebID-RSA, WebAccessControl</p>
+                </div>
+              </section>
+
+              <section id="webcredits" about="[this:#challenges]" rel="dcterms:hasPart" resource="[this:#webcredits]">
+                <h3 about="[this:#webcredits]" property="dcterms:title">Web Credits</h3>
+                <div about="[this:#webcredits]" property="dcterms:description">
+                  <p>The webcredits ontology will be used as a simple way to track credits between URIs.</p>
+                </div>
+              </section>
+
+              <section id="webpayments" about="[this:#challenges]" rel="dcterms:hasPart" resource="[this:#webpayments]">
+                <h3 about="[this:#webpayments]" property="dcterms:title">W3C Web Payments</h3>
+                <div about="[this:#webpayments]" property="dcterms:description">
+                  <p>The work by the W3C web payments community group will be leveraged as much as possible.</p>
+                </div>
+              </section>
+
+
             </div>
           </section>
-        </div>
-      </section>
 
       <section id="implementation" about="http://webid.im/paper/" rel="dcterms:hasPart" resource="[this:#implementation]">
         <h2 about="[this:#implementation]" property="dcterms:title">Implementation</h2>
