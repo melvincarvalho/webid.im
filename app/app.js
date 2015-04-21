@@ -1,44 +1,48 @@
 jQuery(document).ready(function() {
 
-	var SIOC = $rdf.Namespace("http://rdfs.org/sioc/ns#");
-	var RDF = $rdf.Namespace("http://www.w3.org/1999/02/22-rdf-syntax-ns#");
-	var DCT = $rdf.Namespace("http://purl.org/dc/terms/");
-	var FOAF = $rdf.Namespace("http://xmlns.com/foaf/0.1/");
-	var OWL = $rdf.Namespace("http://www.w3.org/2002/07/owl#");
-	var LIKE = $rdf.Namespace("http://ontologi.es/like#");
-
+	var DCT   = $rdf.Namespace("http://purl.org/dc/terms/");
+	var FACE  = $rdf.Namespace("https://graph.facebook.com/schema/~/");
+	var FOAF  = $rdf.Namespace("http://xmlns.com/foaf/0.1/");
+	var LIKE  = $rdf.Namespace("http://ontologi.es/like#");
+	var LDP   = $rdf.Namespace("http://www.w3.org/ns/ldp#");
+	var OWL   = $rdf.Namespace("http://www.w3.org/2002/07/owl#");
+	var PIM   = $rdf.Namespace("http://www.w3.org/ns/pim/space#");
+	var RDF   = $rdf.Namespace("http://www.w3.org/1999/02/22-rdf-syntax-ns#");
+	var RDFS  = $rdf.Namespace("http://www.w3.org/2000/01/rdf-schema#");
+	var SIOC  = $rdf.Namespace("http://rdfs.org/sioc/ns#");
 
 	// main
 	//'use strict';
-	var template = document.querySelector('template[is=auto-binding]');
+	var template      = document.querySelector('template[is=auto-binding]');
 	document.template = template;
 
-	var action      = getParam('action'); // show friends or chat
-	var avatar      = getParam('avatar');
-	var color       = getParam('color');
-	var date        = getParam('date');
-	var hash        = getParam('hash');
-	var ldpc        = getParam('ldpc');
-	var name        = getParam('name');
-	var presenceURI = getParam('presenceURI');
-	var seeAlso     = getParam('seeAlso')  || getParam('invite');
-	var title       = getParam('title');
-	var type        = getParam('type');
-	var webid       = getParam('webid');
-	var wss         = getParam('wss');
+	var action        = getParam('action'); // show friends or chat
+	var avatar        = getParam('avatar');
+	var color         = getParam('color');
+	var date          = getParam('date');
+	var hash          = getParam('hash');
+	var ldpc          = getParam('ldpc');
+	var name          = getParam('name');
+	var presenceURI   = getParam('presenceURI');
+	var seeAlso       = getParam('seeAlso')  || getParam('invite');
+	var title         = getParam('title');
+	var type          = getParam('type');
+	var webid         = getParam('webid');
+	var wss           = getParam('wss');
 
-	var genericphoto = 'images/generic_photo.png';
-	var soundURI = 'http://webid.im/pinglow.mp3';
-	var defaultLdpc = 'https://klaranet.com/d/chat/'; // hard code for now until more websockets are there
+	var genericphoto  = 'images/generic_photo.png';
+	var soundURI      = 'http://webid.im/pinglow.mp3';
+	var defaultLdpc   = 'https://klaranet.com/d/chat/'; // hard code for now until more websockets are there
+	var defaultIcon   = 'https://cdn1.iconfinder.com/data/icons/app-tab-bar-icons-for-ios/30/User_login.png';
 	var notify = false;
 	var g = $rdf.graph();
 	var f = $rdf.fetcher(g);
 	// add CORS proxy
-	var PROXY = "https://data.fm/proxy?uri={uri}";
+	var PROXY      = "https://data.fm/proxy?uri={uri}";
 	var AUTH_PROXY = "https://rww.io/auth-proxy?uri=";
 	$rdf.Fetcher.crossSiteProxyTemplate=PROXY;
-	var kb = $rdf.graph();
-	var fetcher = $rdf.fetcher(kb);
+	var kb         = $rdf.graph();
+	var fetcher    = $rdf.fetcher(kb);
 
 	template.init = {
 		action      : action,
@@ -270,8 +274,25 @@ jQuery(document).ready(function() {
 		updatePresence(template.settings.webid, template.settings.presenceURI);
 
 		addPost(template.settings.avatar, message.text.trim(), template.settings.webid, template.settings.name,
-		getChannel(template.settings.ldpc, template.settings.type,  today) + id + '#this',
-		new Date().toISOString(), false, template.settings.webid );
+		        getChannel(template.settings.ldpc, template.settings.type,  today) + id + '#this',
+		           new Date().toISOString(), false, template.settings.webid );
+
+	  var exists = false;
+		for (i=0; i<template.dates.length; i++) {
+			if (template.dates[i] === today) {
+				exists = true;
+			}
+		}
+		if (!exists) {
+			template.dates.push(today);
+
+			$('#dates').prepend('<div id="'+ today +'" class="date">' + today + '</div><br>');
+			$('#' + display).on('click', function () {
+				template.posts = [] ;
+				rendermain( template.settings.webid, $(this).text());
+				$(this).css('color', 'darkblue');
+			});
+		}
 		showNewest();
 
 	};
@@ -402,6 +423,9 @@ jQuery(document).ready(function() {
 			}
 
 
+      // called from sidebar, show one date
+			// called today, show today's posts, if any
+			// called today, no posts, show recent conversation
 			function renderPosts(ok, body) {
 				console.log('fetched posts');
 
@@ -412,7 +436,6 @@ jQuery(document).ready(function() {
 
 				//console.log('posts : ' + posts);
 				$('#logs').empty();
-				//$('#logs').append(g.toString());
 
 				// sort by date
 				if (posts && posts.length > 0) {
@@ -512,7 +535,7 @@ jQuery(document).ready(function() {
 
 						if(notify && i === posts.length-1 &&  url[0].object.value != webid && hidden ){
 							var notification = new Notification(name[0].object.value,
-								{'icon': "https://cdn1.iconfinder.com/data/icons/app-tab-bar-icons-for-ios/30/User_login.png",
+								{'icon': defaultIcon,
 								"body" : text[0].object.value });
 								notify = false;
 
@@ -555,12 +578,6 @@ jQuery(document).ready(function() {
 				f.nowOrWhenFetched( webid.split('#')[0] , undefined, function(ok, body) {
 					console.log('webid fetched');
 
-					var LDP = $rdf.Namespace("http://www.w3.org/ns/ldp#");
-					var RDF = $rdf.Namespace("http://www.w3.org/1999/02/22-rdf-syntax-ns#");
-					var FOAF = $rdf.Namespace("http://xmlns.com/foaf/0.1/");
-					var PIM = $rdf.Namespace("http://www.w3.org/ns/pim/space#");
-					var RDFS = $rdf.Namespace("http://www.w3.org/2000/01/rdf-schema#");
-					var FACE = $rdf.Namespace("https://graph.facebook.com/schema/~/");
 
 					var webidname;
 					var webidavatar;
