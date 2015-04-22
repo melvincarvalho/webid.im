@@ -142,12 +142,13 @@ xml:lang="en" lang="en">
         <h2 about="[this:#conceptual-design]" property="dcterms:title">Conceptual Design</h2>
         <div about="[this:#conceptual-design]" property="dcterms:description">
           <p>Instant messages occur within a SIOC Space.  Spaces can be sub divided in different ways.  A single based container, a container with one sub container per day, a container with one sub
-          container per friend, or a root which is divided by both friends and then date.  Presence is stored at the root of the container.  The display is shown for a given user on a given date.  The
+          container per friend, or a root which is divided by both friends and then date.  A single user per day container is also set up by default in order to act as a personal diary or journal.
+          Presence is stored at the root of the container.  The display is shown for a given user on a given date.  The
           default date is today's date.  If there are no messages in today's date, the last known date is used.  Authentication is provided via WebID and access control via WebACL.  Linked data is used
           for discovery where possible, including a seeAlso from the webID, and if not taken from query string parameters.  Once authenticated the user is cached in localstorage.  Messages are expanded
           to show images, audio and video when matched.  Friends
           are added to a roster by following FOAF : knows relations in the WebID.  Facebook open graph protocol is also leveraged when appropriate.  The chat system can also perform basic commands such
-          as PUT and PATCH to a URI.</p>
+          as PUT and PATCH to a URI.  Data is stored in /chat/ area of the ldpc and /chat/diary/ for the diary.</p>
 
           <section id="presence" about="[this:#solid]" rel="dcterms:hasPart" resource="[this:#presence]">
             <h3 about="[this:#presence]" property="dcterms:title">Presence</h3>
