@@ -153,11 +153,14 @@ xml:lang="en" lang="en">
           <section id="presence" about="[this:#solid]" rel="dcterms:hasPart" resource="[this:#presence]">
             <h3 about="[this:#presence]" property="dcterms:title">Presence</h3>
             <div about="[this:#presence]" property="dcterms:description">
-              <p>Presence is recoreded and retrieved from the query string variable, presenceURI.  The format of presence is:
+              <p>Presence is recorded and retrieved from from a location, found in the the query string variable, "presenceURI".  The format of presence file is:
 
-                <p><code>:me http://rdfs.org/sioc/ns#last_activity_date "date" .</code></p>
+                <p><code>:user http://rdfs.org/sioc/ns#last_activity_date "date" .</code></p>
 
-                If the presenceURI is not set a default is guessed by placing it at the top of the LDPC in a file "/,presence".  This system was
+                If the presenceURI is not set, a default is guessed by placing it at the top of the LDPC, and checking a file "/,presence".  When a new message is input
+                the last_activity_date is set to that time.  Users are generally ordered on the roster in accordance with last active.
+
+                This system was
                 a simple system designed for proof-of-concept, a more robust presence system is future work.</p>
             </div>
           </section>
