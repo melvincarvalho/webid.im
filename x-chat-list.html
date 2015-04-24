@@ -1,11 +1,3 @@
-<!--
-A single user list with a username, avatar, and desc.
-
-##### Example
-
-<x-chat-list avatar="url" username="name" message="hello" status="online" timestamp="1420145273945"></x-chat-list>
-
--->
 <script src="bower_components/time-elements/time-elements.js"></script>
 <polymer-element name="x-chat-list" attributes="uri webid audio video img avatar viewer color like username text status timestamp">
   <template>
@@ -61,7 +53,7 @@ A single user list with a username, avatar, and desc.
     color: #6D84B4;
     font-size: 0.75em;
   }
-  .img {
+  .media {
     max-height: 800px;
     max-width: 100%;
   }
@@ -111,7 +103,7 @@ A single user list with a username, avatar, and desc.
     color: #636363;
   }
   :host([like]) core-icon-button {
-  color: #da4336;
+    color: #da4336;
   }
 
   </style>
@@ -126,17 +118,17 @@ A single user list with a username, avatar, and desc.
       <core-icon-button
       id="favicon"
       icon="favorite"
-       on-tap="{{handleLike}}">
-      </core-icon-button>
-      <template if="{{img}}">
-        <img class="img" src="{{img}}"/>
-      </template>
-      <template if="{{video}}">
-        <video controls src="{{video}}"></video>
-      </template>
-      <template if="{{audio}}">
-        <audio controls src="{{audio}}"></audio>
-      </template>
+      on-tap="{{handleLike}}">
+    </core-icon-button>
+    <template if="{{img}}">
+      <img class="media" src="{{img}}"/>
+    </template>
+    <template if="{{video}}">
+      <video class="media" controls src="{{video}}"></video>
+    </template>
+    <template if="{{audio}}">
+      <audio class="media" controls src="{{audio}}"></audio>
+    </template>
   </div>
   <div><a class="timestamp" target="_blank" href="{{uri}}"><time class="timestamp" is="relative-time" datetime="{{timestamp}}"></time></a></div>
 </section>
@@ -157,6 +149,7 @@ Polymer('x-chat-list', {
   ready: function() {
 
   },
+
   handleLike: function() {
     if (!this.viewer) return;
     console.log(' like : ' + this.like);
@@ -180,8 +173,5 @@ Polymer('x-chat-list', {
 
   }
 });
-
-
-
 </script>
 </polymer-element>
