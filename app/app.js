@@ -933,39 +933,6 @@ jQuery(document).ready(function() {
 				var status;
 
 
-				// work out presence
-				if (template.settings.webid) {
-					if (!template.users[template.settings.webid]) template.users[template.settings.webid] = {};
-					var onlinetime = 86400000;
-					var awaytime = 864000000;
-					var messagetime = new Date(time);
-					if (template.users[template.settings.webid].lastActive && new Date(template.users[template.settings.webid].lastActive) > messagetime ) {
-						if (template.users[webid]) {
-							messagetime = new Date(template.users[webid].lastActive);
-						}
-					}
-					var now = new Date();
-
-					if (now.getTime() - messagetime.getTime() < onlinetime) {
-						status = 'online';
-						for (var i=0; i<template.posts.length; i++) {
-							if (template.posts[i].webid === template.settings.webid) {
-								template.posts[i].status = status;
-								if (!template.users) template.users = {};
-								if (!template.users[webid]) template.users[webid] = {};
-								template.users[webid].status = status;
-							}
-						}
-					} else if (now.getTime() - messagetime.getTime() < awaytime) {
-						status = 'away';
-						for (var i=0; i<template.posts.length; i++) {
-							if (template.posts[i][template.settings.webid] === template.settings.webid) {
-								template.posts[i].status = status;
-								template.users[webid].status = status;
-							}
-						}
-					}
-				}
 
 				m.status = status;
 
@@ -983,6 +950,11 @@ jQuery(document).ready(function() {
 				if (!exists) {
 					template.posts.push(m);
 					showNewest();
+				}
+
+				// work out presence
+				if (template.settings.webid) {
+					setPresence(template.settings.webid, new Date(time));
 				}
 
 			}
@@ -1070,7 +1042,9 @@ jQuery(document).ready(function() {
 
 			// setPresence
 			//
-			// sets presence in form to online away or offline
+			// sets template.users.webid
+			//   lastActive
+			//   status online | away | offline
 			function setPresence(webid, time) {
 				var onlinetime = 86400000;
 				var awaytime = 864000000;
@@ -1099,6 +1073,18 @@ jQuery(document).ready(function() {
 					template.friends[i].statue = status;
 					template.friends[i].lastActive = time;
 				}
+
+        template.posts.forEach(function(el, i){
+
+					if (el.webid === webid) {
+						el.status = status;
+						template.users[webid].status = status;
+					}
+
+				});
+
+
+
 			}
 
 
