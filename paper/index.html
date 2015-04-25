@@ -61,7 +61,7 @@ xml:lang="en" lang="en">
         <h2>Abstract</h2>
         <div property="dcterms:abstract" class="entry-summary">
           <p>We present an instant messaging system, powered by the Social Linked Data Platform (<cite><a href="https://linkeddata.github.io/SoLiD/">SoLiD</a></cite>).  Data is distributed
-          accross personal storage servers.  Using web stanadrds the user is able to control where the data resides, who can see what, and maintain privacy.</p>
+            accross personal storage servers.  Using web stanadrds the user is able to control where the data resides, who can see what, and maintain privacy.</p>
           </div>
         </section>
 
@@ -136,109 +136,126 @@ xml:lang="en" lang="en">
               </section>
 
 
-      <section id="conceptual-design" about="http://webid.im/paper/" rel="dcterms:hasPart" resource="[this:#conceptual-design]">
-        <h2 about="[this:#conceptual-design]" property="dcterms:title">Conceptual Design</h2>
-        <div about="[this:#conceptual-design]" property="dcterms:description">
-          <p>Instant messages occur within a SIOC Space.  Spaces can be sub divided in different ways.  A single based container, a container with one sub container per day, a container with one sub
-          container per friend, or a root which is divided by both friends and then date.  A single user per day container is also set up by default in order to act as a personal diary or journal.
-          Presence is stored at the root of the container.  The display is shown for a given user on a given date.  The
-          default date is today's date.  If there are no messages in today's date, the last known date is used.  Authentication is provided via WebID and access control via WebACL.  Linked data is used
-          for discovery where possible, including a seeAlso from the webID, and if not taken from query string parameters.  Once authenticated the user is cached in localstorage.  Messages are expanded
-          to show images, audio and video when matched.  Friends
-          are added to a roster by following FOAF : knows relations in the WebID.  Facebook open graph protocol is also leveraged when appropriate.  The chat system can also perform basic commands such
-          as PUT and PATCH to a URI.  Data is stored in /chat/ area of the ldpc and /chat/diary/ for the diary.  It is also possible to 'like' a post by clicking on a heart icon.</p>
+              <section id="conceptual-design" about="http://webid.im/paper/" rel="dcterms:hasPart" resource="[this:#conceptual-design]">
+                <h2 about="[this:#conceptual-design]" property="dcterms:title">Conceptual Design</h2>
+                <div about="[this:#conceptual-design]" property="dcterms:description">
+                  <p>Instant messages occur within a SIOC Space.  Spaces can be sub divided in different ways, single, daily, friends or friendsdaily.
+                  A single user per day container is also set up by default in order to act as a personal diary or journal.
+                  Presence is stored at the root of the container.  The display is shown for a given user on a given date.  The
+                  default date is today's date.  If there are no messages in today's date, the last known date is used.  <p>Authentication is provided via WebID and access control via WebACL.  Linked data is used
+                  for discovery where possible, including a seeAlso from the webID, and if not taken from query string parameters.  Once authenticated the user is cached in localstorage.  </p>Messages are expanded
+                  to show images, audio and video when matched.  Friends
+                  are added to a roster by following FOAF : knows relations in the WebID.  Facebook open graph protocol is also leveraged when appropriate.  The chat system can also perform basic commands such
+                  as PUT and PATCH to a URI.  Data is stored in /chat/ area of the ldpc and /chat/diary/ for the diary.  It is also possible to 'like' a post by clicking on a heart icon.</p>
 
-          <section id="presence" about="[this:#solid]" rel="dcterms:hasPart" resource="[this:#presence]">
-            <h3 about="[this:#presence]" property="dcterms:title">Presence</h3>
-            <div about="[this:#presence]" property="dcterms:description">
-              <p>Presence is recorded and retrieved from from a location, found in the the query string variable, "presenceURI".  The format of presence file is:
-
-                <p><code>:user http://rdfs.org/sioc/ns#last_activity_date "date" .</code></p>
-
-                If the presenceURI is not set, a default is guessed by placing it at the top of the LDPC, and checking a file "/,presence".  When a new message is input
-                the last_activity_date is set to that time.  Users are generally ordered on the roster in accordance with last active.
-
-                This system was
-                a simple system designed for proof-of-concept, a more robust presence system is future work.</p>
-            </div>
-          </section>
-
-
-        </div>
-      </section>
+                  <section id="containertypes" about="[this:#solid]" rel="dcterms:hasPart" resource="[this:#containertypes]">
+                    <h3 about="[this:#containertypes]" property="dcterms:title">Container Types</h3>
+                    <div about="[this:#containertypes]" property="dcterms:description">
+                      <p>
+                      <ul>
+                        <li><strong>single</strong> a single based container</li>
+                        <li><strong>daily</strong> a container with one sub container per day</li>
+                        <li><strong>friends</strong> a container with one sub container per friend</li>
+                        <li><strong>friendsdaily</strong> a root which is divided by both friends and then date</li>
+                      </ul>
+                    </p>
+                    </div>
+                  </section>
 
 
+                  <section id="presence" about="[this:#solid]" rel="dcterms:hasPart" resource="[this:#presence]">
+                    <h3 about="[this:#presence]" property="dcterms:title">Presence</h3>
+                    <div about="[this:#presence]" property="dcterms:description">
+                      <p>Presence is recorded and retrieved from from a location, found in the the query string variable, "presenceURI".  The format of presence file is:
+
+                        <p><code>:user http://rdfs.org/sioc/ns#last_activity_date "date" .</code></p>
+
+                        If the presenceURI is not set, a default is guessed by placing it at the top of the LDPC, and checking a file "/,presence".  When a new message is input
+                        the last_activity_date is set to that time.  Users are generally ordered on the roster in accordance with last active.
+
+                        This system was
+                        a simple system designed for proof-of-concept, a more robust presence system is future work.</p>
+                      </div>
+                    </section>
 
 
-      <section id="components" about="http://webid.im/paper/" rel="dcterms:hasPart" resource="[this:#components]">
-        <h2 about="[this:#components]" property="dcterms:title">Components</h2>
-        <div about="[this:#components]" property="dcterms:description">
-          <p>As far as possible this project aims to reuse web standards and work done by the W3C.  The main items followed are <cite><a href="https://linkeddata.github.io/SoLiD/">SoLiD</a></cite>, W3C Design Issues, WebID, Linked Data, Linked Data Platform,
-            HTML5, RESTful principles and Websockets</p>
-
-              <section id="solid" about="[this:#solid]" rel="dcterms:hasPart" resource="[this:#solid]">
-                <h3 about="[this:#solid]" property="dcterms:title">SoLiD</h3>
-                <div about="[this:#solid]" property="dcterms:description">
-                  <p><cite><a href="https://linkeddata.github.io/SoLiD/">SoLiD</a></cite> is the social linked data platform.  SoLiD was designed from the ground up to be modular and openly extensible. It relies as much as possible on existing W3C standards.
-                    RDF, LDP, Websockets, WebID, WebID-TLS, WebID-RSA, WebAccessControl</p>
-                </div>
-              </section>
-
-              <section id="webcredits" about="[this:#challenges]" rel="dcterms:hasPart" resource="[this:#webcredits]">
-                <h3 about="[this:#webcredits]" property="dcterms:title">Web Credits</h3>
-                <div about="[this:#webcredits]" property="dcterms:description">
-                  <p>The webcredits ontology will be used as a simple way to track credits between URIs.</p>
-                </div>
-              </section>
-
-              <section id="webpayments" about="[this:#challenges]" rel="dcterms:hasPart" resource="[this:#webpayments]">
-                <h3 about="[this:#webpayments]" property="dcterms:title">W3C Web Payments</h3>
-                <div about="[this:#webpayments]" property="dcterms:description">
-                  <p>The work by the W3C web payments community group will be leveraged as much as possible.</p>
-                </div>
-              </section>
+                  </div>
+                </section>
 
 
-            </div>
-          </section>
 
-      <section id="implementation" about="http://webid.im/paper/" rel="dcterms:hasPart" resource="[this:#implementation]">
-        <h2 about="[this:#implementation]" property="dcterms:title">Implementation</h2>
-        <div about="[this:#implementation]" property="dcterms:description" typeof="deo:Results">
-          <p>An implementation of this work is available on <a href="https://github.com/melvincarvalho/webid.im">github</a> as free software under the MIT license.</p>
-        </div>
 
-        <section>
-          <img src="paper.png"/>
-        </section>
+                <section id="components" about="http://webid.im/paper/" rel="dcterms:hasPart" resource="[this:#components]">
+                  <h2 about="[this:#components]" property="dcterms:title">Components</h2>
+                  <div about="[this:#components]" property="dcterms:description">
+                    <p>As far as possible this project aims to reuse web standards and work done by the W3C.  The main items followed are <cite><a href="https://linkeddata.github.io/SoLiD/">SoLiD</a></cite>, W3C Design Issues, WebID, Linked Data, Linked Data Platform,
+                      HTML5, RESTful principles and Websockets</p>
 
-      </section>
+                      <section id="solid" about="[this:#solid]" rel="dcterms:hasPart" resource="[this:#solid]">
+                        <h3 about="[this:#solid]" property="dcterms:title">SoLiD</h3>
+                        <div about="[this:#solid]" property="dcterms:description">
+                          <p><cite><a href="https://linkeddata.github.io/SoLiD/">SoLiD</a></cite> is the social linked data platform.  SoLiD was designed from the ground up to be modular and openly extensible. It relies as much as possible on existing W3C standards.
+                            RDF, LDP, Websockets, WebID, WebID-TLS, WebID-RSA, WebAccessControl</p>
+                          </div>
+                        </section>
 
-      <section id="conclusions" about="http://webid.im/paper/" rel="dcterms:hasPart" resource="[this:#conclusions]">
-        <h2 about="[this:#conclusions]" property="dcterms:title">Conclusions</h2>
-        <div about="[this:#conclusions]" property="dcterms:description" typeof="sro:Conclusion">
-          <p>In this article, we have discussed a way to improve realtime communications on the web using Linked Data.  Future work includes caching and realtime
-          streaming RDF.</p>
-        </div>
-      </section>
+                        <section id="webcredits" about="[this:#challenges]" rel="dcterms:hasPart" resource="[this:#webcredits]">
+                          <h3 about="[this:#webcredits]" property="dcterms:title">Web Credits</h3>
+                          <div about="[this:#webcredits]" property="dcterms:description">
+                            <p>The webcredits ontology will be used as a simple way to track credits between URIs.</p>
+                          </div>
+                        </section>
 
-      <section id="acknowledgements" about="http://webid.im/paper/" rel="dcterms:hasPart" resource="[this:#acknowledgements]">
-        <h2 about="[this:#acknowledgements]" property="dcterms:title">Acknowledgements</h2>
-        <div about="[this:#acknowledgements]" property="dcterms:description" typeof="deo:Acknowledgements">
-          <p>We would like to extend our thanks to those individuals and groups working to make the Web better. A special thanks to <a about="http://webid.im/paper/" rel="cito:isReviewedBy" resource="http://deiu.rww.io/profile/card#me" href="http://deiu.rww.io/profile/card#me">Andrei Sambra</a> and MIT DIG for all their work.</p>
-        </div>
-      </section>
+                        <section id="webpayments" about="[this:#challenges]" rel="dcterms:hasPart" resource="[this:#webpayments]">
+                          <h3 about="[this:#webpayments]" property="dcterms:title">W3C Web Payments</h3>
+                          <div about="[this:#webpayments]" property="dcterms:description">
+                            <p>The work by the W3C web payments community group will be leveraged as much as possible.</p>
+                          </div>
+                        </section>
 
-      <section id="references">
-        <h2>References</h2>
-        <div>
-          <ol>
-            <li id="ref-3">Principles of Design, <a about="[this:#conceptual-design]" rel="dcterms:references cito:citesAsSourceDocument cito:citesAsRecommendedReading" href="http://www.w3.org/DesignIssues/Principles.html#PLP">http://www.w3.org/DesignIssues/Principles.html#PLP</a></li>
-          </ol>
-        </div>
-      </section>
-    </div>
 
-  </article>
-</body>
-</html>
+                      </div>
+                    </section>
+
+                    <section id="implementation" about="http://webid.im/paper/" rel="dcterms:hasPart" resource="[this:#implementation]">
+                      <h2 about="[this:#implementation]" property="dcterms:title">Implementation</h2>
+                      <div about="[this:#implementation]" property="dcterms:description" typeof="deo:Results">
+                        <p>An implementation of this work is available on <a href="https://github.com/melvincarvalho/webid.im">github</a> as free software under the MIT license.</p>
+                      </div>
+
+                      <section>
+                        <img src="paper.png"/>
+                      </section>
+
+
+
+                      </section>
+
+                      <section id="conclusions" about="http://webid.im/paper/" rel="dcterms:hasPart" resource="[this:#conclusions]">
+                        <h2 about="[this:#conclusions]" property="dcterms:title">Conclusions</h2>
+                        <div about="[this:#conclusions]" property="dcterms:description" typeof="sro:Conclusion">
+                          <p>In this article, we have discussed a way to improve realtime communications on the web using Linked Data.  Future work includes caching and realtime
+                            streaming RDF.</p>
+                          </div>
+                        </section>
+
+                        <section id="acknowledgements" about="http://webid.im/paper/" rel="dcterms:hasPart" resource="[this:#acknowledgements]">
+                          <h2 about="[this:#acknowledgements]" property="dcterms:title">Acknowledgements</h2>
+                          <div about="[this:#acknowledgements]" property="dcterms:description" typeof="deo:Acknowledgements">
+                            <p>We would like to extend our thanks to those individuals and groups working to make the Web better. A special thanks to <a about="http://webid.im/paper/" rel="cito:isReviewedBy" resource="http://deiu.rww.io/profile/card#me" href="http://deiu.rww.io/profile/card#me">Andrei Sambra</a> and MIT DIG for all their work.</p>
+                          </div>
+                        </section>
+
+                        <section id="references">
+                          <h2>References</h2>
+                          <div>
+                            <ol>
+                              <li id="ref-3">Principles of Design, <a about="[this:#conceptual-design]" rel="dcterms:references cito:citesAsSourceDocument cito:citesAsRecommendedReading" href="http://www.w3.org/DesignIssues/Principles.html#PLP">http://www.w3.org/DesignIssues/Principles.html#PLP</a></li>
+                            </ol>
+                          </div>
+                        </section>
+                      </div>
+
+                    </article>
+                  </body>
+                  </html>
