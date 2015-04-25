@@ -154,6 +154,20 @@ xml:lang="en" lang="en">
                   </section>
 
 
+                  <section id="discovery" about="[this:#solid]" rel="dcterms:hasPart" resource="[this:#discovery]">
+                    <h3 about="[this:#discovery]" property="dcterms:title">Discovery</h3>
+                    <div about="[this:#discovery]" property="dcterms:description">
+                      <p>Discovery is the process of finding out more information from pointers, in order to all the app to render the items it needs.  Discovery is initially seeded via
+                      the login widget which returns the user's webid and query string parameters which sets the app state.  Query string parameters are optional.  From a person a roster
+                      is pulled in via the foaf : knows relation.  A special help room is hard coded and added to the roster.  One level of seeAlso is added to check for other data, some of
+                      which may be private.  Storage is found using the pim : storage relation.  In our case the storage must have a websocket in the Updates-Via header to allow realtime communications.
+                      If no such header is found we fall back to a well known default location, which is normally the ldpc root plus "chat/".  All current settings can be found by clicking the settings
+                      icon.</p>
+                      </div>
+                    </section>
+
+
+
                   <section id="presence" about="[this:#solid]" rel="dcterms:hasPart" resource="[this:#presence]">
                     <h3 about="[this:#presence]" property="dcterms:title">Presence</h3>
                     <div about="[this:#presence]" property="dcterms:description">
