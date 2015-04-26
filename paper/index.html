@@ -134,7 +134,7 @@ xml:lang="en" lang="en">
                   Presence is stored at the root of the container.  The display is shown for a given user on a given date.  The
                   default date is today's date.  If there are no messages in today's date, the last known date is used.  <p>Authentication is provided via WebID and access control via WebACL.  Integration with bots are permissible via ACLs.
                     Linked data is used
-                  for discovery where possible, including a seeAlso from the webID, and if not taken from query string parameters.  Once authenticated the user is cached in localstorage.  </p>Messages are expanded
+                  for discovery where possible, including a seeAlso from the webID, and if not, taken from query string parameters.  Once authenticated the user is cached in localstorage.  </p>Messages are expanded
                   to show images, audio and video when matched.  Friends
                   are added to a roster by following FOAF : knows relations in the WebID.  Facebook open graph protocol is also leveraged when appropriate.  The chat system can also perform basic commands such
                   as PUT and PATCH to a URI.  Data is stored in /chat/ area of the ldpc and /chat/diary/ for the diary.  It is also possible to 'like' a post by clicking on a heart icon.</p>
@@ -144,7 +144,7 @@ xml:lang="en" lang="en">
                     <div about="[this:#containertypes]" property="dcterms:description">
                       <p>
                       <ul>
-                        <li><strong>single</strong> a single container without sud divisions, where all content is stored in a single location</li>
+                        <li><strong>single</strong> a single container without sub divisions, where all content is stored in a single location</li>
                         <li><strong>daily</strong> a container with one sub container per day</li>
                         <li><strong>friends</strong> a container with one sub container per friend</li>
                         <li><strong>friendsdaily</strong> a root which is divided by both friends and then date</li>
