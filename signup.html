@@ -1,0 +1,126 @@
+<!doctype html>
+<html lang="en">
+
+<head>
+
+  <title>Signup Widget</title>
+  <meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
+  <meta name="viewport" content="width=device-width, minimum-scale=1.0, initial-scale=1.0, user-scalable=yes">
+
+  <script src="bower_components/webcomponentsjs/webcomponents.min.js"></script>
+
+  <link rel='icon' href='data:;base64,iVBORw0KGgo='>
+
+  <link rel="import" href="bower_components/font-roboto/roboto.html">
+  <link rel="import" href="bower_components/core-header-panel/core-header-panel.html">
+  <link rel="import" href="bower_components/core-toolbar/core-toolbar.html">
+  <link rel="import" href="bower_components/paper-tabs/paper-tabs.html">
+  <link rel="import" href="bower_components/webid-login/webid-login.html">
+  <link rel="import" href="bower_components/webid-signup/webid-signup.html">
+  <style>
+  html,body {
+    height: 100%;
+    margin: 0;
+    background-color: #fff;
+    font-family: 'Roboto', sans-serif;
+    font-weight: 200;
+  }
+  .container {
+    width: 80%;
+    margin: 50px auto;
+  }
+  @media (min-width: 481px) {
+    #tabs {
+      width: 200px;
+    }
+    .container {
+      width: 90%;
+    }
+  }
+  core-header-panel {
+    height: 100%;
+    overflow: auto;
+    -webkit-overflow-scrolling: touch;
+  }
+  core-toolbar {
+    background: #03a9f4;
+    color: white;
+  }
+  #tabs {
+    width: 100%;
+    margin: 0;
+    -webkit-user-select: none;
+    -moz-user-select: none;
+    -ms-user-select: none;
+    user-select: none;
+    text-transform: uppercase;
+  }
+  paper-tab::shadow #ink {
+    color: #fff!important;
+  }
+  paper-tabs::shadow #selectionBar {
+    background-color: #fff!important;
+  }
+  webid-signup {
+    width: 100%;
+  }
+  </style>
+
+</head>
+
+<body unresolved>
+
+  <core-header-panel>
+
+  <core-toolbar>
+    <paper-tabs id="tabs" selected="signup" self-end>
+      <paper-tab name="signup">Signup</paper-tab>
+    </paper-tabs>
+  </core-toolbar>
+
+  <!-- main page content will go here -->
+
+  <div class="container" layout vertical center>
+    <webid-login></webid-login>
+    <webid-signup hidden></webid-signup>
+  </div>
+
+  </core-header-panel>
+
+
+  <script>
+    var tabs = document.querySelector('paper-tabs');
+    tabs.addEventListener('core-select', function() {
+      if (tabs.selected == "login") {
+        document.querySelector('webid-login').hidden = false;
+        document.querySelector('webid-signup').hidden = true;
+      } else if (tabs.selected == "signup") {
+        document.querySelector('webid-login').hidden = true;
+        document.querySelector('webid-signup').hidden = false;
+      }
+    });
+    function getParam(name) {
+        name = name.replace(/[\[]/,"\\\[").replace(/[\]]/,"\\\]");
+        var regexS = "[\\?&]"+name+"=([^&#]*)";
+        var regex = new RegExp(regexS);
+        var results = regex.exec(window.location.href);
+        if( results == null ) {
+          return "";
+        } else {
+          return decodeURIComponent(results[1]);
+        }
+      }
+    window.addEventListener('WebComponentsReady', function(e) {
+        var tab = getParam("tab");
+        if (tab.length > 0) {
+          tabs.selected = tab;
+        }
+        console.log("Done importing components!");
+    });
+  </script>
+</body>
+
+</html>
+
+
+
