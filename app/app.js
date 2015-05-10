@@ -139,6 +139,20 @@ jQuery(document).ready(function() {
 	template.dates = [];
 
 
+  function daemon() {
+		var heartbeat = 60;
+
+		setInterval(function() {
+
+			console.log('ping');
+			//render();
+
+	  }, heartbeat * 1000);
+	}
+
+	daemon();
+
+
 	// localstorage
 	template.new = true;
 	if (localStorage.getItem('webid')) {
@@ -149,7 +163,7 @@ jQuery(document).ready(function() {
 		renderSidebar();
 		rendermain(template.settings.webid, template.settings.date);
 		updatePresence(template.settings.webid, template.settings.presenceURI);
-		connectToSocket(template.settings.wss, getChannel(template.settings.ldpc, template.settings.type, template.settings.date) +',meta', template.settings.subs);
+		connectToSocket(template.settings.wss, getChannel(template.settings.ldpc, template.settings.type, template.settings.date), template.settings.subs);
 	}
 
 	setTimeout( function () { $('#back').one('click', function() { window.location.href = '/'; } ); }, 1500 );
@@ -226,11 +240,11 @@ jQuery(document).ready(function() {
 			$.ajax({
 				url: file,
 				contentType: "text/turtle",
-				type: 'PUT',
+				type: 'POST',
 				data: data,
 				success: function(result) {
 					showNewest();
-
+          //console.log(result);
 				}
 			});
 
@@ -260,8 +274,9 @@ jQuery(document).ready(function() {
 		console.log(turtle);
 
 		var today = new Date().toISOString().substr(0,10);
-		putFile(getChannel(template.settings.ldpc, template.settings.type, today) + id, turtle);
+		putFile(getChannel(template.settings.ldpc, template.settings.type, today), turtle);
 
+/*
 		$.ajax({
 			url: getChannel(template.settings.ldpc, template.settings.type, today) + ',meta',
 			contentType: "text/turtle",
@@ -270,6 +285,7 @@ jQuery(document).ready(function() {
 			success: function(result) {
 			}
 		});
+*/
 
 		updatePresence(template.settings.webid, template.settings.presenceURI);
 
@@ -976,9 +992,6 @@ jQuery(document).ready(function() {
 
 					socket.onopen = function(){
 						console.log(this);
-						//var today = new Date().toISOString().substr(0,10);
-						//var sub = 'sub ' + getChannel(template.settings.ldpc, template.settings.type, today) +',meta';
-						//var sub = 'sub ' + getChannel(template.settings.ldpc, template.settings.type, today) +',meta';
 						console.log(sub);
 						this.send('sub ' + sub);
 					};
@@ -1133,7 +1146,7 @@ jQuery(document).ready(function() {
 				rendermain();
 				renderSidebar();
 				var today = new Date().toISOString().substr(0,10);
-				connectToSocket(template.settings.wss, getChannel(template.settings.ldpc, template.settings.type, today) +',meta', template.settings.subs);
+				connectToSocket(template.settings.wss, getChannel(template.settings.ldpc, template.settings.type, today), template.settings.subs);
 
 				setTimeout( function () { $('#back').one('click', back ) }, 1000 );
 
@@ -1159,7 +1172,7 @@ jQuery(document).ready(function() {
 				var today = new Date().toISOString().substr(0,10);
 				connectToSocket(template.settings.wss,
 					getChannel(template.settings.ldpc,
-						template.settings.type, today) +',meta', template.settings.subs);
+						template.settings.type, today), template.settings.subs);
 					}
 
 					// Listen to WebIDAuth events
