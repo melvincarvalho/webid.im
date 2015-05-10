@@ -145,7 +145,7 @@ jQuery(document).ready(function() {
 		setInterval(function() {
 
 			console.log('ping');
-			//render();
+			renderSidebar();
 
 	  }, heartbeat * 1000);
 	}
