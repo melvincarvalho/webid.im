@@ -980,15 +980,16 @@ jQuery(document).ready(function() {
 
 
 
-			function connectToSocket(socket, sub, subs) {
+			function connectToSocket(uri, sub, subs) {
+				var socket;
 
 				// socket
 				if ( subs.indexOf(sub) !== -1 ) {
 					console.log('Already subscribed to : ' + sub);
 				} else {
-					console.log("Opening socket to : " + socket);
+					console.log("Opening socket to : " + uri);
 					subs.push(sub);
-					var socket = new WebSocket(socket);
+					socket = new ReconnectingWebSocket(uri);
 
 					socket.onopen = function(){
 						console.log(this);
