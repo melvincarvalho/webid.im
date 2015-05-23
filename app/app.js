@@ -1,5 +1,6 @@
 jQuery(document).ready(function() {
 
+	var CURR  = $rdf.Namespace("https://w3id.org/cc#");
 	var DCT   = $rdf.Namespace("http://purl.org/dc/terms/");
 	var FACE  = $rdf.Namespace("https://graph.facebook.com/schema/~/");
 	var FOAF  = $rdf.Namespace("http://xmlns.com/foaf/0.1/");
@@ -137,20 +138,12 @@ jQuery(document).ready(function() {
 	template.users = {};
 	template.posts = [];
 	template.dates = [];
+	template.queue = [];
+	template.settings.wallet = [];
+	template.settings.seeAlso = [];
 
 
-  function daemon() {
-		var heartbeat = 60;
 
-		setInterval(function() {
-
-			console.log('ping');
-			renderSidebar();
-
-	  }, heartbeat * 1000);
-	}
-
-	daemon();
 
 
 	// localstorage
@@ -164,7 +157,11 @@ jQuery(document).ready(function() {
 		rendermain(template.settings.webid, template.settings.date);
 		updatePresence(template.settings.webid, template.settings.presenceURI);
 		connectToSocket(template.settings.wss, getChannel(template.settings.ldpc, template.settings.type, template.settings.date), template.settings.subs);
+		template.queue.push(template.settings.webid);
 	}
+
+	daemon();
+	fetchAll();
 
 	setTimeout( function () { $('#back').one('click', function() { window.location.href = '/'; } ); }, 1500 );
 
@@ -235,7 +232,7 @@ jQuery(document).ready(function() {
 		}
 
 
-		function putFile(file, data) {
+		function postFile(file, data) {
 
 			$.ajax({
 				url: file,
@@ -274,7 +271,7 @@ jQuery(document).ready(function() {
 		console.log(turtle);
 
 		var today = new Date().toISOString().substr(0,10);
-		putFile(getChannel(template.settings.ldpc, template.settings.type, today), turtle);
+		postFile(getChannel(template.settings.ldpc, template.settings.type, today), turtle);
 
 /*
 		$.ajax({
@@ -313,9 +310,53 @@ jQuery(document).ready(function() {
 
 	};
 
+	// QUEUE
+  function updateQueue() {
+    var i;
+    console.log('updating queue');
 
-	// render functions
+    var knows = g.statementsMatching($rdf.sym(template.settings.webid), FOAF('knows'), undefined);
+    for (i=0; i<knows.length; i++) {
+      //console.log(knows[i].object.uri);
+      addToFriends(template.friends, {id: knows[i].object.value, label: knows[i].object.value});
+      addToQueue(template.queue, knows[i].object.uri);
+    }
 
+    var wallets = g.statementsMatching($rdf.sym(template.settings.webid), CURR('wallet'), undefined);
+    for (i=0; i<wallets.length; i++) {
+      console.log('wallet found : ' + wallets[i].object.value);
+      addToArray(template.settings.wallet, wallets[i].object.value);
+      addToQueue(template.queue, wallets[i].object.value);
+    }
+
+    var seeAlso = g.statementsMatching($rdf.sym(template.settings.webid), RDFS('seeAlso'), undefined);
+    for (i=0; i<seeAlso.length; i++) {
+      console.log('seeAlso found : ' + seeAlso[i].object.value);
+      addToArray(template.settings.seeAlso, seeAlso[i].object.value);
+      addToQueue(template.queue, seeAlso[i].object.value);
+    }
+
+    for (i=0; i<template.settings.wallet.length; i++) {
+      addToQueue(template.queue, template.settings.wallet[i]);
+    }
+
+  }
+
+  function daemon() {
+    var heartbeat = 60;
+
+    setInterval(function() {
+
+      console.log('ping');
+
+      // render();
+
+    }, heartbeat * 1000);
+  }
+
+
+
+	// RENDER
 	function renderSidebar() {
 		if (template.settings.action === 'friends') {
 			if ( ! $('#storage').find('select').length ) {
@@ -383,6 +424,65 @@ jQuery(document).ready(function() {
 			});
 
 		}
+
+	}
+
+	function renderstorage() {
+		if ( ! $('#storage').find('select').length ) {
+			$('#storage').append($('<div>Storage</div>'));
+			$('#storage').append($('<hr>'));
+			$('#storage').append($('<select id="storagedropdown"></select>'));
+			$('#storage').append($('<hr>'));
+			$('#storage').append('<div><paper-button raised="true" type="button" id="diary" target="_blank">My Journal</paper-button></div>');
+			$('#storage').append($('<br>'));
+			$('#diary').on('click', function() {
+				var diaryURI = '?action=chat&type=daily&ldpc='+ encodeURIComponent($('#storagedropdown').val()) +
+											encodeURIComponent('chat/diary/') +'&webid='+encodeURIComponent(template.settings.webid) + '&name=' +
+											encodeURIComponent(template.settings.name);
+				if (template.settings.avatar) {
+					diaryURI += '&avatar=' + encodeURIComponent(template.settings.avatar) + '&title=Diary';
+				}
+				window.open( diaryURI );
+				return false;
+			});
+		}
+		for (var i=0; i<template.settings.storage.length; i++) {
+			var storage = template.settings.storage[i];
+			if (! $('#storagedropdown option[value="'+storage+'"]').length) {
+				$('#storagedropdown').append( new Option(storage, storage) );
+			}
+		}
+
+	}
+
+	function renderdates() {
+		f.nowOrWhenFetched( template.settings.ldpc , undefined, function(ok, body) {
+
+			console.log('fetched dates in ' + template.settings.ldpc);
+
+			var LDP = $rdf.Namespace("http://www.w3.org/ns/ldp#");
+			var dates = g.statementsMatching(undefined, LDP('contains'), undefined, $rdf.sym(template.settings.ldpc));
+
+
+			for (var i=dates.length-1; i>=0; i--) {
+				var display;
+				var date = dates[i];
+				if (date && date.object && date.object.value) {
+					display = date.object.value.substr(-11,10);
+				}
+				if (! (/[0-9]+-[0-9]+-[0-9]+$/i).test(display) ) continue;
+				template.dates.push(display);
+
+				$('#dates').append('<div id="'+ display +'" class="date">' + display + '</div><br>');
+				$('#' + display).on('click', function () {
+					template.posts = [] ;
+					rendermain( template.settings.webid, $(this).text());
+					$(this).css('color', 'darkblue');
+				});
+
+			}
+
+		});
 
 	}
 
@@ -587,7 +687,29 @@ jQuery(document).ready(function() {
 			}
 
 
-			// fetch functions
+			// FETCH
+		  function fetchAll() {
+
+		    updateQueue();
+
+		    //if (template.queue.length === 0) return;
+
+		    for (var i=0; i<template.queue.length; i++) {
+		      if (f.getState(template.queue[i].split('#')[0]) === 'unrequested') {
+		        fetch(template.queue[i]);
+		      }
+		    }
+
+		  }
+
+		  function fetch(uri) {
+		    console.log('fetching ' + uri);
+		    f.nowOrWhenFetched(uri.split('#')[0],undefined, function(ok, body) {
+		      render();
+		      fetchAll();
+		    });
+		  }
+
 
 			function fetchWebid(webid) {
 				// fetch webid
@@ -630,6 +752,7 @@ jQuery(document).ready(function() {
 						addStorage(storage.value);
 					}
 
+/*
 					if (seeAlso) {
 						template.settings.seeAlso = seeAlso.value;
 						fetchSeeAlso(seeAlso.value);
@@ -638,9 +761,59 @@ jQuery(document).ready(function() {
 					if (template.settings.seeAlso) {
 						fetchSeeAlso(template.settings.seeAlso);
 					}
+					*/
 
 					setTimeout(function() { fetchFriends(webid); }, 1500);
 					setTimeout(fetchPublicChannels, 500);
+
+					fetchAll();
+
+				});
+
+			}
+
+			function renderWebid() {
+				// fetch webid
+				f.nowOrWhenFetched( template.settings.webid.split('#')[0] , undefined, function(ok, body) {
+					console.log('render webid');
+
+
+					var webidname;
+					var webidavatar;
+					var storage;
+					var seeAlso;
+
+					webidavatar = g.any(kb.sym(template.settings.webid), FOAF('img')) ||
+					              g.any(kb.sym(template.settings.webid), FOAF('depiction'));
+					if (webidavatar) webidavatar = webidavatar.value;
+					webidname = g.any(kb.sym(template.settings.webid), FOAF('name'))  || g.any(kb.sym(webid), FACE('name')) ;
+
+
+					storage = g.statementsMatching(kb.sym(template.settings.webid), PIM('storage'));
+					seeAlso = g.any(kb.sym(template.settings.webid), RDFS('seeAlso'));
+
+					if (webidname) webidname = webidname.value;
+
+					if (!webidavatar && (/graph.facebook.com/i).test(webid) ) {
+						webidavatar = webid.split('#')[0] + '/picture';
+					}
+
+					if (webidavatar) {
+						template.avatar = webidavatar;
+						template.settings.avatar = webidavatar;
+					} else {
+						template.avatar = genericphoto;
+					}
+					if (webidname) {
+						template.name = webidname;
+						template.settings.name = webidname;
+					} else {
+						template.name = template.settings.name;
+					}
+
+					for (var i=0; i<storage.length; i++) {
+						addStorage(storage[i].object.value);
+					}
 
 				});
 
@@ -727,8 +900,7 @@ jQuery(document).ready(function() {
 						var name;
 						var avatar;
 
-						avatar = g.any(kb.sym(friend), FOAF('img'))
-						|| g.any(kb.sym(friend), FOAF('depiction'));
+						avatar = g.any(kb.sym(friend), FOAF('img')) || g.any(kb.sym(friend), FOAF('depiction'));
 						name = g.any(kb.sym(friend), FOAF('name'))  || g.any(kb.sym(friend), FACE('name')) ;
 
 						if(avatar) avatar = avatar.value;
@@ -1103,8 +1275,11 @@ jQuery(document).ready(function() {
 
 
 			function render() {
-				rendermain();
-				rendersidebar();
+				console.log('rendering');
+				renderWebid();
+				renderstorage();
+				//rendermain();
+				//rendersidebar();
 			}
 
 
@@ -1114,6 +1289,30 @@ jQuery(document).ready(function() {
 					volume: 0.9
 				}).play();
 				navigator.vibrate(500);
+			}
+
+			function addToArray(array, el) {
+			  if (!array) return;
+			  if (array.indexOf(el) === -1) {
+			    array.push(el);
+			  }
+			}
+
+			function addToQueue(array, el) {
+			  if (!array) return;
+			  if (array.indexOf(el) === -1) {
+			    array.push(el);
+			  }
+			}
+
+			function addToFriends(array, el) {
+			  if (!array) return;
+			  for (var i=0; i<array.length; i++) {
+			    if (array[i].id === el.id) {
+			      return;
+			    }
+			  }
+			  array.push(el);
 			}
 
 
