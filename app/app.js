@@ -359,30 +359,7 @@ jQuery(document).ready(function() {
 	// RENDER
 	function renderSidebar() {
 		if (template.settings.action === 'friends') {
-			if ( ! $('#storage').find('select').length ) {
-				$('#storage').append($('<div>Storage</div>'));
-				$('#storage').append($('<hr>'));
-				$('#storage').append($('<select id="storagedropdown"></select>'));
-				$('#storage').append($('<hr>'));
-				$('#storage').append('<div><paper-button raised="true" type="button" id="diary" target="_blank">My Journal</paper-button></div>');
-				$('#storage').append($('<br>'));
-				$('#diary').on('click', function() {
-					var diaryURI = '?action=chat&type=daily&ldpc='+ encodeURIComponent($('#storagedropdown').val()) +
-					               encodeURIComponent('chat/diary/') +'&webid='+encodeURIComponent(template.settings.webid) + '&name=' +
-					               encodeURIComponent(template.settings.name);
-					if (template.settings.avatar) {
-						diaryURI += '&avatar=' + encodeURIComponent(template.settings.avatar) + '&title=Diary';
-					}
-					window.open( diaryURI );
-					return false;
-				});
-			}
-			for (var i=0; i<template.settings.storage.length; i++) {
-				var storage = template.settings.storage[i];
-				if (! $('#storagedropdown option[value="'+storage+'"]').length) {
-					$('#storagedropdown').append( new Option(storage, storage) );
-				}
-			}
+			renderdates();
 		} else if (template.settings.action === 'chat') {
 
 			// populate dates
@@ -394,9 +371,7 @@ jQuery(document).ready(function() {
 
 				console.log('fetched dates in ' + template.settings.ldpc);
 
-				var LDP = $rdf.Namespace("http://www.w3.org/ns/ldp#");
 				var dates = g.statementsMatching(undefined, LDP('contains'), undefined, $rdf.sym(template.settings.ldpc));
-
 
 				for (var i=dates.length-1; i>=0; i--) {
 					var display;
@@ -460,7 +435,6 @@ jQuery(document).ready(function() {
 
 			console.log('fetched dates in ' + template.settings.ldpc);
 
-			var LDP = $rdf.Namespace("http://www.w3.org/ns/ldp#");
 			var dates = g.statementsMatching(undefined, LDP('contains'), undefined, $rdf.sym(template.settings.ldpc));
 
 
