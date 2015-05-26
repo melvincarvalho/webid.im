@@ -633,20 +633,55 @@ jQuery(document).ready(function() {
 				//if (template.queue.length === 0) return;
 
 				for (var i=0; i<template.queue.length; i++) {
-					if (f.getState(template.queue[i].split('#')[0]) === 'unrequested') {
-						fetch(template.queue[i]);
+					if(template.queue[i]) {
+						if (f.getState(template.queue[i].split('#')[0]) === 'unrequested') {
+							fetch(template.queue[i]);
+						}
+					} else {
+						console.error('queue item ' + i + ' is undefined');
+						console.log(template.queue);
 					}
 				}
 
 			}
 
 			function fetch(uri) {
-				console.log('fetching ' + uri);
-				f.nowOrWhenFetched(uri.split('#')[0],undefined, function(ok, body) {
-					render();
-					fetchAll();
-				});
-			}
+		    console.log('fetching ' + uri);
+		    console.log(g);
+
+		    var why = uri.split('#')[0];
+		    var l = localStorage.getItem(why);
+		    if (l) {
+		      var triples = JSON.parse(l);
+		      for (var i=0; i<triples.length; i++) {
+		        g.add( $rdf.sym(triples[i].subject.value), $rdf.sym(triples[i].predicate.value), $rdf.term(triples[i].object.value), $rdf.sym(triples[i].why.value) );
+		      }
+		      console.log(triples);
+		      var index = template.queue.indexOf(uri);
+		      console.log('length of queue : ' + template.queue.length);
+		      //if (index > -1) {
+		      //  console.log('length of queue : ' + template.queue.length);
+		      //  template.queue.splice(index, 1);
+		      //}
+		      render();
+		      f.requested[why] = 'requested';
+		      fetchAll();
+		      return;
+		    }
+		    f.nowOrWhenFetched(why, undefined, function(ok, body) {
+		      cache(uri);
+		      render();
+		      fetchAll();
+		    });
+		  }
+
+		  function cache(uri) {
+		    console.log('caching ' + uri);
+		    var why = uri.split('#')[0];
+		    var triples = g.statementsMatching(undefined, undefined, undefined, $rdf.sym(why));
+		    localStorage.setItem(why, JSON.stringify(triples));
+		    console.log(triples);
+		  }
 
 
 			function fetchWebid(webid) {
