@@ -138,6 +138,7 @@ jQuery(document).ready(function() {
 	template.users = {};
 	template.posts = [];
 	template.settings.dates = [];
+	template.settings.displayDates = [];
 	template.queue = [];
 	template.settings.wallet = [];
 	template.settings.seeAlso = [];
@@ -179,7 +180,7 @@ jQuery(document).ready(function() {
 
 	template.modal = function() {
 		console.info('toggling modal');
-		template.printSettings = JSON.stringify(template.settings, null, 2);
+		template.printSettings = JSON.stringify(template.queue, null, 2);
 		$('#modal').toggle();
 	};
 
@@ -310,7 +311,7 @@ jQuery(document).ready(function() {
 		for (i=0; i<knows.length; i++) {
 			//console.log(knows[i].object.uri);
 			//addToFriends(template.friends, {id: knows[i].object.value, label: knows[i].object.value});
-			addToQueue(template.queue, knows[i].object.uri);
+			addToQueue(template.queue, knows[i].object.value);
 		}
 
 		var wallets = g.statementsMatching($rdf.sym(template.settings.webid), CURR('wallet'), undefined);
@@ -801,7 +802,7 @@ jQuery(document).ready(function() {
 				if (!webid) webid = template.settings.webid;
 				if (!webid) return;
 
-				console.log('fetching friends of ' + webid);
+				//console.log('fetching friends of ' + webid);
 
 				// friends
 				console.log(kb);
@@ -856,7 +857,7 @@ jQuery(document).ready(function() {
 					// add avatar
 					if (avatar) {
 						fr.avatar = avatar;
-						fr.uri += '&avatar='+encodeURIComponent(avatar);
+						fr.value += '&avatar='+encodeURIComponent(avatar);
 					} else {
 						fr.avatar = genericphoto;
 					}
@@ -864,7 +865,7 @@ jQuery(document).ready(function() {
 					// add name
 					if (name) {
 						fr.name = name;
-						fr.uri += '&name='+encodeURIComponent(name);
+						fr.value += '&name='+encodeURIComponent(name);
 						fr.text += '&title='+encodeURIComponent(name);
 					} else {
 						fr.name = friend;
@@ -872,7 +873,7 @@ jQuery(document).ready(function() {
 
 					// add title
 					if (template.settings.name) {
-						fr.uri += '&title=' + encodeURIComponent(template.settings.name);
+						fr.value += '&title=' + encodeURIComponent(template.settings.name);
 					}
 
 
@@ -980,7 +981,7 @@ jQuery(document).ready(function() {
 						// add avatar
 						if (avatar) {
 							fr.avatar = avatar;
-							fr.uri += '&avatar='+encodeURIComponent(avatar);
+							fr.value += '&avatar='+encodeURIComponent(avatar);
 						} else {
 							fr.avatar = genericphoto;
 						}
@@ -988,7 +989,7 @@ jQuery(document).ready(function() {
 						// add name
 						if (name) {
 							fr.name = name;
-							fr.uri += '&name='+encodeURIComponent(name);
+							fr.value += '&name='+encodeURIComponent(name);
 							fr.text += '&title='+encodeURIComponent(name);
 						} else {
 							fr.name = friend;
@@ -996,7 +997,7 @@ jQuery(document).ready(function() {
 
 						// add title
 						if (template.settings.name) {
-							fr.uri += '&title=' + encodeURIComponent(template.settings.name);
+							fr.value += '&title=' + encodeURIComponent(template.settings.name);
 						}
 
 
