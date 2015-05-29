@@ -283,6 +283,9 @@ jQuery(document).ready(function() {
 		getChannel(template.settings.ldpc, template.settings.type,  today) + id + '#this',
 		new Date().toISOString(), false, template.settings.webid );
 
+		addToDates(template.settings.dates, today);
+		template.settings.dates = template.settings.dates.sort().reverse();
+
 		var exists = false;
 		for (i=0; i<template.settings.dates.length; i++) {
 			if (template.settings.dates[i] === today) {
@@ -1391,6 +1394,7 @@ jQuery(document).ready(function() {
 					}
 				}
 				array.push(el);
+
 			}
 
 
