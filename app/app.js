@@ -1,3 +1,5 @@
+var g;
+
 jQuery(document).ready(function() {
 
 	var CURR  = $rdf.Namespace("https://w3id.org/cc#");
@@ -36,7 +38,7 @@ jQuery(document).ready(function() {
 	var defaultLdpc   = 'https://klaranet.com/d/chat/'; // hard code for now until more websockets are there
 	var defaultIcon   = 'https://cdn1.iconfinder.com/data/icons/app-tab-bar-icons-for-ios/30/User_login.png';
 	var notify = false;
-	var g = $rdf.graph();
+	g = $rdf.graph();
 	var f = $rdf.fetcher(g);
 	// add CORS proxy
 	var PROXY      = "https://data.fm/proxy?uri={uri}";
@@ -180,7 +182,7 @@ jQuery(document).ready(function() {
 
 	template.modal = function() {
 		console.info('toggling modal');
-		template.printSettings = JSON.stringify(template.queue, null, 2);
+		template.printSettings = JSON.stringify(template.settings, null, 2);
 		$('#modal').toggle();
 	};
 
@@ -321,6 +323,10 @@ jQuery(document).ready(function() {
 			addToQueue(template.queue, wallets[i].object.value);
 		}
 
+		for (i=0; i<template.settings.wallet.length; i++) {
+			addToQueue(template.queue, template.settings.wallet[i]);
+		}
+
 		var seeAlso = g.statementsMatching($rdf.sym(template.settings.webid), RDFS('seeAlso'), undefined);
 		for (i=0; i<seeAlso.length; i++) {
 			console.log('seeAlso found : ' + seeAlso[i].object.value);
@@ -328,11 +334,14 @@ jQuery(document).ready(function() {
 			addToQueue(template.queue, seeAlso[i].object.value);
 		}
 
-		for (i=0; i<template.settings.wallet.length; i++) {
-			addToQueue(template.queue, template.settings.wallet[i]);
-		}
-
+		// add containers
 		addToQueue(template.queue, template.settings.ldpc);
+		if (template.settings.type === 'daily') {
+			var dates = g.statementsMatching($rdf.sym(template.settings.ldpc), LDP('contains'), undefined);
+			for (i=0; i<dates.length; i++) {
+				addToQueue(template.queue, dates[i].object.value + '*');
+			}
+		}
 
 	}
 
@@ -495,6 +504,9 @@ jQuery(document).ready(function() {
 			posts = g.statementsMatching(undefined, undefined, SIOC('Post'), $rdf.sym(template.settings.ldpc + template.settings.date + '/*'));
 		} else {
 			posts = g.statementsMatching(undefined, undefined, SIOC('Post'), $rdf.sym(template.settings.ldpc + template.settings.dates[0] + '/*'));
+			if (template.dates && template.dates.length > 0) {
+				posts.concat(g.statementsMatching(undefined, undefined, SIOC('Post'), $rdf.sym(template.settings.ldpc + template.settings.dates[1] + '/*')));
+			}
 		}
 
 
@@ -647,42 +659,48 @@ jQuery(document).ready(function() {
 			}
 
 			function fetch(uri) {
-		    console.log('fetching ' + uri);
-		    console.log(g);
+				console.log('fetching ' + uri);
+				console.log(g);
 
-		    var why = uri.split('#')[0];
-		    var l = localStorage.getItem(why);
-		    if (l) {
-		      var triples = JSON.parse(l);
-		      for (var i=0; i<triples.length; i++) {
-		        g.add( $rdf.sym(triples[i].subject.value), $rdf.sym(triples[i].predicate.value), $rdf.term(triples[i].object.value), $rdf.sym(triples[i].why.value) );
-		      }
-		      console.log(triples);
-		      var index = template.queue.indexOf(uri);
-		      console.log('length of queue : ' + template.queue.length);
-		      //if (index > -1) {
-		      //  console.log('length of queue : ' + template.queue.length);
-		      //  template.queue.splice(index, 1);
-		      //}
-		      render();
-		      f.requested[why] = 'requested';
-		      fetchAll();
-		      return;
-		    }
-		    f.nowOrWhenFetched(why, undefined, function(ok, body) {
-		      cache(uri);
-		      render();
-		      fetchAll();
-		    });
-		  }
+				var why = uri.split('#')[0];
+				var l = localStorage.getItem(why);
+				if (l) {
+					var triples = JSON.parse(l);
+					for (var i=0; i<triples.length; i++) {
+						var t = triples[i].object.uri;
+						if (t) {
+							t = $rdf.sym(triples[i].object.value);
+						} else {
+							t = $rdf.term(triples[i].object.value);
+						}
+						g.add( $rdf.sym(triples[i].subject.value), $rdf.sym(triples[i].predicate.value), t, $rdf.sym(triples[i].why.value) );
+					}
+					console.log(triples);
+					var index = template.queue.indexOf(uri);
+					console.log('length of queue : ' + template.queue.length);
+					//if (index > -1) {
+					//  console.log('length of queue : ' + template.queue.length);
+					//  template.queue.splice(index, 1);
+					//}
+					render();
+					f.requested[why] = 'requested';
+					fetchAll();
+					return;
+				}
+				f.nowOrWhenFetched(why, undefined, function(ok, body) {
+					cache(uri);
+					render();
+					fetchAll();
+				});
+			}
 
-		  function cache(uri) {
-		    console.log('caching ' + uri);
-		    var why = uri.split('#')[0];
-		    var triples = g.statementsMatching(undefined, undefined, undefined, $rdf.sym(why));
-		    localStorage.setItem(why, JSON.stringify(triples));
-		    console.log(triples);
-		  }
+			function cache(uri) {
+				console.log('caching ' + uri);
+				var why = uri.split('#')[0];
+				var triples = g.statementsMatching(undefined, undefined, undefined, $rdf.sym(why));
+				localStorage.setItem(why, JSON.stringify(triples));
+				console.log(triples);
+			}
 
 
 			function fetchWebid(webid) {
