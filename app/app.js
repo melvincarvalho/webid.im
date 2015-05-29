@@ -504,8 +504,8 @@ jQuery(document).ready(function() {
 			posts = g.statementsMatching(undefined, undefined, SIOC('Post'), $rdf.sym(template.settings.ldpc + template.settings.date + '/*'));
 		} else {
 			posts = g.statementsMatching(undefined, undefined, SIOC('Post'), $rdf.sym(template.settings.ldpc + template.settings.dates[0] + '/*'));
-			if (template.dates && template.dates.length > 0) {
-				posts.concat(g.statementsMatching(undefined, undefined, SIOC('Post'), $rdf.sym(template.settings.ldpc + template.settings.dates[1] + '/*')));
+			if (template.settings.dates && template.settings.dates.length > 0) {
+				posts = posts.concat(g.statementsMatching(undefined, undefined, SIOC('Post'), $rdf.sym(template.settings.ldpc + template.settings.dates[1] + '/*')));
 			}
 		}
 
