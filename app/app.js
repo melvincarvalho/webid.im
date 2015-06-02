@@ -25,7 +25,7 @@ jQuery(document).ready(function() {
 	var date          = getParam('date');
 	var hash          = getParam('hash');
 	var ldpc          = getParam('ldpc');
-	var ldpc          = getParam('room');
+	var room          = getParam('room');
 	var name          = getParam('name');
 	var presenceURI   = getParam('presenceURI');
 	var seeAlso       = getParam('seeAlso')  || getParam('invite');
