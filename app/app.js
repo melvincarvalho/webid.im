@@ -25,6 +25,7 @@ jQuery(document).ready(function() {
 	var date          = getParam('date');
 	var hash          = getParam('hash');
 	var ldpc          = getParam('ldpc');
+	var ldpc          = getParam('room');
 	var name          = getParam('name');
 	var presenceURI   = getParam('presenceURI');
 	var seeAlso       = getParam('seeAlso')  || getParam('invite');
@@ -54,6 +55,7 @@ jQuery(document).ready(function() {
 		date        : date,
 		hash        : hash,
 		ldpc        : ldpc,
+		room        : room,
 		name        : name,
 		presenceURI : presenceURI,
 		seeAlso     : seeAlso,
@@ -68,6 +70,7 @@ jQuery(document).ready(function() {
 		action      : template.init.action,
 		color       : template.init.color,
 		ldpc        : template.init.ldpc,
+		room        : template.init.room,
 		date        : template.init.date,
 		hash        : template.init.hash,
 		name        : template.init.name,
@@ -326,9 +329,11 @@ jQuery(document).ready(function() {
 			addToQueue(template.queue, wallets[i].object.value);
 		}
 
+/*
 		for (i=0; i<template.settings.wallet.length; i++) {
 			addToQueue(template.queue, template.settings.wallet[i]);
 		}
+*/
 
 		var seeAlso = g.statementsMatching($rdf.sym(template.settings.webid), RDFS('seeAlso'), undefined);
 		for (i=0; i<seeAlso.length; i++) {
@@ -339,6 +344,8 @@ jQuery(document).ready(function() {
 
 		// add containers
 		addToQueue(template.queue, template.settings.ldpc);
+		addToQueue(template.queue, template.settings.room);
+
 		if (template.settings.type === 'daily') {
 			var dates = g.statementsMatching($rdf.sym(template.settings.ldpc), LDP('contains'), undefined);
 			for (i=0; i<dates.length; i++) {
