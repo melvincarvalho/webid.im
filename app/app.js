@@ -34,7 +34,6 @@ jQuery(document).ready(function() {
 	var title         = getParam('title');
 	var type          = getParam('type');
 	var webid         = getParam('webid');
-	var wss           = getParam('wss');
 
 	var genericphoto  = 'images/generic_photo.png';
 	var soundURI      = 'http://webid.im/pinglow.mp3';
@@ -63,8 +62,7 @@ jQuery(document).ready(function() {
 		seeAlso     : seeAlso,
 		title       : title,
 		type        : type,
-		webid       : webid,
-		wss         : wss
+		webid       : webid
 	};
 
 	template.settings = {
@@ -80,8 +78,7 @@ jQuery(document).ready(function() {
 		seeAlso     : template.init.seeAlso,
 		title       : template.init.title,
 		type        : template.init.type,
-		webid       : template.init.webid,
-		wss         : template.init.wss
+		webid       : template.init.webid
 	};
 
 	template.settings.storage = [];
@@ -115,9 +112,6 @@ jQuery(document).ready(function() {
 			template.settings.presenceURI = template.settings.ldpc.split('/').splice(0, template.settings.ldpc.split('/').length-2).join('/') + '/' + ',presence';
 		}
 	}
-	if (!template.settings.wss) {
-		template.settings.wss = 'wss://' + template.settings.ldpc.split('/')[2];
-	}
 
 	// Assign a random color
 	var randomColor = function() {
@@ -140,18 +134,26 @@ jQuery(document).ready(function() {
 		template.show = true;
 	}
 
-	template.settings.subs = [];
-	template.friends = [];
-	template.users = {};
-	template.posts = [];
-	template.settings.dates = [];
+	template.settings.subs         = [];
+	template.friends               = [];
+	template.users                 = {};
+	template.posts                 = [];
+	template.settings.dates        = [];
 	template.settings.displayDates = [];
-	template.queue = [];
-	template.settings.seeAlso = [];
+	template.queue                 = [];
+	template.settings.seeAlso      = [];
 	template.settings.subscribedTo = [];
-	template.settings.toChannel = [];
-	template.settings.wallet = [];
+	template.settings.toChannel    = [];
+	template.settings.wallet       = [];
+	template.settings.wss          = [];
 
+  setWss();
+
+  function setWss() {
+		if (template.settings.ldpc) {
+			addToQueue(template.settings.wss, 'wss://' + template.settings.ldpc.split('/')[2]);
+		}
+	}
 
 
 
@@ -166,7 +168,7 @@ jQuery(document).ready(function() {
 		renderSidebar();
 		renderMain(template.settings.webid, template.settings.date);
 		updatePresence(template.settings.webid, template.settings.presenceURI);
-		connectToSocket(template.settings.wss, getChannel(template.settings.ldpc, template.settings.type, template.settings.date), template.settings.subs);
+		connectToSocket(template.settings.wss[0], getChannel(template.settings.ldpc, template.settings.type, template.settings.date), template.settings.subs);
 		template.queue.push(template.settings.webid);
 	}
 
@@ -1327,7 +1329,7 @@ jQuery(document).ready(function() {
 				template.posts = [];
 
 				var today = new Date().toISOString().substr(0,10);
-				connectToSocket(template.settings.wss, getChannel(template.settings.ldpc, template.settings.type, today), template.settings.subs);
+				connectToSocket(template.settings.wss[0], getChannel(template.settings.ldpc, template.settings.type, today), template.settings.subs);
 
 				fetchAll();
 				render();
@@ -1355,7 +1357,7 @@ jQuery(document).ready(function() {
 				renderMain(template.settings.webid);
 				setTimeout(renderSidebar, 1000);
 				var today = new Date().toISOString().substr(0,10);
-				connectToSocket(template.settings.wss,
+				connectToSocket(template.settings.wss[0],
 					getChannel(template.settings.ldpc,
 						template.settings.type, today), template.settings.subs);
 					}
