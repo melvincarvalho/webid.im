@@ -2,12 +2,14 @@ var g;
 
 jQuery(document).ready(function() {
 
+	var CHAT  = $rdf.Namespace("https://ns.rww.io/chat#");
 	var CURR  = $rdf.Namespace("https://w3id.org/cc#");
 	var DCT   = $rdf.Namespace("http://purl.org/dc/terms/");
 	var FACE  = $rdf.Namespace("https://graph.facebook.com/schema/~/");
 	var FOAF  = $rdf.Namespace("http://xmlns.com/foaf/0.1/");
 	var LIKE  = $rdf.Namespace("http://ontologi.es/like#");
 	var LDP   = $rdf.Namespace("http://www.w3.org/ns/ldp#");
+	var MBLOG = $rdf.Namespace("http://www.w3.org/ns/mblog#");
 	var OWL   = $rdf.Namespace("http://www.w3.org/2002/07/owl#");
 	var PIM   = $rdf.Namespace("http://www.w3.org/ns/pim/space#");
 	var RDF   = $rdf.Namespace("http://www.w3.org/1999/02/22-rdf-syntax-ns#");
@@ -145,8 +147,10 @@ jQuery(document).ready(function() {
 	template.settings.dates = [];
 	template.settings.displayDates = [];
 	template.queue = [];
-	template.settings.wallet = [];
 	template.settings.seeAlso = [];
+	template.settings.subscribedTo = [];
+	template.settings.toChannel = [];
+	template.settings.wallet = [];
 
 
 
@@ -352,6 +356,21 @@ jQuery(document).ready(function() {
 				addToQueue(template.queue, dates[i].object.value + '*');
 			}
 		}
+
+		var subscribedTo = g.statementsMatching($rdf.sym(template.settings.room), MBLOG('subscribedTo'), undefined);
+		for (i=0; i<subscribedTo.length; i++) {
+			console.log('subscribedTo found : ' + subscribedTo[i].object.value);
+			addToArray(template.settings.subscribedTo, subscribedTo[i].object.value);
+			addToQueue(template.queue, subscribedTo[i].object.value);
+			var toChannel = g.statementsMatching($rdf.sym(subscribedTo[i].object.value), MBLOG('toChannel'), undefined);
+			for (j=0; j<toChannel.length; j++) {
+				console.log('toChannel found : ' + toChannel[i].object.value);
+				addToArray(template.settings.toChannel, toChannel[i].object.value);
+				addToQueue(template.queue, toChannel[i].object.value);
+			}
+		}
+
+
 
 	}
 
@@ -950,133 +969,6 @@ jQuery(document).ready(function() {
 			}
 
 
-			function fetchFriends(webid) {
-
-				if (!webid) webid = template.settings.webid;
-				if (!webid) return;
-
-				console.log('fetching friends of ' + webid);
-
-				// friends
-				console.log(kb);
-				$.each(g.statementsMatching(kb.sym(webid), FOAF('knows'), undefined), function(index, value) {
-
-					var friend = value.object.value;
-
-					var FACE = $rdf.Namespace("https://graph.facebook.com/schema/~/");
-
-
-					var profileuri = (friend.split('#'))[0];
-					f.nowOrWhenFetched( profileuri , undefined, function(ok, body) {
-						var name;
-						var avatar;
-
-						avatar = g.any(kb.sym(friend), FOAF('img')) || g.any(kb.sym(friend), FOAF('depiction'));
-						name = g.any(kb.sym(friend), FOAF('name'))  || g.any(kb.sym(friend), FACE('name')) ;
-
-						if(avatar) avatar = avatar.value;
-						if(name) name = name.value;
-
-						var users = [template.settings.webid,friend];
-						users.sort();
-						users = users.join("\n");
-						var hash = CryptoJS.SHA256(users);
-						console.log(friend + ' ' + f.getState(friend));
-						console.log(template.settings.ldpc);
-
-						var l = template.settings.ldpc;
-
-						if (template.settings.type === 'friendsdaily') {
-							l = template.settings.ldpc;
-						} else if (template.settings.type === 'daily') {
-							l = template.settings.ldpc.split('/').splice(0, template.settings.ldpc.split('/').length-2).join('/') + '/';
-						} else if (template.settings.type === 'single') {
-							l = template.settings.ldpc.split('/').splice(0, template.settings.ldpc.split('/').length-2).join('/') + '/';
-						}
-						console.log('setting ldpc of ' + friend + ' to ' + getChannel(l, 'friends', null, hash));
-
-						var fr = {
-							text : 'chat.html?action=chat&' +
-							'/&webid='+encodeURIComponent(template.settings.webid)+'&avatar=' +
-							encodeURIComponent(template.settings.avatar)+'&name=' +
-							encodeURIComponent(template.settings.name) ,
-							uri : 'chat.html?action=chat&ldpc=' +encodeURIComponent(template.settings.ldpc)+ hash + '%2F&webid='+encodeURIComponent(friend),
-							ldpc : getChannel(l, 'friends', null, hash),
-							webid : template.settings.webid,
-							type : 'daily'
-						};
-
-						// add avatar
-						if (avatar) {
-							fr.avatar = avatar;
-							fr.value += '&avatar='+encodeURIComponent(avatar);
-						} else {
-							fr.avatar = genericphoto;
-						}
-
-						// add name
-						if (name) {
-							fr.name = name;
-							fr.value += '&name='+encodeURIComponent(name);
-							fr.text += '&title='+encodeURIComponent(name);
-						} else {
-							fr.name = friend;
-						}
-
-						// add title
-						if (template.settings.name) {
-							fr.value += '&title=' + encodeURIComponent(template.settings.name);
-						}
-
-
-						if (template.users && template.users[friend] ) {
-							console.log('setting presence of ' + friend );
-							fr.status = template.users[friend].status;
-							fr.lastActive = template.users[friend].lastActive;
-						}
-
-						// insert in right place
-						var exists = false;
-						for (var i=0; i<template.friends.length; i++) {
-							if ( template.friends[i].name === fr.name ) {
-								exists = true;
-								template.friends.splice(i,1);
-							}
-						}
-
-						if (fr.status) {
-							template.friends.unshift( fr );
-						} else if (avatar){
-							var count = 0;
-							for (var i=0; i<template.friends.length; i++) {
-								if (template.friends[i].status) count++;
-							}
-							template.friends.splice(count, 0, fr);
-						} else {
-							template.friends.push( fr );
-						}
-
-						// sort
-						template.friends.sort(function(a, b) {
-							if (a.status && b.status) {
-								if (!a.lastActive) return -1;
-								if (!b.lastActive) return 1;
-								return new Date(b.lastActive).getTime() - new Date(a.lastActive).getTime();
-							}
-							if (a.status) return -1;
-
-							return 1;
-						});
-
-
-					});
-
-
-				});
-
-
-
-			}
 
 
 			// helper functions //
