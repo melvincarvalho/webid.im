@@ -1,0 +1,22 @@
+@prefix rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#> .
+
+<>
+    <http://creativecommons.org/ns#attributionName> "Melvin Carvalho" ;
+    <http://creativecommons.org/ns#attributionURL> <> ;
+    <http://creativecommons.org/ns#license> <http://creativecommons.org/licenses/by-sa/2.0/uk/deed.en_GB> ;
+    <http://purl.org/dc/terms/issued> "2015-06-03"^^<http://www.w3.org/2001/XMLSchema#date> ;
+    a <http://www.w3.org/2002/07/owl#Ontology> ;
+    <http://www.w3.org/2000/01/rdf-schema#label> "Chat Vocabulary"@en ;
+    <http://xmlns.com/foaf/0.1/maker> <https://melvincarvalho.com/#me> .
+
+<#ChatSpace>
+    a <http://www.w3.org/2000/01/rdf-schema#Class> ;
+    <http://www.w3.org/2000/01/rdf-schema#comment> "A common workspace for chat data."@en ;
+    <http://www.w3.org/2000/01/rdf-schema#isDefinedBy> <> ;
+    <http://www.w3.org/2000/01/rdf-schema#label> "ChatSpace"@en .
+
+<#DailyChannel>
+    a <http://www.w3.org/2000/01/rdf-schema#Class> ;
+    <http://www.w3.org/2000/01/rdf-schema#comment> "A container for SIOC chat posts.  The container is divided into sub containers, one per day"@en ;
+    <http://www.w3.org/2000/01/rdf-schema#isDefinedBy> <> ;
+    <http://www.w3.org/2000/01/rdf-schema#label> "DailyChannel"@en .
