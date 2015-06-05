@@ -208,7 +208,7 @@ jQuery(document).ready(function() {
 		template.queue.push(template.settings.webid);
 	}
 
-	daemon();
+	setTimeout(daemon, 5000);
 	fetchAll();
 
 	setTimeout( function () { $('#back').one('click', function() { window.location.href = '/'; } ); }, 1500 );
@@ -414,14 +414,17 @@ jQuery(document).ready(function() {
 	function daemon() {
 		var heartbeat = 60;
 
-		setInterval(function() {
+		function run() {
 
 			console.log('ping');
 
 			fetchAll();
 			render();
 
-		}, heartbeat * 1000);
+		}
+
+    run();
+		setInterval(run, heartbeat * 1000);
 	}
 
 
