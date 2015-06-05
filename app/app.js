@@ -1,4 +1,6 @@
 var g;
+var db;
+var template;
 
 jQuery(document).ready(function() {
 
@@ -18,7 +20,7 @@ jQuery(document).ready(function() {
 
 	// main
 	//'use strict';
-	var template      = document.querySelector('template[is=auto-binding]');
+	template          = document.querySelector('template[is=auto-binding]');
 	document.template = template;
 
 	var action        = getParam('action'); // show friends or chat
@@ -29,7 +31,6 @@ jQuery(document).ready(function() {
 	var ldpc          = getParam('ldpc');
 	var room          = getParam('room');
 	var name          = getParam('name');
-	var presenceURI   = getParam('presenceURI');
 	var seeAlso       = getParam('seeAlso')  || getParam('invite');
 	var title         = getParam('title');
 	var type          = getParam('type');
@@ -40,6 +41,8 @@ jQuery(document).ready(function() {
 	var defaultLdpc   = 'https://klaranet.com/d/chat/'; // hard code for now until more websockets are there
 	var defaultIcon   = 'https://cdn1.iconfinder.com/data/icons/app-tab-bar-icons-for-ios/30/User_login.png';
 	var notify = false;
+
+	// start in memory DB
 	g = $rdf.graph();
 	var f = $rdf.fetcher(g);
 	// add CORS proxy
@@ -48,6 +51,13 @@ jQuery(document).ready(function() {
 	$rdf.Fetcher.crossSiteProxyTemplate=PROXY;
 	var kb         = $rdf.graph();
 	var fetcher    = $rdf.fetcher(kb);
+
+	// start browser cache DB
+	db = new Dexie("chrome:theSession");
+	db.version(1).stores({
+		cache: 'why,quads',
+	});
+	db.open();
 
 	template.init = {
 		action      : action,
@@ -58,7 +68,6 @@ jQuery(document).ready(function() {
 		ldpc        : ldpc,
 		room        : room,
 		name        : name,
-		presenceURI : presenceURI,
 		seeAlso     : seeAlso,
 		title       : title,
 		type        : type,
@@ -74,7 +83,6 @@ jQuery(document).ready(function() {
 		date        : template.init.date,
 		hash        : template.init.hash,
 		name        : template.init.name,
-		presenceURI : template.init.presenceURI,
 		seeAlso     : template.init.seeAlso,
 		title       : template.init.title,
 		type        : template.init.type,
@@ -105,13 +113,6 @@ jQuery(document).ready(function() {
 	if (!template.settings.type) {
 		template.settings.type = 'friendsdaily';
 	}
-	if (!template.settings.presenceURI) {
-		if (template.settings.type === 'friendsdaily') {
-			template.settings.presenceURI = template.settings.ldpc + ',presence';
-		} else {
-			template.settings.presenceURI = template.settings.ldpc.split('/').splice(0, template.settings.ldpc.split('/').length-2).join('/') + '/' + ',presence';
-		}
-	}
 
 	// Assign a random color
 	var randomColor = function() {
@@ -138,21 +139,56 @@ jQuery(document).ready(function() {
 	template.friends               = [];
 	template.users                 = {};
 	template.posts                 = [];
+	template.queue                 = [];
+
 	template.settings.dates        = [];
 	template.settings.displayDates = [];
-	template.queue                 = [];
+	template.settings.presenceURI  = [];
 	template.settings.seeAlso      = [];
 	template.settings.subscribedTo = [];
 	template.settings.toChannel    = [];
 	template.settings.wallet       = [];
 	template.settings.wss          = [];
 
-  setWss();
+	setWss();
+	setPresenceURI();
 
-  function setWss() {
-		if (template.settings.ldpc) {
-			addToQueue(template.settings.wss, 'wss://' + template.settings.ldpc.split('/')[2]);
+	function setWss() {
+		var wss;
+		var ldpc;
+
+		if (template.settings.toChannel > 0) {
+			ldpc = template.settings.toChannel[0];
+		} else if (template.settings.ldpc) {
+			ldpc = template.settings.ldpc;
 		}
+
+		wss = 'wss://' + ldpc.split('/')[2];
+		addToQueue(template.settings.wss, wss);
+
+	}
+
+
+
+	function setPresenceURI() {
+
+		var presenceURI;
+		var ldpc;
+
+		if (template.settings.toChannel > 0) {
+			ldpc = template.settings.toChannel[0];
+		} else if (template.settings.ldpc) {
+			ldpc = template.settings.ldpc;
+		}
+
+		if (template.settings.type === 'friendsdaily') {
+			presenceURI = template.settings.ldpc + ',presence';
+		} else {
+			presenceURI = template.settings.ldpc.split('/').splice(0, template.settings.ldpc.split('/').length-2).join('/') + '/' + ',presence';
+		}
+
+		addToQueue(template.settings.presenceURI, presenceURI);
+
 	}
 
 
@@ -167,7 +203,7 @@ jQuery(document).ready(function() {
 		template.new = false;
 		renderSidebar();
 		renderMain(template.settings.webid, template.settings.date);
-		updatePresence(template.settings.webid, template.settings.presenceURI);
+		updatePresence(template.settings.webid, template.settings.presenceURI[0]);
 		connectToSocket(template.settings.wss[0], getChannel(template.settings.ldpc, template.settings.type, template.settings.date), template.settings.subs);
 		template.queue.push(template.settings.webid);
 	}
@@ -286,7 +322,7 @@ jQuery(document).ready(function() {
 		postFile(getChannel(template.settings.ldpc, template.settings.type, today), turtle);
 
 
-		updatePresence(template.settings.webid, template.settings.presenceURI);
+		updatePresence(template.settings.webid, template.settings.presenceURI[0]);
 
 		addPost(template.settings.avatar, message.text.trim(), template.settings.webid, template.settings.name,
 		getChannel(template.settings.ldpc, template.settings.type,  today) + id + '#this',
@@ -330,27 +366,26 @@ jQuery(document).ready(function() {
 
 		var wallets = g.statementsMatching($rdf.sym(template.settings.webid), CURR('wallet'), undefined);
 		for (i=0; i<wallets.length; i++) {
-			console.log('wallet found : ' + wallets[i].object.value);
+			//console.log('wallet found : ' + wallets[i].object.value);
 			addToArray(template.settings.wallet, wallets[i].object.value);
 			addToQueue(template.queue, wallets[i].object.value);
 		}
 
-/*
-		for (i=0; i<template.settings.wallet.length; i++) {
-			addToQueue(template.queue, template.settings.wallet[i]);
-		}
-*/
 
 		var seeAlso = g.statementsMatching($rdf.sym(template.settings.webid), RDFS('seeAlso'), undefined);
 		for (i=0; i<seeAlso.length; i++) {
-			console.log('seeAlso found : ' + seeAlso[i].object.value);
+			//console.log('seeAlso found : ' + seeAlso[i].object.value);
 			addToArray(template.settings.seeAlso, seeAlso[i].object.value);
 			addToQueue(template.queue, seeAlso[i].object.value);
 		}
 
 		// add containers
-		addToQueue(template.queue, template.settings.ldpc);
-		addToQueue(template.queue, template.settings.room);
+		if (template.settings.ldpc) {
+			addToQueue(template.queue, template.settings.ldpc);
+		}
+		if (template.settings.room) {
+			addToQueue(template.queue, template.settings.room);
+		}
 
 		if (template.settings.type === 'daily') {
 			var dates = g.statementsMatching($rdf.sym(template.settings.ldpc), LDP('contains'), undefined);
@@ -361,12 +396,12 @@ jQuery(document).ready(function() {
 
 		var subscribedTo = g.statementsMatching($rdf.sym(template.settings.room), MBLOG('subscribedTo'), undefined);
 		for (i=0; i<subscribedTo.length; i++) {
-			console.log('subscribedTo found : ' + subscribedTo[i].object.value);
+			//console.log('subscribedTo found : ' + subscribedTo[i].object.value);
 			addToArray(template.settings.subscribedTo, subscribedTo[i].object.value);
 			addToQueue(template.queue, subscribedTo[i].object.value);
 			var toChannel = g.statementsMatching($rdf.sym(subscribedTo[i].object.value), MBLOG('toChannel'), undefined);
 			for (j=0; j<toChannel.length; j++) {
-				console.log('toChannel found : ' + toChannel[i].object.value);
+				//console.log('toChannel found : ' + toChannel[i].object.value);
 				addToArray(template.settings.toChannel, toChannel[i].object.value);
 				addToQueue(template.queue, toChannel[i].object.value);
 			}
@@ -437,7 +472,7 @@ jQuery(document).ready(function() {
 				$(this).css('color', 'darkblue');
 			});
 		}
-		console.log('fetched dates in ' + template.settings.ldpc);
+		//console.log('fetched dates in ' + template.settings.ldpc);
 
 		var dates = g.statementsMatching(undefined, LDP('contains'), undefined, $rdf.sym(template.settings.ldpc));
 
@@ -473,8 +508,6 @@ jQuery(document).ready(function() {
 		}
 
 		//$('#webid-login').hide();
-
-		//updatePresence(webid, template.settings.presenceURI);
 
 		console.log('rendering main screen for : ' + webid);
 
@@ -690,47 +723,60 @@ jQuery(document).ready(function() {
 			}
 
 			function fetch(uri) {
-				console.log('fetching ' + uri);
-				console.log(g);
+				console.log('fetching : ' + uri);
+				//console.log(g);
 
 				var why = uri.split('#')[0];
-				var l = localStorage.getItem(why);
-				if (l) {
-					var triples = JSON.parse(l);
-					for (var i=0; i<triples.length; i++) {
-						var t = triples[i].object.uri;
-						if (t) {
-							t = $rdf.sym(triples[i].object.value);
-						} else {
-							t = $rdf.term(triples[i].object.value);
+
+				db.cache.get(why).then(function(res){
+					if (res && res.quads && res.quads.length) {
+						console.log('uncached : ');
+						console.log(res);
+						for(var i=0; i<res.quads.length; i++) {
+							//console.log(res.quads);
+							//console.log('item : ');
+							//console.log(res.quads[i]);
+							var t = res.quads[i].object.uri;
+							if (t) {
+								t = $rdf.sym(res.quads[i].object.value);
+							} else {
+								t = $rdf.term(res.quads[i].object.value);
+							}
+							//console.log(g.any( $rdf.sym(res.quads[i].subject.value), $rdf.sym(res.quads[i].predicate.value), t, $rdf.sym(res.quads[i].why.value) ));
+							if (!g.any( $rdf.sym(res.quads[i].subject.value), $rdf.sym(res.quads[i].predicate.value), t, $rdf.sym(res.quads[i].why.value) )) {
+								g.add( $rdf.sym(res.quads[i].subject.value), $rdf.sym(res.quads[i].predicate.value), t, $rdf.sym(res.quads[i].why.value) );
+							}
+
 						}
-						g.add( $rdf.sym(triples[i].subject.value), $rdf.sym(triples[i].predicate.value), t, $rdf.sym(triples[i].why.value) );
+						f.requested[why] = 'requested';
+						render();
+						//fetchAll();
+					} else {
+						f.nowOrWhenFetched(why, undefined, function(ok, body) {
+							cache(uri);
+							render();
+							fetchAll();
+						});
 					}
-					console.log(triples);
-					var index = template.queue.indexOf(uri);
-					console.log('length of queue : ' + template.queue.length);
-					//if (index > -1) {
-					//  console.log('length of queue : ' + template.queue.length);
-					//  template.queue.splice(index, 1);
-					//}
-					render();
-					f.requested[why] = 'requested';
-					fetchAll();
-					return;
-				}
-				f.nowOrWhenFetched(why, undefined, function(ok, body) {
-					cache(uri);
-					render();
-					fetchAll();
+				}).catch(function(error) {
+					console.error(error);
 				});
+
 			}
 
 			function cache(uri) {
 				console.log('caching ' + uri);
 				var why = uri.split('#')[0];
-				var triples = g.statementsMatching(undefined, undefined, undefined, $rdf.sym(why));
-				localStorage.setItem(why, JSON.stringify(triples));
-				console.log(triples);
+				var quads = g.statementsMatching(undefined, undefined, undefined, $rdf.sym(why));
+				//localStorage.setItem(why, JSON.stringify(triples));
+
+				db.cache.put({"why": why, "quads": quads}). then(function(){
+					console.log('cached : ' + quads);
+				}).catch(function(error) {
+					console.error(error);
+				});
+
+
 			}
 
 
@@ -744,7 +790,7 @@ jQuery(document).ready(function() {
 			}
 
 			function renderWebid() {
-				console.log('render webid');
+				//console.log('render webid');
 
 
 				var webidname;
@@ -854,7 +900,7 @@ jQuery(document).ready(function() {
 				//console.log('fetching friends of ' + webid);
 
 				// friends
-				console.log(kb);
+				//console.log(kb);
 				$.each(g.statementsMatching(kb.sym(webid), FOAF('knows'), undefined), function(index, value) {
 
 					var friend = value.object.value;
@@ -877,8 +923,8 @@ jQuery(document).ready(function() {
 					users.sort();
 					users = users.join("\n");
 					var hash = CryptoJS.SHA256(users);
-					console.log(friend + ' ' + f.getState(friend));
-					console.log(template.settings.ldpc);
+					//console.log(friend + ' ' + f.getState(friend));
+					//console.log(template.settings.ldpc);
 
 					var l = template.settings.ldpc;
 
@@ -889,7 +935,7 @@ jQuery(document).ready(function() {
 					} else if (template.settings.type === 'single') {
 						l = template.settings.ldpc.split('/').splice(0, template.settings.ldpc.split('/').length-2).join('/') + '/';
 					}
-					console.log('setting ldpc of ' + friend + ' to ' + getChannel(l, 'friends', null, hash));
+					//console.log('setting ldpc of ' + friend + ' to ' + getChannel(l, 'friends', null, hash));
 
 					var fr = {
 						text : 'chat.html?action=chat&' +
@@ -927,7 +973,7 @@ jQuery(document).ready(function() {
 
 
 					if (template.users && template.users[friend] ) {
-						console.log('setting presence of ' + friend );
+						//console.log('setting presence of ' + friend );
 						fr.status = template.users[friend].status;
 						fr.lastActive = template.users[friend].lastActive;
 					}
@@ -1179,7 +1225,7 @@ jQuery(document).ready(function() {
 					console.log(turtle);
 
 					$.ajax({
-						url: template.settings.presenceURI,
+						url: presenceURI,
 						contentType: "application/sparql-update",
 						type: 'PATCH',
 						data: turtle,
@@ -1370,7 +1416,7 @@ jQuery(document).ready(function() {
 							localStorage.setItem('webid', e.detail.user);
 							renderMain(e.detail.user);
 							// presence
-							updatePresence(e.detail.user, template.settings.presenceURI);
+							updatePresence(e.detail.user, template.settings.presenceURI[0]);
 						} else {
 							console.log("Auth failed!");
 							console.log(e.detail);
