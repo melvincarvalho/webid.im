@@ -231,6 +231,12 @@ jQuery(document).ready(function() {
 		$('#modal').toggle();
 	};
 
+	template.refresh = function() {
+		console.info('refresh');
+		fetchAll();
+		render();
+	};
+
 
 	template.publish = function() {
 		if(!template.input) return;
