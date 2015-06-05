@@ -104,7 +104,7 @@ jQuery(document).ready(function() {
 		template.ui.friends = false;
 	}
 
-	if (!template.settings.ldpc) {
+	if (!getLdpc()) {
 		template.settings.ldpc = defaultLdpc;
 	}
 	if (!template.settings.title) {
@@ -159,8 +159,8 @@ jQuery(document).ready(function() {
 
 		if (template.settings.toChannel > 0) {
 			ldpc = template.settings.toChannel[0];
-		} else if (template.settings.ldpc) {
-			ldpc = template.settings.ldpc;
+		} else if (getLdpc()) {
+			ldpc = getLdpc();
 		}
 
 		wss = 'wss://' + ldpc.split('/')[2];
@@ -177,21 +177,23 @@ jQuery(document).ready(function() {
 
 		if (template.settings.toChannel > 0) {
 			ldpc = template.settings.toChannel[0];
-		} else if (template.settings.ldpc) {
-			ldpc = template.settings.ldpc;
+		} else if (getLdpc()) {
+			ldpc = getLdpc();
 		}
 
 		if (template.settings.type === 'friendsdaily') {
-			presenceURI = template.settings.ldpc + ',presence';
+			presenceURI = getLdpc() + ',presence';
 		} else {
-			presenceURI = template.settings.ldpc.split('/').splice(0, template.settings.ldpc.split('/').length-2).join('/') + '/' + ',presence';
+			presenceURI = getLdpc().split('/').splice(0, getLdpc().split('/').length-2).join('/') + '/' + ',presence';
 		}
 
 		addToQueue(template.settings.presenceURI, presenceURI);
 
 	}
 
-
+  function getLdpc() {
+		return template.settings.ldpc;
+	}
 
 
 	// localstorage
@@ -204,7 +206,7 @@ jQuery(document).ready(function() {
 		renderSidebar();
 		renderMain(template.settings.webid, template.settings.date);
 		updatePresence(template.settings.webid, template.settings.presenceURI[0]);
-		connectToSocket(template.settings.wss[0], getChannel(template.settings.ldpc, template.settings.type, template.settings.date), template.settings.subs);
+		connectToSocket(template.settings.wss[0], getChannel(getLdpc(), template.settings.type, template.settings.date), template.settings.subs);
 		template.queue.push(template.settings.webid);
 	}
 
@@ -233,8 +235,8 @@ jQuery(document).ready(function() {
 
 	template.refresh = function() {
 		console.info('refresh');
-		db.cache.delete(template.settings.ldpc).then(function() {
-			console.log('deleted : ' + template.settings.ldpc);
+		db.cache.delete(getLdpc()).then(function() {
+			console.log('deleted : ' + getLdpc());
 		});
 		fetchAll();
 		render();
@@ -328,13 +330,13 @@ jQuery(document).ready(function() {
 		console.log(turtle);
 
 		var today = new Date().toISOString().substr(0,10);
-		postFile(getChannel(template.settings.ldpc, template.settings.type, today), turtle);
+		postFile(getChannel(getLdpc(), template.settings.type, today), turtle);
 
 
 		updatePresence(template.settings.webid, template.settings.presenceURI[0]);
 
 		addPost(template.settings.avatar, message.text.trim(), template.settings.webid, template.settings.name,
-		getChannel(template.settings.ldpc, template.settings.type,  today) + id + '#this',
+		getChannel(getLdpc(), template.settings.type,  today) + id + '#this',
 		new Date().toISOString(), false, template.settings.webid );
 
 		addToDates(template.settings.dates, today);
@@ -389,15 +391,15 @@ jQuery(document).ready(function() {
 		}
 
 		// add containers
-		if (template.settings.ldpc) {
-			addToQueue(template.queue, template.settings.ldpc);
+		if (getLdpc()) {
+			addToQueue(template.queue, getLdpc());
 		}
 		if (template.settings.room) {
 			addToQueue(template.queue, template.settings.room);
 		}
 
 		if (template.settings.type === 'daily') {
-			var dates = g.statementsMatching($rdf.sym(template.settings.ldpc), LDP('contains'), undefined);
+			var dates = g.statementsMatching($rdf.sym(getLdpc()), LDP('contains'), undefined);
 			for (i=0; i<dates.length; i++) {
 				addToQueue(template.queue, dates[i].object.value + '*');
 			}
@@ -484,9 +486,9 @@ jQuery(document).ready(function() {
 				$(this).css('color', 'darkblue');
 			});
 		}
-		//console.log('fetched dates in ' + template.settings.ldpc);
+		//console.log('fetched dates in ' + getLdpc());
 
-		var dates = g.statementsMatching(undefined, LDP('contains'), undefined, $rdf.sym(template.settings.ldpc));
+		var dates = g.statementsMatching(undefined, LDP('contains'), undefined, $rdf.sym(getLdpc()));
 
 		$('#dates').empty();
 		for (var i=dates.length-1; i>=0; i--) {
@@ -544,9 +546,9 @@ jQuery(document).ready(function() {
 				date = template.settings.dates[0];
 			}
 
-			//template.settings.ldpc = getParam('ldpc');
+			//getLdpc() = getParam('ldpc');
 			//if (!date) date = new Date().toISOString().substr(0,10);
-			var fetchuri = getChannel(template.settings.ldpc, template.settings.type, date) + '*';
+			var fetchuri = getChannel(getLdpc(), template.settings.type, date) + '*';
 
 			// populate chat
 			if(refresh) {
@@ -577,11 +579,11 @@ jQuery(document).ready(function() {
 
 		var posts;
 		if (template.settings.date) {
-			posts = g.statementsMatching(undefined, undefined, SIOC('Post'), $rdf.sym(template.settings.ldpc + template.settings.date + '/*'));
+			posts = g.statementsMatching(undefined, undefined, SIOC('Post'), $rdf.sym(getLdpc() + template.settings.date + '/*'));
 		} else {
-			posts = g.statementsMatching(undefined, undefined, SIOC('Post'), $rdf.sym(template.settings.ldpc + template.settings.dates[0] + '/*'));
+			posts = g.statementsMatching(undefined, undefined, SIOC('Post'), $rdf.sym(getLdpc() + template.settings.dates[0] + '/*'));
 			if (template.settings.dates && template.settings.dates.length > 0) {
-				posts = posts.concat(g.statementsMatching(undefined, undefined, SIOC('Post'), $rdf.sym(template.settings.ldpc + template.settings.dates[1] + '/*')));
+				posts = posts.concat(g.statementsMatching(undefined, undefined, SIOC('Post'), $rdf.sym(getLdpc() + template.settings.dates[1] + '/*')));
 			}
 		}
 
@@ -936,14 +938,14 @@ jQuery(document).ready(function() {
 					users = users.join("\n");
 					var hash = CryptoJS.SHA256(users);
 					//console.log(friend + ' ' + f.getState(friend));
-					//console.log(template.settings.ldpc);
+					//console.log(getLdpc());
 
-					var l = template.settings.ldpc;
+					var l = getLdpc();
 
 					if (template.settings.type === 'friendsdaily') {
-						l = template.settings.ldpc;
+						l = getLdpc();
 					} else if (template.settings.type === 'daily') {
-						l = template.settings.ldpc.split('/').splice(0, template.settings.ldpc.split('/').length-2).join('/') + '/';
+						l = getLdpc().split('/').splice(0, getLdpc().split('/').length-2).join('/') + '/';
 					} else if (template.settings.type === 'single') {
 						l = template.settings.ldpc.split('/').splice(0, template.settings.ldpc.split('/').length-2).join('/') + '/';
 					}
