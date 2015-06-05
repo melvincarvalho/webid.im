@@ -50,6 +50,7 @@
     "materialize": "~0.95.2",
     "ng-file-upload": "~3.0.7",
     "ngImgCrop": "~0.3.2",
-    "webid-signup": "~0.0.2"
+    "webid-signup": "~0.0.2",
+    "dexie": "~1.1.0"
   }
 }
