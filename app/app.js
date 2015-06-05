@@ -233,6 +233,9 @@ jQuery(document).ready(function() {
 
 	template.refresh = function() {
 		console.info('refresh');
+		db.cache.delete(template.settings.ldpc).then(function() {
+			console.log('deleted : ' + template.settings.ldpc);
+		});
 		fetchAll();
 		render();
 	};
