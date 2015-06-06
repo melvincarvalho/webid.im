@@ -615,7 +615,7 @@ jQuery(document).ready(function() {
 		if (template.settings.date) {
 			posts = g.statementsMatching(undefined, undefined, SIOC('Post'), $rdf.sym(getLdpc() + template.settings.date + '/*'));
 			if (multipleContainers) {
-				posts = posts.concat(g.statementsMatching(undefined, undefined, SIOC('Post'), $rdf.sym(template.settings.toChannel[1] + template.settings.dates[1] + '/*')));
+				posts = posts.concat(g.statementsMatching(undefined, undefined, SIOC('Post'), $rdf.sym(template.settings.toChannel[1] + template.settings.date + '/*')));
 			}
 		} else {
 			posts = g.statementsMatching(undefined, undefined, SIOC('Post'), $rdf.sym(getLdpc() + template.settings.dates[0] + '/*'));
