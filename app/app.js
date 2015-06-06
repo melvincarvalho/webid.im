@@ -2,21 +2,23 @@ var g;
 var db;
 var template;
 
+var CHAT  = $rdf.Namespace("https://ns.rww.io/chat#");
+var CURR  = $rdf.Namespace("https://w3id.org/cc#");
+var DCT   = $rdf.Namespace("http://purl.org/dc/terms/");
+var FACE  = $rdf.Namespace("https://graph.facebook.com/schema/~/");
+var FOAF  = $rdf.Namespace("http://xmlns.com/foaf/0.1/");
+var LIKE  = $rdf.Namespace("http://ontologi.es/like#");
+var LDP   = $rdf.Namespace("http://www.w3.org/ns/ldp#");
+var MBLOG = $rdf.Namespace("http://www.w3.org/ns/mblog#");
+var OWL   = $rdf.Namespace("http://www.w3.org/2002/07/owl#");
+var PIM   = $rdf.Namespace("http://www.w3.org/ns/pim/space#");
+var RDF   = $rdf.Namespace("http://www.w3.org/1999/02/22-rdf-syntax-ns#");
+var RDFS  = $rdf.Namespace("http://www.w3.org/2000/01/rdf-schema#");
+var SIOC  = $rdf.Namespace("http://rdfs.org/sioc/ns#");
+
+
 jQuery(document).ready(function() {
 
-	var CHAT  = $rdf.Namespace("https://ns.rww.io/chat#");
-	var CURR  = $rdf.Namespace("https://w3id.org/cc#");
-	var DCT   = $rdf.Namespace("http://purl.org/dc/terms/");
-	var FACE  = $rdf.Namespace("https://graph.facebook.com/schema/~/");
-	var FOAF  = $rdf.Namespace("http://xmlns.com/foaf/0.1/");
-	var LIKE  = $rdf.Namespace("http://ontologi.es/like#");
-	var LDP   = $rdf.Namespace("http://www.w3.org/ns/ldp#");
-	var MBLOG = $rdf.Namespace("http://www.w3.org/ns/mblog#");
-	var OWL   = $rdf.Namespace("http://www.w3.org/2002/07/owl#");
-	var PIM   = $rdf.Namespace("http://www.w3.org/ns/pim/space#");
-	var RDF   = $rdf.Namespace("http://www.w3.org/1999/02/22-rdf-syntax-ns#");
-	var RDFS  = $rdf.Namespace("http://www.w3.org/2000/01/rdf-schema#");
-	var SIOC  = $rdf.Namespace("http://rdfs.org/sioc/ns#");
 
 	// main
 	//'use strict';
@@ -578,6 +580,17 @@ jQuery(document).ready(function() {
 				f.nowOrWhenFetched( fetchuri , undefined, renderPosts );
 			}
 
+			if (multipleContainers()) {
+				fetchuri = getChannel(template.settings.toChannel[1], template.settings.type, date) + '*';
+
+				// populate chat
+				if(refresh) {
+					f.requestURI( fetchuri, undefined, true, renderPosts );
+				} else {
+					f.nowOrWhenFetched( fetchuri , undefined, renderPosts );
+				}
+
+			}
 
 
 			showNewest();
@@ -601,12 +614,15 @@ jQuery(document).ready(function() {
 		var posts;
 		if (template.settings.date) {
 			posts = g.statementsMatching(undefined, undefined, SIOC('Post'), $rdf.sym(getLdpc() + template.settings.date + '/*'));
+			if (multipleContainers) {
+				posts = posts.concat(g.statementsMatching(undefined, undefined, SIOC('Post'), $rdf.sym(template.settings.toChannel[1] + template.settings.dates[1] + '/*')));
+			}
 		} else {
 			posts = g.statementsMatching(undefined, undefined, SIOC('Post'), $rdf.sym(getLdpc() + template.settings.dates[0] + '/*'));
 			if (template.settings.dates && template.settings.dates.length > 0) {
 				posts = posts.concat(g.statementsMatching(undefined, undefined, SIOC('Post'), $rdf.sym(getLdpc() + template.settings.dates[1] + '/*')));
 			}
-			if (template.settings.toChannel && template.settings.toChannel.lenth > 1) {
+			if (template.settings.toChannel && template.settings.toChannel.length > 1) {
 				posts = posts.concat(g.statementsMatching(undefined, undefined, SIOC('Post'), $rdf.sym(template.settings.toChannel[1] + template.settings.dates[0] + '/*')));
 			}
 		}
