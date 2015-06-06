@@ -714,25 +714,16 @@ jQuery(document).ready(function() {
 				hidden = "webkitHidden";
 				visibilityChange = "webkitvisibilitychange";
 			}
-			
-			if( notify && i === posts.length-1 &&  url[0].object.value != webid && hidden ){
-				var notification = new Notification(name[0].object.value,
-					{'icon': defaultIcon,
-					"body" : text[0].object.value });
-					notify = false;
 
-					notification.onclick = function(x) {
-						try {
-							window.focus();
-							this.cancel();
-						}
-						catch (ex) {
-						}
-					};
+			if (!localStorage.getItem(post.subject.value)) {
+				popup(text, name);
+				localStorage.setItem(post.subject.value, true);
+			}
 
-					setTimeout(function(){
-						notification.close();
-					}, 10000);
+
+			if( notify && i === posts.length-1 &&  !localStorage.getItem(post.subject.value ) ){
+			//if( notify && i === posts.length-1 &&  url[0].object.value != webid && hidden ){
+				popup(name, text);
 
 				}
 
@@ -1197,6 +1188,7 @@ jQuery(document).ready(function() {
 				setPresence(template.settings.webid, new Date(time));
 			}
 
+
 		}
 
 
@@ -1228,6 +1220,10 @@ jQuery(document).ready(function() {
 			return 'wss://' + uri.split('/')[2];
 		}
 
+
+    function sendSub(message, socket) {
+			socket.send(message);
+		}
 
 		function connectToSocket(sub, subs) {
 			var socket;
@@ -1267,8 +1263,13 @@ jQuery(document).ready(function() {
 				} else {
 					socket = template.sockets[template.settings.wss.indexOf(wss)];
 				}
+
+
+
 				subs.push(sub);
-				socket.send('sub ' + sub);
+				setTimeout(function(){
+					sendSub('sub ' + sub, socket);
+				}, 1000);
 
 
 			}
@@ -1460,6 +1461,26 @@ jQuery(document).ready(function() {
 
 
 		});
+
+
+		function popup(text, name) {
+			var notification = new Notification(name, {'icon': defaultIcon, "body" : text });
+
+			notification.onclick = function(x) {
+				try {
+					window.focus();
+					this.cancel();
+				}
+				catch (ex) {
+				}
+			};
+
+			setTimeout(function(){
+				notification.close();
+			}, 4000);
+
+
+		}
 
 
 		//$(window).bind("popstate", back);
