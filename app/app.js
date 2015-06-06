@@ -697,7 +697,7 @@ jQuery(document).ready(function() {
 				like = false;
 			} else {
 				like = true;
-				console.log(like);
+				//console.log(like);
 			}
 
 			if (avatar.length === 0) {
