@@ -1247,7 +1247,7 @@ jQuery(document).ready(function() {
 					if (template.settings.wss.indexOf(wss) === -1) {
 						console.log("Opening socket to : " + wss);
 						template.settings.wss.push(wss);
-						socket = new ReconnectingWebSocket(wss);
+						socket = new WebSocket(wss);
 						template.sockets.push(socket);
 
 						socket.onopen = function(){
