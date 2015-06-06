@@ -504,6 +504,7 @@ jQuery(document).ready(function() {
 		}
 		//console.log('fetched dates in ' + getLdpc());
 
+    template.settings.dates = [];
 		var dates = g.statementsMatching(undefined, LDP('contains'), undefined, $rdf.sym(getLdpc()));
 		if(multipleContainers()) {
 			for (i=0; i<template.settings.toChannel.length; i++) {
