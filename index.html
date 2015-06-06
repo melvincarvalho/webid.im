@@ -89,7 +89,7 @@
 								<core-collapse id="dates">
 
 									<template repeat="{{date in settings.dates}}">
-									<div id="{{date}}" class="date">{{date}}</div>
+									<div id="{{date}}" on-tap={{renderDate}} class="date">{{date}}</div>
 								  </template>
 
 						</core-collapse>

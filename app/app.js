@@ -247,6 +247,11 @@ jQuery(document).ready(function() {
 		$('#modal').toggle();
 	};
 
+	template.renderDate = function() {
+		console.info('rendering date');
+		console.log(this);
+	};
+
 	template.refresh = function() {
 		console.info('refresh');
 		db.cache.delete(getLdpc()).then(function() {
