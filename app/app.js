@@ -137,7 +137,7 @@ jQuery(document).ready(function() {
 		template.show = true;
 	}
 
-	template.settings.subs         = [];
+	template.subs                  = [];
 	template.friends               = [];
 	template.users                 = {};
 	template.posts                 = [];
@@ -207,7 +207,7 @@ jQuery(document).ready(function() {
 		renderSidebar();
 		renderMain(template.settings.webid, template.settings.date);
 		updatePresence(template.settings.webid, template.settings.presenceURI[0]);
-		//connectToSocket(template.settings.wss[0], getChannel(getLdpc(), template.settings.type, template.settings.date), template.settings.subs);
+		//connectToSocket(template.settings.wss[0], getChannel(getLdpc(), template.settings.type, template.settings.date), template.subs);
 		template.queue.push(template.settings.webid);
 	}
 
@@ -1226,7 +1226,7 @@ jQuery(document).ready(function() {
 				for (var i=0; i<template.friends.length; i++) {
 					var sub = template.friends[i].ldpc + today + '/';
 					console.log('connecting to : ' + sub);
-					connectToSocket(sub, template.settings.subs);
+					connectToSocket(sub, template.subs);
 				}
 			}
 
@@ -1457,7 +1457,7 @@ jQuery(document).ready(function() {
 				template.posts = [];
 
 				var today = new Date().toISOString().substr(0,10);
-				//connectToSocket(template.settings.wss[0], getChannel(template.settings.ldpc, template.settings.type, today), template.settings.subs);
+				//connectToSocket(template.settings.wss[0], getChannel(template.settings.ldpc, template.settings.type, today), template.subs);
 
 				fetchAll();
 				render();
@@ -1487,7 +1487,7 @@ jQuery(document).ready(function() {
 				var today = new Date().toISOString().substr(0,10);
 				//connectToSocket(template.settings.wss[0],
 					//	getChannel(template.settings.ldpc,
-						//		template.settings.type, today), template.settings.subs);
+						//		template.settings.type, today), template.subs);
 					}
 
 					// Listen to WebIDAuth events
