@@ -142,6 +142,7 @@ jQuery(document).ready(function() {
 	template.users                 = {};
 	template.posts                 = [];
 	template.queue                 = [];
+	template.sockets               = [];
 
 	template.settings.dates        = [];
 	template.settings.displayDates = [];
@@ -152,23 +153,9 @@ jQuery(document).ready(function() {
 	template.settings.wallet       = [];
 	template.settings.wss          = [];
 
-	setWss();
+	//setWss();
 	setPresenceURI();
 
-	function setWss() {
-		var wss;
-		var ldpc;
-
-		if (template.settings.toChannel > 0) {
-			ldpc = template.settings.toChannel[0];
-		} else if (getLdpc()) {
-			ldpc = getLdpc();
-		}
-
-		wss = 'wss://' + ldpc.split('/')[2];
-		addToQueue(template.settings.wss, wss);
-
-	}
 
 
 
@@ -220,7 +207,7 @@ jQuery(document).ready(function() {
 		renderSidebar();
 		renderMain(template.settings.webid, template.settings.date);
 		updatePresence(template.settings.webid, template.settings.presenceURI[0]);
-		connectToSocket(template.settings.wss[0], getChannel(getLdpc(), template.settings.type, template.settings.date), template.settings.subs);
+		//connectToSocket(template.settings.wss[0], getChannel(getLdpc(), template.settings.type, template.settings.date), template.settings.subs);
 		template.queue.push(template.settings.webid);
 	}
 
@@ -450,6 +437,7 @@ jQuery(document).ready(function() {
 
 			fetchAll();
 			render();
+			connectToSockets();
 
 		}
 
@@ -509,7 +497,7 @@ jQuery(document).ready(function() {
 		}
 		//console.log('fetched dates in ' + getLdpc());
 
-    template.settings.dates = [];
+		template.settings.dates = [];
 		var dates = g.statementsMatching(undefined, LDP('contains'), undefined, $rdf.sym(getLdpc()));
 		if(multipleContainers()) {
 			for (i=0; i<template.settings.toChannel.length; i++) {
@@ -1219,42 +1207,76 @@ jQuery(document).ready(function() {
 			}
 
 
+			function getRoom(webid, friend) {
+
+			}
+
+			function getSharedRoom(webid, friend) {
+				var users = [template.settings.webid,friend];
+				users.sort();
+				users = users.join("\n");
+				var hash = CryptoJS.SHA256(users);
+				return 'https://klaranet.com/d/chat/' + hash + '/';
+
+			}
+
+			function connectToSockets() {
+				var today = new Date().toISOString().substr(0,10);
+
+				for (var i=0; i<template.friends.length; i++) {
+					var sub = template.friends[i].ldpc + today + '/';
+					console.log('connecting to : ' + sub);
+					connectToSocket(sub, template.settings.subs);
+				}
+			}
 
 
+			function getWss(uri) {
+				return 'wss://' + uri.split('/')[2];
+			}
 
 
-			function connectToSocket(uri, sub, subs) {
+			function connectToSocket(sub, subs) {
 				var socket;
 
 				// socket
 				if ( subs.indexOf(sub) !== -1 ) {
 					console.log('Already subscribed to : ' + sub);
 				} else {
-					console.log("Opening socket to : " + uri);
+					var wss = getWss(sub);
+					if (template.settings.wss.indexOf(wss) === -1) {
+						console.log("Opening socket to : " + wss);
+						template.settings.wss.push(wss);
+						socket = new ReconnectingWebSocket(wss);
+						template.sockets.push(socket);
+
+						socket.onopen = function(){
+							console.log(this);
+							console.log(sub);
+						};
+
+						socket.onmessage = function(msg){
+							console.log('Incoming message : ');
+							console.log(msg);
+							var today = new Date().toISOString().substr(0,10);
+
+							playSound(soundURI);
+							renderMain(template.settings.webid, today, true);
+
+							Notification.requestPermission(function (permission) {
+								// If the user is okay, let's create a notification
+								if (permission === "granted") {
+									notify = true;
+								}
+							});
+						};
+
+					} else {
+						socket = template.sockets[template.settings.wss.indexOf(wss)];
+					}
 					subs.push(sub);
-					socket = new ReconnectingWebSocket(uri);
+					socket.send('sub ' + sub);
 
-					socket.onopen = function(){
-						console.log(this);
-						console.log(sub);
-						this.send('sub ' + sub);
-					};
-
-					socket.onmessage = function(msg){
-						console.log('Incoming message : ');
-						console.log(msg);
-						var today = new Date().toISOString().substr(0,10);
-
-						playSound(soundURI);
-						renderMain(template.settings.webid, today, true);
-
-						Notification.requestPermission(function (permission) {
-							// If the user is okay, let's create a notification
-							if (permission === "granted") {
-								notify = true;
-							}
-						});
-					};
 
 				}
 			}
@@ -1435,7 +1457,7 @@ jQuery(document).ready(function() {
 				template.posts = [];
 
 				var today = new Date().toISOString().substr(0,10);
-				connectToSocket(template.settings.wss[0], getChannel(template.settings.ldpc, template.settings.type, today), template.settings.subs);
+				//connectToSocket(template.settings.wss[0], getChannel(template.settings.ldpc, template.settings.type, today), template.settings.subs);
 
 				fetchAll();
 				render();
@@ -1463,9 +1485,9 @@ jQuery(document).ready(function() {
 				renderMain(template.settings.webid);
 				setTimeout(renderSidebar, 1000);
 				var today = new Date().toISOString().substr(0,10);
-				connectToSocket(template.settings.wss[0],
-					getChannel(template.settings.ldpc,
-						template.settings.type, today), template.settings.subs);
+				//connectToSocket(template.settings.wss[0],
+					//	getChannel(template.settings.ldpc,
+						//		template.settings.type, today), template.settings.subs);
 					}
 
 					// Listen to WebIDAuth events
