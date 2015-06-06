@@ -1246,7 +1246,11 @@ jQuery(document).ready(function() {
 
 					socket.onmessage = function(msg){
 						console.log('Incoming message : ');
-						console.log(msg);
+						var a = msg.data.split(' ');
+						console.log(a[1]);
+						db.cache.delete(a[1]).then(function() {
+							refresh();
+						});
 						var today = new Date().toISOString().substr(0,10);
 
 						playSound(soundURI);
