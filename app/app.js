@@ -191,8 +191,20 @@ jQuery(document).ready(function() {
 
 	}
 
-  function getLdpc() {
-		return template.settings.ldpc;
+	function getLdpc() {
+		if (template.settings.toChannel && template.settings.toChannel.length > 0) {
+			return template.settings.toChannel[0];
+		} else {
+			return template.settings.ldpc;
+		}
+	}
+
+	function multipleContainers() {
+		if (template.settings.toChannel && template.settings.toChannel.length > 1) {
+			return true;
+		} else {
+			return false;
+		}
 	}
 
 
@@ -412,9 +424,9 @@ jQuery(document).ready(function() {
 			addToQueue(template.queue, subscribedTo[i].object.value);
 			var toChannel = g.statementsMatching($rdf.sym(subscribedTo[i].object.value), MBLOG('toChannel'), undefined);
 			for (j=0; j<toChannel.length; j++) {
-				//console.log('toChannel found : ' + toChannel[i].object.value);
-				addToArray(template.settings.toChannel, toChannel[i].object.value);
-				addToQueue(template.queue, toChannel[i].object.value);
+				console.log('toChannel found : ' + toChannel[j].object.value);
+				addToArray(template.settings.toChannel, toChannel[j].object.value);
+				addToQueue(template.queue, toChannel[j].object.value);
 			}
 		}
 
@@ -434,7 +446,7 @@ jQuery(document).ready(function() {
 
 		}
 
-    run();
+		run();
 		setInterval(run, heartbeat * 1000);
 	}
 
@@ -478,6 +490,8 @@ jQuery(document).ready(function() {
 	}
 
 	function renderDates() {
+		var i;
+
 		function addClick(display) {
 			$('#' + display).on('click', function () {
 				template.posts = [] ;
@@ -489,9 +503,14 @@ jQuery(document).ready(function() {
 		//console.log('fetched dates in ' + getLdpc());
 
 		var dates = g.statementsMatching(undefined, LDP('contains'), undefined, $rdf.sym(getLdpc()));
+		if(multipleContainers()) {
+			for (i=0; i<template.settings.toChannel.length; i++) {
+				dates = dates.concat(g.statementsMatching(undefined, LDP('contains'), undefined, $rdf.sym( template.settings.toChannel[i] )));
+			}
+		}
 
-		$('#dates').empty();
-		for (var i=dates.length-1; i>=0; i--) {
+		//$('#dates').empty();
+		for (i=dates.length-1; i>=0; i--) {
 			var display;
 			if (dates[i] && dates[i].object && dates[i].object.value) {
 				display = dates[i].object.value.substr(-11,10);
@@ -500,7 +519,9 @@ jQuery(document).ready(function() {
 
 
 			addToDates(template.settings.dates, display);
-			$('#dates').append('<div id="'+ display +'" class="date">' + display + '</div><br>');
+			template.settings.dates = template.settings.dates.sort().reverse();
+
+			//$('#dates').append('<div id="'+ display +'" class="date">' + display + '</div><br>');
 			addClick(display);
 		}
 
@@ -584,6 +605,9 @@ jQuery(document).ready(function() {
 			posts = g.statementsMatching(undefined, undefined, SIOC('Post'), $rdf.sym(getLdpc() + template.settings.dates[0] + '/*'));
 			if (template.settings.dates && template.settings.dates.length > 0) {
 				posts = posts.concat(g.statementsMatching(undefined, undefined, SIOC('Post'), $rdf.sym(getLdpc() + template.settings.dates[1] + '/*')));
+			}
+			if (template.settings.toChannel && template.settings.toChannel.lenth > 1) {
+				posts = posts.concat(g.statementsMatching(undefined, undefined, SIOC('Post'), $rdf.sym(template.settings.toChannel[1] + template.settings.dates[0] + '/*')));
 			}
 		}
 
