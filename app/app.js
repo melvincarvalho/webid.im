@@ -1002,7 +1002,7 @@ jQuery(document).ready(function() {
 
 
 				if (template.users && template.users[friend] ) {
-					//console.log('setting presence of ' + friend );
+					console.log('setting presence of ' + friend );
 					fr.status = template.users[friend].status;
 					fr.lastActive = template.users[friend].lastActive;
 				}
@@ -1326,7 +1326,7 @@ jQuery(document).ready(function() {
 		//   status online | away | offline
 		function setPresence(webid, time) {
 			var onlinetime = 86400000;
-			var awaytime = 864000000;
+			var awaytime   = 864000000;
 			if (!template.users) {
 				template.users = {};
 			}
@@ -1348,10 +1348,13 @@ jQuery(document).ready(function() {
 			}
 
 			template.users[webid].status = status;
+
+			/*
 			for(var i=0; i<template.friends.length; i++) {
 				template.friends[i].statue = status;
 				template.friends[i].lastActive = time;
 			}
+			*/
 
 			template.posts.forEach(function(el, i){
 
