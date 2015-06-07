@@ -7,7 +7,7 @@ A single user list with a username, avatar, and desc.
 
 -->
 <script src="bower_components/time-elements/time-elements.js"></script>
-<polymer-element name="x-friend-list" attributes="uri img avatar color username text status timestamp lastActive ldpc webid type">
+<polymer-element name="x-friend-list" attributes="unread uri img avatar color username text status timestamp lastActive ldpc webid type">
   <template>
 	<style>
 	:host {
@@ -104,7 +104,7 @@ A single user list with a username, avatar, and desc.
 		</div>
 		<div flex>
 			<div class="username">{{username}}</div>
-                        <time class="timestamp" is="relative-time" datetime="{{lastActive}}"></time>
+      <template if="{{unread}}"><strong>({{unread}})</strong> </template><time class="timestamp" is="relative-time" datetime="{{lastActive}}"></time>
 		</div>
 	</section>
 </template>
@@ -121,6 +121,7 @@ Polymer('x-friend-list', {
   ldpc: '',
   webid: '',
   type: '',
+  unread: '',
 	timestamp: new Date().toISOString(),
   tap: function() {
 

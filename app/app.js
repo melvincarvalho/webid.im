@@ -719,8 +719,8 @@ jQuery(document).ready(function() {
 
 
 			if( notify && i === posts.length-1 &&  !localStorage.getItem(post.subject.value ) ){
-			//if( notify && i === posts.length-1 &&  url[0].object.value != webid && hidden ){
-				popup(name, text);
+				//if( notify && i === posts.length-1 &&  url[0].object.value != webid && hidden ){
+					popup(name, text);
 
 				}
 
@@ -1221,7 +1221,7 @@ jQuery(document).ready(function() {
 		}
 
 
-    function sendSub(message, socket) {
+		function sendSub(message, socket) {
 			socket.send(message);
 		}
 
@@ -1489,8 +1489,8 @@ jQuery(document).ready(function() {
 		}
 
 
-    function unreadPosts() {
-			var i;
+		function unreadPosts() {
+			var i,j;
 			var posts = g.statementsMatching(undefined, undefined, SIOC('Post'), undefined);
 			for (i=0; i<posts.length; i++) {
 				var post = posts[i];
@@ -1502,11 +1502,21 @@ jQuery(document).ready(function() {
 				localStorage.setItem(subject, 'u');
 			}
 
+      for(i=0; i<template.friends.length; i++) {
+				template.friends[i].unread = 0;
+			}
+
 			for (i = 0; i < localStorage.length; i++){
 				var val = localStorage.getItem(localStorage.key(i));
-			  if (val === 'u') {
+				if (val === 'u') {
 					console.log('Unread Post!');
 					console.log(localStorage.key(i));
+					for(j=0; j<template.friends.length; j++) {
+						if (localStorage.key(i).indexOf(template.friends[j].ldpc) === 0) {
+							template.friends[j].unread++;
+						}
+					}
+
 				}
 			}
 
