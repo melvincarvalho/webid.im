@@ -370,7 +370,7 @@ jQuery(document).ready(function() {
 
 	// QUEUE
 	function updateQueue() {
-		var i;
+		var i, j;
 		console.log('updating queue');
 		addToQueue(template.queue, template.settings.webid);
 
@@ -379,6 +379,10 @@ jQuery(document).ready(function() {
 			//console.log(knows[i].object.uri);
 			//addToFriends(template.friends, {id: knows[i].object.value, label: knows[i].object.value});
 			addToQueue(template.queue, knows[i].object.value);
+			var workspaces = g.statementsMatching($rdf.sym(knows[i].object.value), PIM('storage'), undefined);
+			for (j=0; j<workspaces.length; j++) {
+				addToQueue(template.queue, workspaces[j].object.value);
+			}
 		}
 
 		var wallets = g.statementsMatching($rdf.sym(template.settings.webid), CURR('wallet'), undefined);
@@ -797,7 +801,6 @@ jQuery(document).ready(function() {
 			console.log('caching ' + uri);
 			var why = uri.split('#')[0];
 			var quads = g.statementsMatching(undefined, undefined, undefined, $rdf.sym(why));
-			//localStorage.setItem(why, JSON.stringify(triples));
 
 			db.cache.put({"why": why, "quads": quads}). then(function(){
 				console.log('cached : ' + quads);
