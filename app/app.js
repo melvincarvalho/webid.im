@@ -438,6 +438,7 @@ jQuery(document).ready(function() {
 			fetchAll();
 			render();
 			connectToSockets();
+			unreadPosts();
 
 		}
 
@@ -715,10 +716,6 @@ jQuery(document).ready(function() {
 				visibilityChange = "webkitvisibilitychange";
 			}
 
-			if (!localStorage.getItem(post.subject.value)) {
-				popup(text, name);
-				localStorage.setItem(post.subject.value, true);
-			}
 
 
 			if( notify && i === posts.length-1 &&  !localStorage.getItem(post.subject.value ) ){
@@ -1180,6 +1177,9 @@ jQuery(document).ready(function() {
 			}
 			if (!exists) {
 				template.posts.push(m);
+				if (!localStorage.getItem(uri)) {
+					localStorage.setItem(uri, 'r');
+				}
 				showNewest();
 			}
 
@@ -1248,8 +1248,10 @@ jQuery(document).ready(function() {
 						console.log('Incoming message : ');
 						var a = msg.data.split(' ');
 						console.log(a[1]);
-						db.cache.delete(a[1]).then(function() {
-							refresh();
+						addToQueue(template.settings.queue, a[1]);
+						addToQueue(template.settings.queue, a[1] + '*');
+						db.cache.delete(a[1] + '*').then(function() {
+							fetch(a[1] + '*');
 						});
 						var today = new Date().toISOString().substr(0,10);
 
@@ -1486,6 +1488,29 @@ jQuery(document).ready(function() {
 
 		}
 
+
+    function unreadPosts() {
+			var i;
+			var posts = g.statementsMatching(undefined, undefined, SIOC('Post'), undefined);
+			for (i=0; i<posts.length; i++) {
+				var post = posts[i];
+				var subject = post.subject.value;
+				var status = localStorage.getItem(subject);
+				if ( status === 'r' ) {
+					continue;
+				}
+				localStorage.setItem(subject, 'u');
+			}
+
+			for (i = 0; i < localStorage.length; i++){
+				var val = localStorage.getItem(localStorage.key(i));
+			  if (val === 'u') {
+					console.log('Unread Post!');
+					console.log(localStorage.key(i));
+				}
+			}
+
+		}
 
 		//$(window).bind("popstate", back);
 
