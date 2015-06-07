@@ -1177,11 +1177,11 @@ jQuery(document).ready(function() {
 			}
 			if (!exists) {
 				template.posts.push(m);
-				if (!localStorage.getItem(uri)) {
-					localStorage.setItem(uri, 'r');
-				}
 				showNewest();
 			}
+
+			localStorage.setItem(uri, 'r');
+
 
 			// work out presence
 			if (template.settings.webid) {
