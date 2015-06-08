@@ -140,6 +140,7 @@ jQuery(document).ready(function() {
 	template.subs                  = [];
 	template.friends               = [];
 	template.users                 = {};
+	template.fetched               = {}
 	template.posts                 = [];
 	template.queue                 = [];
 	template.sockets               = [];
@@ -757,6 +758,7 @@ jQuery(document).ready(function() {
 		}
 
 		function fetch(uri) {
+			template.fetched[uri] = new Date();
 			console.log('fetching : ' + uri);
 			//console.log(g);
 
@@ -765,6 +767,7 @@ jQuery(document).ready(function() {
 			db.cache.get(why).then(function(res){
 				if (res && res.quads && res.quads.length) {
 					console.log('uncached : ');
+					console.log('fetched '+ uri +' from cache in : ' + (new Date() - template.fetched[uri]) );
 					console.log(res);
 					for(var i=0; i<res.quads.length; i++) {
 						//console.log(res.quads);
@@ -783,11 +786,13 @@ jQuery(document).ready(function() {
 
 					}
 					f.requested[why] = 'requested';
+					console.log('fetched '+ uri +' from cache in : ' + (new Date() - template.fetched[uri]) );
 					render();
 					//fetchAll();
 				} else {
 					f.nowOrWhenFetched(why, undefined, function(ok, body) {
 						cache(uri);
+						console.log('fetched '+ uri +' from rdflib in : ' + (new Date() - template.fetched[uri]) );
 						render();
 						fetchAll();
 					});
@@ -1551,6 +1556,7 @@ jQuery(document).ready(function() {
 
 	function unreadPosts() {
 		var i,j;
+		var count = 0;
 		var posts = g.statementsMatching(undefined, undefined, SIOC('Post'), undefined);
 		for (i=0; i<posts.length; i++) {
 			var post = posts[i];
@@ -1569,7 +1575,8 @@ jQuery(document).ready(function() {
 		for (i = 0; i < localStorage.length; i++){
 			var val = localStorage.getItem(localStorage.key(i));
 			if (val === 'u') {
-				console.log('Unread Post : ' + localStorage.key(i));
+				//console.log('Unread Post : ' + localStorage.key(i));
+				count++;
 				for(j=0; j<template.friends.length; j++) {
 					if (localStorage.key(i).indexOf(template.friends[j].ldpc) === 0) {
 						template.friends[j].unread++;
@@ -1578,6 +1585,8 @@ jQuery(document).ready(function() {
 
 			}
 		}
+
+    console.log('Unread posts : ' + count);
 
 	}
 
