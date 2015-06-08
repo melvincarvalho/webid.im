@@ -1499,11 +1499,11 @@ jQuery(document).ready(function() {
 		turtle += '<../'+hash+'> ';
 		turtle += '    a <https://ns.rww.io/chat#DailyChannel> . ';
 
+		var root = template.settings.ldpc.split('/').splice(0, template.settings.ldpc.split('/').length-2).join('/') + '/';
 
-
-		putFile(template.settings.ldpc + '../rooms/' + hash, turtle);
-		template.settings.room = template.settings.ldpc + '../rooms/' + hash + '#main';
-		addToQueue(template.settings.queue, template.settings.ldpc + '../rooms/' + hash);
+		putFile(root + 'rooms/' + hash, turtle);
+		template.settings.room = root + 'rooms/' + hash + '#main';
+		addToQueue(template.settings.queue, root + 'rooms/' + hash);
 
 		window.history.pushState(stateObject, "",
 		'?action=chat&name=' + encodeURIComponent(template.settings.name) +
@@ -1514,6 +1514,8 @@ jQuery(document).ready(function() {
 		'&webid='          + encodeURIComponent(detail.webid) +
 		'&type='           + encodeURIComponent(detail.type) );
 
+		template.settings.subscribedTo = [];
+		template.settings.toChannel = [];
 
 
 		fetchAll();
