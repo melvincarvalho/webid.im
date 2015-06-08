@@ -143,6 +143,7 @@ jQuery(document).ready(function() {
 	template.posts                 = [];
 	template.queue                 = [];
 	template.sockets               = [];
+	template.renders               = 0;
 
 	template.settings.dates        = [];
 	template.settings.displayDates = [];
@@ -1005,7 +1006,7 @@ jQuery(document).ready(function() {
 
 
 				if (template.users && template.users[friend] ) {
-					console.log('setting presence of ' + friend );
+					//console.log('setting presence of ' + friend );
 					fr.status = template.users[friend].status;
 					fr.lastActive = template.users[friend].lastActive;
 				}
@@ -1374,7 +1375,7 @@ jQuery(document).ready(function() {
 
 
 	function render() {
-		console.log('rendering');
+		console.log('render : ' + template.renders++);
 		renderWebid();
 		renderFriends();
 		renderDates();
