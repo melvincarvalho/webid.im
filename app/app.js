@@ -40,7 +40,7 @@ jQuery(document).ready(function() {
 
 	var genericphoto  = 'images/generic_photo.png';
 	var soundURI      = 'http://webid.im/pinglow.mp3';
-	var defaultLdpc   = 'https://klaranet.com/d/chat/'; // hard code for now until more websockets are there
+	var defaultLdpc   = 'https://klaranet.com/home/5edbedfea2005c9feca6c014a6d8b2237d1e54c4113155621e2d7ecb7427c42b/Friends/.chat/'; // hard code for now until more websockets are there
 	var defaultIcon   = 'https://cdn1.iconfinder.com/data/icons/app-tab-bar-icons-for-ios/30/User_login.png';
 	var notify = false;
 
