@@ -1354,261 +1354,265 @@ jQuery(document).ready(function() {
 
 			/*
 			for(var i=0; i<template.friends.length; i++) {
-				template.friends[i].statue = status;
-				template.friends[i].lastActive = time;
+			template.friends[i].statue = status;
+			template.friends[i].lastActive = time;
+		}
+		*/
+
+		template.posts.forEach(function(el, i){
+
+			if (el.webid === webid) {
+				el.status = status;
+				template.users[webid].status = status;
 			}
-			*/
-
-			template.posts.forEach(function(el, i){
-
-				if (el.webid === webid) {
-					el.status = status;
-					template.users[webid].status = status;
-				}
-
-			});
-
-
-
-		}
-
-
-		function render() {
-			console.log('rendering');
-			renderWebid();
-			renderFriends();
-			renderDates();
-			renderStorage();
-			renderSidebar();
-			renderMain();
-		}
-
-
-		function playSound(uri) {
-			var sound = new Howl({
-				urls: [uri],
-				volume: 0.9
-			}).play();
-			navigator.vibrate(500);
-		}
-
-		function addToArray(array, el) {
-			if (!array) return;
-			if (array.indexOf(el) === -1) {
-				array.push(el);
-			}
-		}
-
-		function addToQueue(array, el) {
-			if (!array) return;
-			if (array.indexOf(el) === -1) {
-				array.push(el);
-			}
-		}
-
-		function addToFriends(array, el) {
-			if (!array) return;
-			for (var i=0; i<array.length; i++) {
-				if (array[i].id === el.id) {
-					return;
-				}
-			}
-			array.push(el);
-		}
-
-
-		function addToDates(array, el) {
-			if (!array) return;
-			if (!el) return;
-
-			if (! (/[0-9]+-[0-9]+-[0-9]+$/i).test(el) ) return;
-
-			for (var i=0; i<array.length; i++) {
-				if (array[i] === el) {
-					return;
-				}
-			}
-			array.push(el);
-
-		}
-
-
-
-
-		window.addEventListener('action-changed', function(e) {
-
-			function putFile(file, data) {
-
-				$.ajax({
-					url: file,
-					contentType: "text/turtle",
-					type: 'PUT',
-					data: data,
-					success: function(result) {
-						showNewest();
-						//console.log(result);
-					}
-				});
-
-			}
-
-
-			var detail = e.detail;
-
-			var stateObject = { 'action' : 'chat' };
-
-			window.history.pushState(stateObject, "",
-			'?action=chat&name=' + encodeURIComponent(template.settings.name) +
-			'&avatar='         + encodeURIComponent(template.settings.avatar) +
-			'&title='          + encodeURIComponent(detail.title) +
-			'&ldpc='           + encodeURIComponent(detail.ldpc) +
-			'&webid='          + encodeURIComponent(detail.webid) +
-			'&type='           + encodeURIComponent(detail.type) );
-
-
-			template.ui.friends = false;
-			template.chat = true;
-			template.settings.action = 'chat';
-			template.show = true;
-			template.settings.type = detail.type;
-			template.settings.date = undefined;
-			template.title = detail.title;
-			$('#title').text(detail.title); // bug in polymer?
-			template.settings.ldpc = detail.ldpc;
-			template.show = true;
-			template.settings.dates = [];
-			template.posts = [];
-
-			var today = new Date().toISOString().substr(0,10);
-			//connectToSocket(template.settings.wss[0], getChannel(template.settings.ldpc, template.settings.type, today), template.subs);
-
-
-			var a = template.settings.ldpc.split('/');
-			var hash = a[a.length-2];
-
-
-			var turtle = '';
-			turtle += '<#main> ';
-			turtle += '   <http://www.w3.org/ns/mblog#subscribedTo> <#sub1>, <#sub2> ; ';
-			turtle += ' a <http://www.w3.org/ns/mblog#SubscriptionList> . ';
-
-
-
-			turtle += '<#sub1> ';
-			turtle += '    <http://www.w3.org/ns/mblog#toChannel> <../'+ hash +'/>  ; ';
-			turtle += '    a <http://www.w3.org/ns/mblog#Subscription> ; ';
-			turtle += '    <http://www.w3.org/ns/mblog#owner> <'+ template.settings.webid +'> . ';
-
-			turtle += '<#sub2> ';
-			turtle += '    <http://www.w3.org/ns/mblog#toChannel> <../' + hash + '/>  ; ';
-			turtle += '    a <http://www.w3.org/ns/mblog#Subscription> ; ';
-			turtle += '    <http://www.w3.org/ns/mblog#owner> <'+ detail.webid +'> . ';
-
-			turtle += '<../'+hash+'> ';
-			turtle += '    a <https://ns.rww.io/chat#DailyChannel> . ';
-
-
-
-      putFile(template.settings.ldpc + '../rooms/' + hash, turtle);
-			addToQueue(template.settings.queue, template.settings.ldpc + '../rooms/' + hash);
-
-			fetchAll();
-			render();
-
-
-			setTimeout( function () { $('#back').one('click', back ); }, 1000 );
-
 
 		});
 
 
-		function popup(text, name) {
-			var notification = new Notification(name, {'icon': defaultIcon, "body" : text });
 
-			notification.onclick = function(x) {
-				try {
-					window.focus();
-					this.cancel();
-				}
-				catch (ex) {
-				}
-			};
-
-			setTimeout(function(){
-				notification.close();
-			}, 4000);
+	}
 
 
+	function render() {
+		console.log('rendering');
+		renderWebid();
+		renderFriends();
+		renderDates();
+		renderStorage();
+		renderSidebar();
+		renderMain();
+	}
+
+
+	function playSound(uri) {
+		var sound = new Howl({
+			urls: [uri],
+			volume: 0.9
+		}).play();
+		navigator.vibrate(500);
+	}
+
+	function addToArray(array, el) {
+		if (!array) return;
+		if (array.indexOf(el) === -1) {
+			array.push(el);
 		}
+	}
 
-
-		function unreadPosts() {
-			var i,j;
-			var posts = g.statementsMatching(undefined, undefined, SIOC('Post'), undefined);
-			for (i=0; i<posts.length; i++) {
-				var post = posts[i];
-				var subject = post.subject.value;
-				var status = localStorage.getItem(subject);
-				if ( status === 'r' ) {
-					continue;
-				}
-				localStorage.setItem(subject, 'u');
-			}
-
-      for(i=0; i<template.friends.length; i++) {
-				template.friends[i].unread = 0;
-			}
-
-			for (i = 0; i < localStorage.length; i++){
-				var val = localStorage.getItem(localStorage.key(i));
-				if (val === 'u') {
-					console.log('Unread Post!');
-					console.log(localStorage.key(i));
-					for(j=0; j<template.friends.length; j++) {
-						if (localStorage.key(i).indexOf(template.friends[j].ldpc) === 0) {
-							template.friends[j].unread++;
-						}
-					}
-
-				}
-			}
-
+	function addToQueue(array, el) {
+		if (!array) return;
+		if (array.indexOf(el) === -1) {
+			array.push(el);
 		}
+	}
 
-		//$(window).bind("popstate", back);
+	function addToFriends(array, el) {
+		if (!array) return;
+		for (var i=0; i<array.length; i++) {
+			if (array[i].id === el.id) {
+				return;
+			}
+		}
+		array.push(el);
+	}
 
-		function back() {
-			console.log('going back');
-			var stateObject = { 'action' : 'chat' };
-			window.history.pushState(stateObject, "","?action=friends");
 
-			template.ui.friends = true;
-			template.chat = false;
-			template.settings.action  = 'friends';
-			template.settings.type = 'friendsdaily';
-			template.settings.ldpc = defaultLdpc;
-			template.title = 'WebID Chat';
-			renderMain(template.settings.webid);
-			setTimeout(renderSidebar, 1000);
-			var today = new Date().toISOString().substr(0,10);
-			//connectToSocket(template.settings.wss[0],
-				//	getChannel(template.settings.ldpc,
-					//		template.settings.type, today), template.subs);
+	function addToDates(array, el) {
+		if (!array) return;
+		if (!el) return;
+
+		if (! (/[0-9]+-[0-9]+-[0-9]+$/i).test(el) ) return;
+
+		for (var i=0; i<array.length; i++) {
+			if (array[i] === el) {
+				return;
+			}
+		}
+		array.push(el);
+
+	}
+
+
+
+
+	window.addEventListener('action-changed', function(e) {
+
+		function putFile(file, data) {
+
+			$.ajax({
+				url: file,
+				contentType: "text/turtle",
+				type: 'PUT',
+				data: data,
+				success: function(result) {
+					showNewest();
+					//console.log(result);
 				}
-
-				// Listen to WebIDAuth events
-				window.addEventListener('WebIDAuth',function(e) {
-					console.log(e.detail);
-					if (e.detail.success === true) {
-						console.log("Auth successful! WebID: "+e.detail.user);
-						localStorage.setItem('webid', e.detail.user);
-						renderMain(e.detail.user);
-						// presence
-						updatePresence(e.detail.user, template.settings.presenceURI[0]);
-					} else {
-						console.log("Auth failed!");
-						console.log(e.detail);
-					}
-				},false);
-
 			});
+
+		}
+
+
+		var detail = e.detail;
+
+		var stateObject = { 'action' : 'chat' };
+
+
+		template.ui.friends = false;
+		template.chat = true;
+		template.settings.action = 'chat';
+		template.show = true;
+		template.settings.type = detail.type;
+		template.settings.date = undefined;
+		template.title = detail.title;
+		$('#title').text(detail.title); // bug in polymer?
+		template.settings.ldpc = detail.ldpc;
+		template.show = true;
+		template.settings.dates = [];
+		template.posts = [];
+
+		var today = new Date().toISOString().substr(0,10);
+		//connectToSocket(template.settings.wss[0], getChannel(template.settings.ldpc, template.settings.type, today), template.subs);
+
+
+		var a = template.settings.ldpc.split('/');
+		var hash = a[a.length-2];
+
+
+		var turtle = '';
+		turtle += '<#main> ';
+		turtle += '   <http://www.w3.org/ns/mblog#subscribedTo> <#sub1>, <#sub2> ; ';
+		turtle += ' a <http://www.w3.org/ns/mblog#SubscriptionList> . ';
+
+
+
+		turtle += '<#sub1> ';
+		turtle += '    <http://www.w3.org/ns/mblog#toChannel> <../'+ hash +'/>  ; ';
+		turtle += '    a <http://www.w3.org/ns/mblog#Subscription> ; ';
+		turtle += '    <http://www.w3.org/ns/mblog#owner> <'+ template.settings.webid +'> . ';
+
+		turtle += '<#sub2> ';
+		turtle += '    <http://www.w3.org/ns/mblog#toChannel> <../' + hash + '/>  ; ';
+		turtle += '    a <http://www.w3.org/ns/mblog#Subscription> ; ';
+		turtle += '    <http://www.w3.org/ns/mblog#owner> <'+ detail.webid +'> . ';
+
+		turtle += '<../'+hash+'> ';
+		turtle += '    a <https://ns.rww.io/chat#DailyChannel> . ';
+
+
+
+		putFile(template.settings.ldpc + '../rooms/' + hash, turtle);
+		template.settings.room = template.settings.ldpc + '../rooms/' + hash + '#main';
+		addToQueue(template.settings.queue, template.settings.ldpc + '../rooms/' + hash);
+
+		window.history.pushState(stateObject, "",
+		'?action=chat&name=' + encodeURIComponent(template.settings.name) +
+		'&avatar='         + encodeURIComponent(template.settings.avatar) +
+		'&title='          + encodeURIComponent(detail.title) +
+		'&ldpc='           + encodeURIComponent(detail.ldpc) +
+		'&room='           + encodeURIComponent(template.settings.room) +
+		'&webid='          + encodeURIComponent(detail.webid) +
+		'&type='           + encodeURIComponent(detail.type) );
+
+
+
+		fetchAll();
+		render();
+
+
+		setTimeout( function () { $('#back').one('click', back ); }, 1000 );
+
+
+	});
+
+
+	function popup(text, name) {
+		var notification = new Notification(name, {'icon': defaultIcon, "body" : text });
+
+		notification.onclick = function(x) {
+			try {
+				window.focus();
+				this.cancel();
+			}
+			catch (ex) {
+			}
+		};
+
+		setTimeout(function(){
+			notification.close();
+		}, 4000);
+
+
+	}
+
+
+	function unreadPosts() {
+		var i,j;
+		var posts = g.statementsMatching(undefined, undefined, SIOC('Post'), undefined);
+		for (i=0; i<posts.length; i++) {
+			var post = posts[i];
+			var subject = post.subject.value;
+			var status = localStorage.getItem(subject);
+			if ( status === 'r' ) {
+				continue;
+			}
+			localStorage.setItem(subject, 'u');
+		}
+
+		for(i=0; i<template.friends.length; i++) {
+			template.friends[i].unread = 0;
+		}
+
+		for (i = 0; i < localStorage.length; i++){
+			var val = localStorage.getItem(localStorage.key(i));
+			if (val === 'u') {
+				console.log('Unread Post!');
+				console.log(localStorage.key(i));
+				for(j=0; j<template.friends.length; j++) {
+					if (localStorage.key(i).indexOf(template.friends[j].ldpc) === 0) {
+						template.friends[j].unread++;
+					}
+				}
+
+			}
+		}
+
+	}
+
+	//$(window).bind("popstate", back);
+
+	function back() {
+		console.log('going back');
+		var stateObject = { 'action' : 'chat' };
+		window.history.pushState(stateObject, "","?action=friends");
+
+		template.ui.friends = true;
+		template.chat = false;
+		template.settings.action  = 'friends';
+		template.settings.type = 'friendsdaily';
+		template.settings.ldpc = defaultLdpc;
+		template.title = 'WebID Chat';
+		renderMain(template.settings.webid);
+		setTimeout(renderSidebar, 1000);
+		var today = new Date().toISOString().substr(0,10);
+		//connectToSocket(template.settings.wss[0],
+			//	getChannel(template.settings.ldpc,
+				//		template.settings.type, today), template.subs);
+			}
+
+			// Listen to WebIDAuth events
+			window.addEventListener('WebIDAuth',function(e) {
+				console.log(e.detail);
+				if (e.detail.success === true) {
+					console.log("Auth successful! WebID: "+e.detail.user);
+					localStorage.setItem('webid', e.detail.user);
+					renderMain(e.detail.user);
+					// presence
+					updatePresence(e.detail.user, template.settings.presenceURI[0]);
+				} else {
+					console.log("Auth failed!");
+					console.log(e.detail);
+				}
+			},false);
+
+		});
