@@ -471,7 +471,7 @@ jQuery(document).ready(function() {
 			$('#storage').append($('<br>'));
 			$('#diary').on('click', function() {
 				var diaryURI = '?action=chat&type=daily&ldpc='+ encodeURIComponent($('#storagedropdown').val()) +
-				encodeURIComponent('chat/diary/') +'&webid='+encodeURIComponent(template.settings.webid) + '&name=' +
+				encodeURIComponent('Private/chat/diary/') +'&webid='+encodeURIComponent(template.settings.webid) + '&name=' +
 				encodeURIComponent(template.settings.name);
 				if (template.settings.avatar) {
 					diaryURI += '&avatar=' + encodeURIComponent(template.settings.avatar) + '&title=Diary';
