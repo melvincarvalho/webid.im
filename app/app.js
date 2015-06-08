@@ -1436,6 +1436,23 @@ jQuery(document).ready(function() {
 
 
 		window.addEventListener('action-changed', function(e) {
+
+			function putFile(file, data) {
+
+				$.ajax({
+					url: file,
+					contentType: "text/turtle",
+					type: 'PUT',
+					data: data,
+					success: function(result) {
+						showNewest();
+						//console.log(result);
+					}
+				});
+
+			}
+
+
 			var detail = e.detail;
 
 			var stateObject = { 'action' : 'chat' };
@@ -1464,6 +1481,36 @@ jQuery(document).ready(function() {
 
 			var today = new Date().toISOString().substr(0,10);
 			//connectToSocket(template.settings.wss[0], getChannel(template.settings.ldpc, template.settings.type, today), template.subs);
+
+
+			var a = template.settings.ldpc.split('/');
+			var hash = a[a.length-2];
+
+
+			var turtle = '';
+			turtle += '<#main> ';
+			turtle += '   <http://www.w3.org/ns/mblog#subscribedTo> <#sub1>, <#sub2> ; ';
+			turtle += ' a <http://www.w3.org/ns/mblog#SubscriptionList> . ';
+
+
+
+			turtle += '<#sub1> ';
+			turtle += '    <http://www.w3.org/ns/mblog#toChannel> <../'+ hash +'/>  ; ';
+			turtle += '    a <http://www.w3.org/ns/mblog#Subscription> ; ';
+			turtle += '    <http://www.w3.org/ns/mblog#owner> <'+ template.settings.webid +'> . ';
+
+			turtle += '<#sub2> ';
+			turtle += '    <http://www.w3.org/ns/mblog#toChannel> <../' + hash + '/>  ; ';
+			turtle += '    a <http://www.w3.org/ns/mblog#Subscription> ; ';
+			turtle += '    <http://www.w3.org/ns/mblog#owner> <'+ detail.webid +'> . ';
+
+			turtle += '<../'+hash+'> ';
+			turtle += '    a <https://ns.rww.io/chat#DailyChannel> . ';
+
+
+
+      putFile(template.settings.ldpc + '../rooms/' + hash, turtle);
+			addToQueue(template.settings.queue, template.settings.ldpc + '../rooms/' + hash);
 
 			fetchAll();
 			render();
