@@ -787,7 +787,7 @@ jQuery(document).ready(function() {
 					}
 					f.requested[why] = 'requested';
 					console.log('fetched '+ uri +' from cache in : ' + (new Date() - template.fetched[uri]) );
-					render();
+					//render();
 					//fetchAll();
 				} else {
 					f.nowOrWhenFetched(why, undefined, function(ok, body) {
