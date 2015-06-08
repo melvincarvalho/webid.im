@@ -1569,8 +1569,7 @@ jQuery(document).ready(function() {
 		for (i = 0; i < localStorage.length; i++){
 			var val = localStorage.getItem(localStorage.key(i));
 			if (val === 'u') {
-				console.log('Unread Post!');
-				console.log(localStorage.key(i));
+				console.log('Unread Post : ' + localStorage.key(i));
 				for(j=0; j<template.friends.length; j++) {
 					if (localStorage.key(i).indexOf(template.friends[j].ldpc) === 0) {
 						template.friends[j].unread++;
