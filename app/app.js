@@ -246,6 +246,7 @@ jQuery(document).ready(function() {
 		db.cache.delete(getLdpc()).then(function() {
 			console.log('deleted : ' + getLdpc());
 		});
+		unreadPosts();
 		fetchAll();
 		render();
 	};
@@ -309,6 +310,11 @@ jQuery(document).ready(function() {
 				success: function(result) {
 					showNewest();
 					//console.log(result);
+				},
+				statusCode: {
+					500: function() {
+
+					}
 				}
 			});
 
@@ -1110,9 +1116,9 @@ jQuery(document).ready(function() {
 				chatDiv.scrollTop = chatDiv.scrollHeight;
 			}
 			setTimeout(function () { if (chatDiv) chatDiv.scrollTop = chatDiv.scrollHeight; }, 500);
-			setTimeout(function () { if (chatDiv) chatDiv.scrollTop = chatDiv.scrollHeight; }, 1000);
-			setTimeout(function () { if (chatDiv) chatDiv.scrollTop = chatDiv.scrollHeight; }, 2000);
-			setTimeout(function () { if (chatDiv) chatDiv.scrollTop = chatDiv.scrollHeight; }, 3000);
+			//setTimeout(function () { if (chatDiv) chatDiv.scrollTop = chatDiv.scrollHeight; }, 1000);
+			//setTimeout(function () { if (chatDiv) chatDiv.scrollTop = chatDiv.scrollHeight; }, 2000);
+			//setTimeout(function () { if (chatDiv) chatDiv.scrollTop = chatDiv.scrollHeight; }, 3000);
 		}
 
 		// add functions
@@ -1528,7 +1534,7 @@ jQuery(document).ready(function() {
 		render();
 
 
-		setTimeout( function () { $('#back').one('click', back ); }, 1000 );
+		setTimeout( function () { $('#back').one('click', back ); render(); }, 1000 );
 
 
 	});
@@ -1586,7 +1592,7 @@ jQuery(document).ready(function() {
 			}
 		}
 
-    console.log('Unread posts : ' + count);
+		console.log('Unread posts : ' + count);
 
 	}
 
@@ -1606,24 +1612,22 @@ jQuery(document).ready(function() {
 		renderMain(template.settings.webid);
 		setTimeout(renderSidebar, 1000);
 		var today = new Date().toISOString().substr(0,10);
-		//connectToSocket(template.settings.wss[0],
-			//	getChannel(template.settings.ldpc,
-				//		template.settings.type, today), template.subs);
-			}
+		render();
+	}
 
-			// Listen to WebIDAuth events
-			window.addEventListener('WebIDAuth',function(e) {
-				console.log(e.detail);
-				if (e.detail.success === true) {
-					console.log("Auth successful! WebID: "+e.detail.user);
-					localStorage.setItem('webid', e.detail.user);
-					renderMain(e.detail.user);
-					// presence
-					updatePresence(e.detail.user, template.settings.presenceURI[0]);
-				} else {
-					console.log("Auth failed!");
-					console.log(e.detail);
-				}
-			},false);
+	// Listen to WebIDAuth events
+	window.addEventListener('WebIDAuth',function(e) {
+		console.log(e.detail);
+		if (e.detail.success === true) {
+			console.log("Auth successful! WebID: "+e.detail.user);
+			localStorage.setItem('webid', e.detail.user);
+			renderMain(e.detail.user);
+			// presence
+			updatePresence(e.detail.user, template.settings.presenceURI[0]);
+		} else {
+			console.log("Auth failed!");
+			console.log(e.detail);
+		}
+	},false);
 
-		});
+});
