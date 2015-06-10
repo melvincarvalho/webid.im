@@ -154,6 +154,7 @@ jQuery(document).ready(function() {
 	template.settings.toChannel    = [];
 	template.settings.wallet       = [];
 	template.settings.wss          = [];
+	template.lastPing              = new Date();
 
 	//setWss();
 	setPresenceURI();
@@ -213,7 +214,7 @@ jQuery(document).ready(function() {
 		template.queue.push(template.settings.webid);
 	}
 
-	setTimeout(daemon, 5000);
+	//setTimeout(daemon, 5000);
 	fetchAll();
 
 	setTimeout( function () { $('#back').one('click', function() { window.location.href = '/'; } ); }, 1500 );
@@ -752,7 +753,8 @@ jQuery(document).ready(function() {
 
 			for (var i=0; i<template.queue.length; i++) {
 				if(template.queue[i]) {
-					if (f.getState(template.queue[i].split('#')[0]) === 'unrequested') {
+					if (!template.fetched[template.queue[i]]) {
+						template.fetched[template.queue[i]] = new Date();
 						fetch(template.queue[i]);
 					}
 				} else {
@@ -793,8 +795,8 @@ jQuery(document).ready(function() {
 					}
 					f.requested[why] = 'requested';
 					console.log('fetched '+ uri +' from cache in : ' + (new Date() - template.fetched[uri]) );
-					//render();
-					//fetchAll();
+					render();
+					fetchAll();
 				} else {
 					f.nowOrWhenFetched(why, undefined, function(ok, body) {
 						cache(uri);
