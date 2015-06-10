@@ -140,7 +140,7 @@ jQuery(document).ready(function() {
 	template.subs                  = [];
 	template.friends               = [];
 	template.users                 = {};
-	template.fetched               = {}
+	template.fetched               = {};
 	template.posts                 = [];
 	template.queue                 = [];
 	template.sockets               = [];
