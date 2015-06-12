@@ -1,4 +1,4 @@
-var g;
+var f,g;
 var db;
 var template;
 
@@ -46,7 +46,7 @@ jQuery(document).ready(function() {
 
 	// start in memory DB
 	g = $rdf.graph();
-	var f = $rdf.fetcher(g);
+	f = $rdf.fetcher(g);
 	// add CORS proxy
 	var PROXY      = "https://data.fm/proxy?uri={uri}";
 	var AUTH_PROXY = "https://rww.io/auth-proxy?uri=";
@@ -214,7 +214,7 @@ jQuery(document).ready(function() {
 		template.queue.push(template.settings.webid);
 	}
 
-	//setTimeout(daemon, 5000);
+	setTimeout(daemon, 5000);
 	fetchAll();
 
 	setTimeout( function () { $('#back').one('click', function() { window.location.href = '/'; } ); }, 1500 );
@@ -243,14 +243,127 @@ jQuery(document).ready(function() {
 	};
 
 	template.refresh = function() {
+		var today = new Date().toISOString().substr(0,10);
 		console.info('refresh');
-		db.cache.delete(getLdpc()).then(function() {
-			console.log('deleted : ' + getLdpc());
-		});
+		template.invalidate(getLdpc());
+		template.invalidate(getLdpc() + today + '/*');
 		unreadPosts();
 		fetchAll();
 		render();
 	};
+
+	template.invalidate = function(uri) {
+		console.log('invalidate : ' + uri);
+		template.fetched[uri] = undefined;
+		//f.unload(uri);
+		f.refresh($rdf.sym(uri));
+		f.requested[uri] = 'unrequested';
+		db.cache.delete(uri).then(function() {
+			console.log('deleted');
+		});
+		db.cache.delete(uri).then(function(res) {
+			console.log('new cache ');
+			console.log(res);
+		});
+
+	};
+
+	template.getRoom = function() {
+		var room;
+		if (template.settings.room && template.settings.room.length > 0) {
+			room = template.settings.room;
+		} else {
+			room = template.settings.ldpd;
+		}
+
+		return room;
+	};
+
+	template.getChannels = function() {
+    var channels;
+
+		if (template.settings.toChannel && template.settings.toChannel.length > 0) {
+			channels = template.settings.toChannel;
+		} else {
+			channels = [template.settings.ldpc];
+		}
+
+		return channels;
+	};
+
+
+	template.getRecentDates = function() {
+    var recentDates;
+
+		if (template.settings.dates && template.settings.dates.length > 0) {
+      recentDates = template.settings.dates.slice(0,2);
+		}
+
+		return recentDates;
+	};
+
+	template.getRecentPosts = function() {
+		var channels    = template.getChannels();
+		var recentDates = template.getRecentDates();
+
+		var posts = [];
+
+		for (var i=0; i<channels.length; i++) {
+			for (var j=0; j<recentDates.length; j++) {
+				posts = posts.concat(g.statementsMatching(undefined, undefined, SIOC('Post'), $rdf.sym(channels[i] + recentDates[j] + '/*')));
+			}
+		}
+
+
+		// sort by date
+		if (posts && posts.length > 0) {
+			posts.sort(function(a, b) {
+				var subjecta = a.subject;
+				var subjectb = b.subject;
+				var createda = g.statementsMatching(subjecta, DCT('created'), undefined);
+				var createdb = g.statementsMatching(subjectb, DCT('created'), undefined);
+				createda = createda[0];
+				createdb = createdb[0];
+				if ( !subjecta || !subjectb || !createda || !createdb ) return;
+				a = new Date(createda.object.value);
+				b = new Date(createdb.object.value);
+				return a>b ? 1 : a<b ? -1 : 0;
+			});
+		}
+
+		for (i=0; i<posts.length; i++) {
+			var post = posts[i];
+			var subject = post.subject;
+			var details = g.statementsMatching(subject, undefined, undefined);
+			var author = g.statementsMatching(subject, DCT('creator'), undefined);
+			if (!author.length) {
+				author = g.statementsMatching(subject, SIOC('has_creator'), undefined);
+			}
+			if (!author.length) continue;
+			var created = g.statementsMatching(subject, DCT('created'), undefined);
+			var text = g.statementsMatching(subject, SIOC('content'), undefined);
+			var name = g.statementsMatching(author[0].object, FOAF('name'), undefined);
+			var url = g.statementsMatching(author[0].object, OWL('sameAs'), undefined);
+			if (!url.length) {
+				url = g.statementsMatching(author[0].object, SIOC('account_of'), undefined);
+			}
+			if (!url.length) continue;
+			var avatar = g.statementsMatching(author[0].object, FOAF('img'), undefined);
+			if (!avatar.length) {
+				avatar = g.statementsMatching(author[0].object, FOAF('depiction'), undefined);
+			}
+			if (!avatar.length) {
+				avatar = g.statementsMatching(author[0].object, SIOC('avatar'), undefined);
+			}
+			var like = g.statementsMatching($rdf.sym(webid), LIKE('likes'), subject);
+
+			console.log(text[0].object.value + ' ' + subject.value);
+    }
+
+		return posts;
+
+	};
+
 
 
 	template.publish = function() {
@@ -314,12 +427,13 @@ jQuery(document).ready(function() {
 				},
 				statusCode: {
 					500: function() {
-
+						console.log('Internal error!');
 					}
 				}
 			});
 
 		}
+
 
 		var id = Math.floor(Math.random() * 100000000);
 
@@ -345,17 +459,7 @@ jQuery(document).ready(function() {
 		console.log(turtle);
 
 		var today = new Date().toISOString().substr(0,10);
-		postFile(getChannel(getLdpc(), template.settings.type, today), turtle);
 
-
-		updatePresence(template.settings.webid, template.settings.presenceURI[0]);
-
-		addPost(template.settings.avatar, message.text.trim(), template.settings.webid, template.settings.name,
-		getChannel(getLdpc(), template.settings.type,  today) + id + '#this',
-		new Date().toISOString(), false, template.settings.webid );
-
-		addToDates(template.settings.dates, today);
-		template.settings.dates = template.settings.dates.sort().reverse();
 
 		var exists = false;
 		for (i=0; i<template.settings.dates.length; i++) {
@@ -364,15 +468,42 @@ jQuery(document).ready(function() {
 			}
 		}
 		if (!exists) {
-			template.settings.dates.push(today);
+			addToDates(template.settings.dates, today);
+			template.settings.dates = template.settings.dates.sort().reverse();
 
-			$('#dates').prepend('<div id="'+ today +'" class="date">' + today + '</div><br>');
-			$('#' + display).on('click', function () {
+			$('#' + today).on('click', function () {
 				template.posts = [] ;
 				renderMain( template.settings.webid, $(this).text());
 				$(this).css('color', 'darkblue');
 			});
+
+			$.ajax({
+				url: getChannel(getLdpc(), template.settings.type, today).substring( 0, getChannel(getLdpc(), template.settings.type, today).lastIndexOf( "/" ) + 1),
+				contentType: "text/turtle",
+				type: 'PUT',
+				success: function(result) {
+					showNewest();
+					//console.log(result);
+				},
+				statusCode: {
+					406: function() {
+						console.log('Success!');
+						postFile(getChannel(getLdpc(), template.settings.type, today), turtle);
+						template.refresh();
+						renderMain(template.settings.webid, today, true);
+					}
+				}
+			});
+
+		} else {
+			postFile(getChannel(getLdpc(), template.settings.type, today), turtle);
 		}
+
+		updatePresence(template.settings.webid, template.settings.presenceURI[0]);
+		addPost(template.settings.avatar, message.text.trim(), template.settings.webid, template.settings.name, getChannel(getLdpc(), template.settings.type,  today) + id + '#this', new Date().toISOString(), false, template.settings.webid );
+		playSound(soundURI);
+		renderMain(template.settings.webid, today, true);
+
 		showNewest();
 
 	};
@@ -556,8 +687,6 @@ jQuery(document).ready(function() {
 
 		console.log('rendering main screen for : ' + webid);
 
-		//fetchWebid(webid);
-
 		if (template.settings.action === 'friends') {
 			$('.post-list').hide();
 			$('.chat-list').show();
@@ -618,7 +747,7 @@ jQuery(document).ready(function() {
 		console.log('fetched posts');
 
 		template.posts = [];
-
+/*
 		var posts;
 		if (template.settings.date) {
 			posts = g.statementsMatching(undefined, undefined, SIOC('Post'), $rdf.sym(getLdpc() + template.settings.date + '/*'));
@@ -655,6 +784,9 @@ jQuery(document).ready(function() {
 				return a>b ? 1 : a<b ? -1 : 0;
 			});
 		}
+		*/
+		var posts = template.getRecentPosts();
+
 		for (var i=0; i<posts.length; i++) {
 			var post = posts[i];
 			var subject = post.subject;
@@ -798,6 +930,7 @@ jQuery(document).ready(function() {
 					render();
 					fetchAll();
 				} else {
+					var quads = g.statementsMatching(undefined, undefined, undefined, $rdf.sym(why));
 					f.nowOrWhenFetched(why, undefined, function(ok, body) {
 						cache(uri);
 						console.log('fetched '+ uri +' from rdflib in : ' + (new Date() - template.fetched[uri]) );
@@ -825,15 +958,6 @@ jQuery(document).ready(function() {
 
 		}
 
-
-		function fetchWebid(webid) {
-			// fetch webid
-			f.nowOrWhenFetched( webid.split('#')[0] , undefined, function(ok, body) {
-				console.log('webid fetched');
-				renderWebid();
-			});
-
-		}
 
 		function renderWebid() {
 			//console.log('render webid');
@@ -876,23 +1000,6 @@ jQuery(document).ready(function() {
 				addStorage(storage[i].object.value);
 			}
 
-		}
-
-
-		function fetchSeeAlso(seeAlso) {
-			var PIM = $rdf.Namespace("http://www.w3.org/ns/pim/space#");
-			f.nowOrWhenFetched( seeAlso.split('#')[0], undefined, function(ok, body) {
-				console.log('seeAlso fetched ' + seeAlso);
-				$.each(g.statementsMatching($rdf.sym(template.settings.webid), PIM('storage'), undefined, $rdf.sym(seeAlso)), function(index, value) {
-					addStorage(value.object.value);
-				});
-				if (template.settings.name === template.settings.webid) {
-					var webidname = g.any(kb.sym(webid), FOAF('name'));
-					if (webidname.length > 0) {
-						template.settings.name = webidname.value;
-					}
-				}
-			});
 		}
 
 
