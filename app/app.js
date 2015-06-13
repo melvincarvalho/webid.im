@@ -501,7 +501,7 @@ jQuery(document).ready(function() {
 
 		updatePresence(template.settings.webid, template.settings.presenceURI[0]);
 		addPost(template.settings.avatar, message.text.trim(), template.settings.webid, template.settings.name, getChannel(getLdpc(), template.settings.type,  today) + id + '#this', new Date().toISOString(), false, template.settings.webid );
-		playSound(soundURI);
+		//playSound(soundURI);
 		renderMain(template.settings.webid, today, true);
 
 		showNewest();
