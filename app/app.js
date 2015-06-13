@@ -603,6 +603,7 @@ jQuery(document).ready(function() {
 	function newDate() {
 		console.log('New Date!');
 		connectToSockets();
+		template.refresh();
 	}
 
 	function newHour() {
