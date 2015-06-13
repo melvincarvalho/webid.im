@@ -572,12 +572,60 @@ jQuery(document).ready(function() {
 
 	}
 
+	function setLastPing() {
+
+		var oldPing = template.lastPing;
+		var newPing = new Date().toISOString();
+
+		console.log('Old ping  : ' + oldPing);
+
+		template.lastPing = newPing;
+		localStorage.setItem('lastPing', newPing);
+		console.log('New ping  : ' + newPing);
+
+		oldPingDate = oldPing.substring(5,7);
+		newPingDate = newPing.substring(5,7);
+
+		if (oldPingDate !== newPingDate) {
+			template.newDate = true;
+		}
+
+		oldPingHour = oldPing.substring(11,13);
+		newPingHour = newPing.substring(11,13);
+
+		if (newPingHour !== oldPingHour) {
+			template.newHour = true;
+		}
+
+
+	}
+
+	function newDate() {
+		console.log('New Date!');
+		connectToSockets();
+	}
+
+	function newHour() {
+		console.log('New Hour!');
+	}
+
+
 	function daemon() {
 		var heartbeat = 60;
 
 		function run() {
 
 			console.log('ping');
+
+			setLastPing();
+
+			if (template.newHour) {
+
+			}
+
+			if (template.newDate) {
+
+			}
 
 			fetchAll();
 			render();
@@ -865,11 +913,11 @@ for (var i=0; i<posts.length; i++) {
 
 	if( notify && i === posts.length-1 &&  !localStorage.getItem(post.subject.value ) ){
 		//if( notify && i === posts.length-1 &&  url[0].object.value != webid && hidden ){
-			popup(name, text);
-
-		}
+		popup(name, text);
 
 	}
+
+}
 
 
 
