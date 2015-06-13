@@ -1710,7 +1710,7 @@ window.addEventListener('action-changed', function(e) {
 	turtle += '<../'+hash+'> ';
 	turtle += '    a <https://ns.rww.io/chat#DailyChannel> . ';
 
-	var root = template.settings.ldpc.split('/').splice(0, template.settings.ldpc.split('/').length-2).join('/') + '/';
+	var root = detail.ldpc.split('/').splice(0, detail.ldpc.split('/').length-2).join('/') + '/';
 
 	putFile(root + 'rooms/' + hash, turtle);
 	template.settings.room = root + 'rooms/' + hash + '#main';
@@ -1808,6 +1808,7 @@ function back() {
 	template.settings.type = 'friendsdaily';
 	template.settings.ldpc = defaultLdpc;
 	template.title = 'WebID Chat';
+	template.settings.toChannel = [];
 	renderMain(template.settings.webid);
 	setTimeout(renderSidebar, 1000);
 	var today = new Date().toISOString().substr(0,10);
