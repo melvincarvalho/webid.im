@@ -154,7 +154,7 @@ jQuery(document).ready(function() {
 	template.settings.toChannel    = [];
 	template.settings.wallet       = [];
 	template.settings.wss          = [];
-	template.lastPing              = new Date();
+	template.lastPing              = new Date().toISOString();
 
 	//setWss();
 	setPresenceURI();
