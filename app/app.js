@@ -255,15 +255,11 @@ jQuery(document).ready(function() {
 	template.invalidate = function(uri) {
 		console.log('invalidate : ' + uri);
 		template.fetched[uri] = undefined;
-		//f.unload(uri);
+		f.unload(uri);
 		f.refresh($rdf.sym(uri));
 		f.requested[uri] = 'unrequested';
 		db.cache.delete(uri).then(function() {
 			console.log('deleted');
-		});
-		db.cache.delete(uri).then(function(res) {
-			console.log('new cache ');
-			console.log(res);
 		});
 
 	};
@@ -302,7 +298,7 @@ jQuery(document).ready(function() {
 		return recentDates;
 	};
 
-	template.getRecentPosts = function() {
+	template.getRecentPosts = function(debug) {
 		var channels    = template.getChannels();
 		var recentDates = template.getRecentDates();
 
@@ -356,8 +352,9 @@ jQuery(document).ready(function() {
 				avatar = g.statementsMatching(author[0].object, SIOC('avatar'), undefined);
 			}
 			var like = g.statementsMatching($rdf.sym(webid), LIKE('likes'), subject);
-
-			console.log(text[0].object.value + ' ' + subject.value);
+      if (debug) {
+				console.log(text[0].object.value + ' ' + subject.value);				
+			}
 		}
 
 		return posts;
