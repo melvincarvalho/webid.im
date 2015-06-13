@@ -50,7 +50,7 @@ jQuery(document).ready(function() {
 	// add CORS proxy
 	var PROXY      = "https://data.fm/proxy?uri={uri}";
 	var AUTH_PROXY = "https://rww.io/auth-proxy?uri=";
-	$rdf.Fetcher.crossSiteProxyTemplate=PROXY;
+	//$rdf.Fetcher.crossSiteProxyTemplate=PROXY;
 	var kb         = $rdf.graph();
 	var fetcher    = $rdf.fetcher(kb);
 
@@ -275,6 +275,50 @@ jQuery(document).ready(function() {
 		return room;
 	};
 
+
+  template.getDates = function(debug) {
+
+    var i;
+		var dates;
+		var ldpc;
+		var channels;
+
+		dates    = [];
+		channels = template.getChannels();
+		ldpc     = getLdpc();
+
+
+		for (i=0; i<channels.length; i++) {
+			var res = g.statementsMatching(undefined, LDP('contains'), undefined, $rdf.sym( channels[i] ));
+			dates   = dates.concat(res);
+		}
+
+		if(debug) {
+
+			var display = function (res){
+				for (var i=0; i<res.quads.length;i++) {
+					if (res.quads[i] && res.quads[i].predicate && res.quads[i].predicate.value && res.quads[i].predicate.value === 'http://www.w3.org/ns/ldp#contains') {
+						console.log(res.quads[i].object.value);
+					}
+				}
+			};
+
+			for (i=0; i<channels.length; i++) {
+				console.log('channel : ' + channels[i]);
+				db.cache.get(channels[i]).then(display);
+			}
+
+			for (i=0; i<dates.length; i++) {
+				console.log('date : ' + dates[i]);
+			}
+
+		}
+
+    return dates;
+
+	},
+
+
 	template.getChannels = function() {
 		var channels;
 
@@ -353,7 +397,7 @@ jQuery(document).ready(function() {
 			}
 			var like = g.statementsMatching($rdf.sym(webid), LIKE('likes'), subject);
       if (debug) {
-				console.log(text[0].object.value + ' ' + subject.value);				
+				console.log(text[0].object.value + ' ' + subject.value);
 			}
 		}
 
