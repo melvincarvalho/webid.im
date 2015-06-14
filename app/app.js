@@ -276,9 +276,9 @@ jQuery(document).ready(function() {
 	};
 
 
-  template.getDates = function(debug) {
+	template.getDates = function(debug) {
 
-    var i;
+		var i;
 		var dates;
 		var ldpc;
 		var channels;
@@ -314,7 +314,7 @@ jQuery(document).ready(function() {
 
 		}
 
-    return dates;
+		return dates;
 
 	},
 
@@ -396,7 +396,7 @@ jQuery(document).ready(function() {
 				avatar = g.statementsMatching(author[0].object, SIOC('avatar'), undefined);
 			}
 			var like = g.statementsMatching($rdf.sym(webid), LIKE('likes'), subject);
-      if (debug) {
+			if (debug) {
 				console.log(text[0].object.value + ' ' + subject.value);
 			}
 		}
@@ -837,747 +837,717 @@ jQuery(document).ready(function() {
 		console.log('fetched posts');
 
 		template.posts = [];
-		/*
+
+
 		var posts;
 		if (template.settings.date) {
-		posts = g.statementsMatching(undefined, undefined, SIOC('Post'), $rdf.sym(getLdpc() + template.settings.date + '/*'));
-		if (multipleContainers) {
-		posts = posts.concat(g.statementsMatching(undefined, undefined, SIOC('Post'), $rdf.sym(template.settings.toChannel[1] + template.settings.date + '/*')));
-	}
-} else {
-posts = g.statementsMatching(undefined, undefined, SIOC('Post'), $rdf.sym(getLdpc() + template.settings.dates[0] + '/*'));
-if (template.settings.dates && template.settings.dates.length > 0) {
-posts = posts.concat(g.statementsMatching(undefined, undefined, SIOC('Post'), $rdf.sym(getLdpc() + template.settings.dates[1] + '/*')));
-}
-if (template.settings.toChannel && template.settings.toChannel.length > 1) {
-posts = posts.concat(g.statementsMatching(undefined, undefined, SIOC('Post'), $rdf.sym(template.settings.toChannel[1] + template.settings.dates[0] + '/*')));
-}
-}
-
-
-
-//console.log('posts : ' + posts);
-$('#logs').empty();
-
-// sort by date
-if (posts && posts.length > 0) {
-posts.sort(function(a, b) {
-var subjecta = a.subject;
-var subjectb = b.subject;
-var createda = g.statementsMatching(subjecta, DCT('created'), undefined);
-var createdb = g.statementsMatching(subjectb, DCT('created'), undefined);
-createda = createda[0];
-createdb = createdb[0];
-if ( !subjecta || !subjectb || !createda || !createdb ) return;
-a = new Date(createda.object.value);
-b = new Date(createdb.object.value);
-return a>b ? 1 : a<b ? -1 : 0;
-});
-}
-*/
-var posts = template.getRecentPosts();
-
-for (var i=0; i<posts.length; i++) {
-	var post = posts[i];
-	var subject = post.subject;
-	var details = g.statementsMatching(subject, undefined, undefined);
-	var author = g.statementsMatching(subject, DCT('creator'), undefined);
-	if (!author.length) {
-		author = g.statementsMatching(subject, SIOC('has_creator'), undefined);
-	}
-	if (!author.length) continue;
-	var created = g.statementsMatching(subject, DCT('created'), undefined);
-	var text = g.statementsMatching(subject, SIOC('content'), undefined);
-	var name = g.statementsMatching(author[0].object, FOAF('name'), undefined);
-	var url = g.statementsMatching(author[0].object, OWL('sameAs'), undefined);
-	if (!url.length) {
-		url = g.statementsMatching(author[0].object, SIOC('account_of'), undefined);
-	}
-	if (!url.length) continue;
-	var avatar = g.statementsMatching(author[0].object, FOAF('img'), undefined);
-	if (!avatar.length) {
-		avatar = g.statementsMatching(author[0].object, FOAF('depiction'), undefined);
-	}
-	if (!avatar.length) {
-		avatar = g.statementsMatching(author[0].object, SIOC('avatar'), undefined);
-	}
-	var like = g.statementsMatching($rdf.sym(webid), LIKE('likes'), subject);
-
-	//console.log('fetch uri is '+ fetchuri);
-	//if (post.why.uri != fetchuri) continue;
-	if (!created) continue;
-	if (!name.length) {
-		name = url[0].object.value;
-	} else {
-		name = name[0].object.value;
-	}
-
-	//var d = date.split('-');
-	//var d1 = new Date(created[0].object.value).toISOString().substr(0,10);
-	//var d2 = new Date(d[0], d[1]-1, d[2]).toISOString().substr(0,10);
-	//if ( date !== new Date(created[0].object.value).toISOString().substr(0,10) ) continue;
-
-	if ( like.length === 0 ) {
-		like = false;
-	} else {
-		like = true;
-		//console.log(like);
-	}
-
-	if (avatar.length === 0) {
-		avatar = null;
-	} else {
-		avatar = avatar[0].object.value;
-	}
-
-
-	text = text[text.length-1].object.value;
-
-	addPost( avatar, text, url[0].object.value, name, post.subject.value, created[0].object.value, like, webid );
-
-	// Set the name of the hidden property and the change event for visibility
-	var hidden, visibilityChange;
-	if (typeof document.hidden !== "undefined") { // Opera 12.10 and Firefox 18 and later support
-		hidden = "hidden";
-		visibilityChange = "visibilitychange";
-	} else if (typeof document.mozHidden !== "undefined") {
-		hidden = "mozHidden";
-		visibilityChange = "mozvisibilitychange";
-	} else if (typeof document.msHidden !== "undefined") {
-		hidden = "msHidden";
-		visibilityChange = "msvisibilitychange";
-	} else if (typeof document.webkitHidden !== "undefined") {
-		hidden = "webkitHidden";
-		visibilityChange = "webkitvisibilitychange";
-	}
-
-
-
-	if( notify && i === posts.length-1 &&  !localStorage.getItem(post.subject.value ) ){
-		//if( notify && i === posts.length-1 &&  url[0].object.value != webid && hidden ){
-		popup(name, text);
-
-	}
-
-}
-
-
-
-}
-
-
-// FETCH
-function fetchAll() {
-
-	updateQueue();
-
-	//if (template.queue.length === 0) return;
-
-	for (var i=0; i<template.queue.length; i++) {
-		if(template.queue[i]) {
-			if (!template.fetched[template.queue[i]]) {
-				template.fetched[template.queue[i]] = new Date();
-				fetch(template.queue[i]);
-			}
+			posts = g.statementsMatching(undefined, undefined, SIOC('Post'), $rdf.sym(getLdpc() + template.settings.date + '/*'));
 		} else {
-			console.error('queue item ' + i + ' is undefined');
-			console.log(template.queue);
+			posts = template.getRecentPosts();
 		}
-	}
 
-}
 
-function fetch(uri) {
-	template.fetched[uri] = new Date();
-	console.log('fetching : ' + uri);
-	//console.log(g);
+		for (var i=0; i<posts.length; i++) {
+			var post = posts[i];
+			var subject = post.subject;
+			var details = g.statementsMatching(subject, undefined, undefined);
+			var author = g.statementsMatching(subject, DCT('creator'), undefined);
+			if (!author.length) {
+				author = g.statementsMatching(subject, SIOC('has_creator'), undefined);
+			}
+			if (!author.length) continue;
+			var created = g.statementsMatching(subject, DCT('created'), undefined);
+			var text = g.statementsMatching(subject, SIOC('content'), undefined);
+			var name = g.statementsMatching(author[0].object, FOAF('name'), undefined);
+			var url = g.statementsMatching(author[0].object, OWL('sameAs'), undefined);
+			if (!url.length) {
+				url = g.statementsMatching(author[0].object, SIOC('account_of'), undefined);
+			}
+			if (!url.length) continue;
+			var avatar = g.statementsMatching(author[0].object, FOAF('img'), undefined);
+			if (!avatar.length) {
+				avatar = g.statementsMatching(author[0].object, FOAF('depiction'), undefined);
+			}
+			if (!avatar.length) {
+				avatar = g.statementsMatching(author[0].object, SIOC('avatar'), undefined);
+			}
+			var like = g.statementsMatching($rdf.sym(webid), LIKE('likes'), subject);
 
-	var why = uri.split('#')[0];
+			//console.log('fetch uri is '+ fetchuri);
+			//if (post.why.uri != fetchuri) continue;
+			if (!created) continue;
+			if (!name.length) {
+				name = url[0].object.value;
+			} else {
+				name = name[0].object.value;
+			}
 
-	db.cache.get(why).then(function(res){
-		if (res && res.quads && res.quads.length) {
-			console.log('uncached : ');
-			console.log('fetched '+ uri +' from cache in : ' + (new Date() - template.fetched[uri]) );
-			console.log(res);
-			for(var i=0; i<res.quads.length; i++) {
-				//console.log(res.quads);
-				//console.log('item : ');
-				//console.log(res.quads[i]);
-				var t = res.quads[i].object.uri;
-				if (t) {
-					t = $rdf.sym(res.quads[i].object.value);
-				} else {
-					t = $rdf.term(res.quads[i].object.value);
-				}
-				//console.log(g.any( $rdf.sym(res.quads[i].subject.value), $rdf.sym(res.quads[i].predicate.value), t, $rdf.sym(res.quads[i].why.value) ));
-				if (!g.any( $rdf.sym(res.quads[i].subject.value), $rdf.sym(res.quads[i].predicate.value), t, $rdf.sym(res.quads[i].why.value) )) {
-					g.add( $rdf.sym(res.quads[i].subject.value), $rdf.sym(res.quads[i].predicate.value), t, $rdf.sym(res.quads[i].why.value) );
-				}
+			//var d = date.split('-');
+			//var d1 = new Date(created[0].object.value).toISOString().substr(0,10);
+			//var d2 = new Date(d[0], d[1]-1, d[2]).toISOString().substr(0,10);
+			//if ( date !== new Date(created[0].object.value).toISOString().substr(0,10) ) continue;
+
+			if ( like.length === 0 ) {
+				like = false;
+			} else {
+				like = true;
+				//console.log(like);
+			}
+
+			if (avatar.length === 0) {
+				avatar = null;
+			} else {
+				avatar = avatar[0].object.value;
+			}
+
+
+			text = text[text.length-1].object.value;
+
+			addPost( avatar, text, url[0].object.value, name, post.subject.value, created[0].object.value, like, webid );
+
+			// Set the name of the hidden property and the change event for visibility
+			var hidden, visibilityChange;
+			if (typeof document.hidden !== "undefined") { // Opera 12.10 and Firefox 18 and later support
+				hidden = "hidden";
+				visibilityChange = "visibilitychange";
+			} else if (typeof document.mozHidden !== "undefined") {
+				hidden = "mozHidden";
+				visibilityChange = "mozvisibilitychange";
+			} else if (typeof document.msHidden !== "undefined") {
+				hidden = "msHidden";
+				visibilityChange = "msvisibilitychange";
+			} else if (typeof document.webkitHidden !== "undefined") {
+				hidden = "webkitHidden";
+				visibilityChange = "webkitvisibilitychange";
+			}
+
+
+
+			if( notify && i === posts.length-1 &&  !localStorage.getItem(post.subject.value ) ){
+				//if( notify && i === posts.length-1 &&  url[0].object.value != webid && hidden ){
+				popup(name, text);
 
 			}
-			f.requested[why] = 'requested';
-			console.log('fetched '+ uri +' from cache in : ' + (new Date() - template.fetched[uri]) );
-			render();
-			fetchAll();
-		} else {
-			var quads = g.statementsMatching(undefined, undefined, undefined, $rdf.sym(why));
-			f.nowOrWhenFetched(why, undefined, function(ok, body) {
-				cache(uri);
-				console.log('fetched '+ uri +' from rdflib in : ' + (new Date() - template.fetched[uri]) );
+
+		}
+
+
+
+	}
+
+
+	// FETCH
+	function fetchAll() {
+
+		updateQueue();
+
+		//if (template.queue.length === 0) return;
+
+		for (var i=0; i<template.queue.length; i++) {
+			if(template.queue[i]) {
+				if (!template.fetched[template.queue[i]]) {
+					template.fetched[template.queue[i]] = new Date();
+					fetch(template.queue[i]);
+				}
+			} else {
+				console.error('queue item ' + i + ' is undefined');
+				console.log(template.queue);
+			}
+		}
+
+	}
+
+	function fetch(uri) {
+		template.fetched[uri] = new Date();
+		console.log('fetching : ' + uri);
+		//console.log(g);
+
+		var why = uri.split('#')[0];
+
+		db.cache.get(why).then(function(res){
+			if (res && res.quads && res.quads.length) {
+				console.log('uncached : ');
+				console.log('fetched '+ uri +' from cache in : ' + (new Date() - template.fetched[uri]) );
+				console.log(res);
+				for(var i=0; i<res.quads.length; i++) {
+					//console.log(res.quads);
+					//console.log('item : ');
+					//console.log(res.quads[i]);
+					var t = res.quads[i].object.uri;
+					if (t) {
+						t = $rdf.sym(res.quads[i].object.value);
+					} else {
+						t = $rdf.term(res.quads[i].object.value);
+					}
+					//console.log(g.any( $rdf.sym(res.quads[i].subject.value), $rdf.sym(res.quads[i].predicate.value), t, $rdf.sym(res.quads[i].why.value) ));
+					if (!g.any( $rdf.sym(res.quads[i].subject.value), $rdf.sym(res.quads[i].predicate.value), t, $rdf.sym(res.quads[i].why.value) )) {
+						g.add( $rdf.sym(res.quads[i].subject.value), $rdf.sym(res.quads[i].predicate.value), t, $rdf.sym(res.quads[i].why.value) );
+					}
+
+				}
+				f.requested[why] = 'requested';
+				console.log('fetched '+ uri +' from cache in : ' + (new Date() - template.fetched[uri]) );
 				render();
 				fetchAll();
-			});
+			} else {
+				var quads = g.statementsMatching(undefined, undefined, undefined, $rdf.sym(why));
+				f.nowOrWhenFetched(why, undefined, function(ok, body) {
+					cache(uri);
+					console.log('fetched '+ uri +' from rdflib in : ' + (new Date() - template.fetched[uri]) );
+					render();
+					fetchAll();
+				});
+			}
+		}).catch(function(error) {
+			console.error(error);
+		});
+
+	}
+
+	function cache(uri) {
+		console.log('caching ' + uri);
+		var why = uri.split('#')[0];
+		var quads = g.statementsMatching(undefined, undefined, undefined, $rdf.sym(why));
+
+		db.cache.put({"why": why, "quads": quads}). then(function(){
+			console.log('cached : ' + quads);
+		}).catch(function(error) {
+			console.error(error);
+		});
+
+
+	}
+
+
+	function renderWebid() {
+		//console.log('render webid');
+
+
+		var webidname;
+		var webidavatar;
+		var storage;
+		var seeAlso;
+
+		webidavatar = g.any(kb.sym(template.settings.webid), FOAF('img')) ||
+		g.any(kb.sym(template.settings.webid), FOAF('depiction'));
+		if (webidavatar) webidavatar = webidavatar.value;
+		webidname = g.any(kb.sym(template.settings.webid), FOAF('name'))  || g.any(kb.sym(webid), FACE('name')) ;
+
+
+		storage = g.statementsMatching(kb.sym(template.settings.webid), PIM('storage'));
+		seeAlso = g.any(kb.sym(template.settings.webid), RDFS('seeAlso'));
+
+		if (webidname) webidname = webidname.value;
+
+		if (!webidavatar && (/graph.facebook.com/i).test(webid) ) {
+			webidavatar = webid.split('#')[0] + '/picture';
 		}
-	}).catch(function(error) {
-		console.error(error);
-	});
 
-}
-
-function cache(uri) {
-	console.log('caching ' + uri);
-	var why = uri.split('#')[0];
-	var quads = g.statementsMatching(undefined, undefined, undefined, $rdf.sym(why));
-
-	db.cache.put({"why": why, "quads": quads}). then(function(){
-		console.log('cached : ' + quads);
-	}).catch(function(error) {
-		console.error(error);
-	});
-
-
-}
-
-
-function renderWebid() {
-	//console.log('render webid');
-
-
-	var webidname;
-	var webidavatar;
-	var storage;
-	var seeAlso;
-
-	webidavatar = g.any(kb.sym(template.settings.webid), FOAF('img')) ||
-	g.any(kb.sym(template.settings.webid), FOAF('depiction'));
-	if (webidavatar) webidavatar = webidavatar.value;
-	webidname = g.any(kb.sym(template.settings.webid), FOAF('name'))  || g.any(kb.sym(webid), FACE('name')) ;
-
-
-	storage = g.statementsMatching(kb.sym(template.settings.webid), PIM('storage'));
-	seeAlso = g.any(kb.sym(template.settings.webid), RDFS('seeAlso'));
-
-	if (webidname) webidname = webidname.value;
-
-	if (!webidavatar && (/graph.facebook.com/i).test(webid) ) {
-		webidavatar = webid.split('#')[0] + '/picture';
-	}
-
-	if (webidavatar) {
-		template.avatar = webidavatar;
-		template.settings.avatar = webidavatar;
-	} else {
-		template.avatar = genericphoto;
-	}
-	if (webidname) {
-		template.name = webidname;
-		template.settings.name = webidname;
-	} else {
-		template.name = template.settings.name;
-	}
-
-	for (var i=0; i<storage.length; i++) {
-		addStorage(storage[i].object.value);
-	}
-
-}
-
-
-function fetchPublicChannels() {
-
-	var ldpc = 'https://klaranet.com/d/chat/watercooler/';
-	var title = 'Help Room';
-	var name = 'Help Room';
-	var avatar = genericphoto;
-
-
-	var fr = {
-		text : 'chat.html?action=chat&type=single&ldpc=' + encodeURIComponent(ldpc) +
-		'&webid='+encodeURIComponent(template.settings.webid),
-		uri : '',
-		name : name,
-		ldpc : ldpc,
-		type : 'single',
-		avatar : avatar,
-		status : 'online',
-		webid : template.settings.webid
-	};
-
-	if (template.settings.avatar) {
-		fr.text += '&avatar=' + encodeURIComponent(template.settings.avatar);
-	}
-
-	if (template.settings.name) {
-		fr.text += '&name=' + encodeURIComponent(template.settings.name);
-	}
-
-	fr.text += '&title='+encodeURIComponent(title);
-
-	var exists = false;
-	for (var i=0; i<template.friends.length; i++) {
-		if ( template.friends[i].name === fr.name ) {
-			exists = true;
-			template.friends.splice(i,1);
+		if (webidavatar) {
+			template.avatar = webidavatar;
+			template.settings.avatar = webidavatar;
+		} else {
+			template.avatar = genericphoto;
 		}
+		if (webidname) {
+			template.name = webidname;
+			template.settings.name = webidname;
+		} else {
+			template.name = template.settings.name;
+		}
+
+		for (var i=0; i<storage.length; i++) {
+			addStorage(storage[i].object.value);
+		}
+
 	}
 
-	template.friends.unshift( fr );
 
-}
+	function fetchPublicChannels() {
 
-function renderFriends() {
+		var ldpc = 'https://klaranet.com/d/chat/watercooler/';
+		var title = 'Help Room';
+		var name = 'Help Room';
+		var avatar = genericphoto;
 
-	if (!webid) webid = template.settings.webid;
-	if (!webid) return;
-
-	//console.log('fetching friends of ' + webid);
-
-	// friends
-	//console.log(kb);
-	$.each(g.statementsMatching(kb.sym(webid), FOAF('knows'), undefined), function(index, value) {
-
-		var friend = value.object.value;
-
-		var FACE = $rdf.Namespace("https://graph.facebook.com/schema/~/");
-
-
-		var profileuri = (friend.split('#'))[0];
-
-		var name;
-		var avatar;
-
-		avatar = g.any(kb.sym(friend), FOAF('img')) || g.any(kb.sym(friend), FOAF('depiction'));
-		name = g.any(kb.sym(friend), FOAF('name'))  || g.any(kb.sym(friend), FACE('name')) ;
-
-		if(avatar) avatar = avatar.value;
-		if(name) name = name.value;
-
-		var users = [template.settings.webid,friend];
-		users.sort();
-		users = users.join("\n");
-		var hash = CryptoJS.SHA256(users);
-		//console.log(friend + ' ' + f.getState(friend));
-		//console.log(getLdpc());
-
-		var l = getLdpc();
-
-		if (template.settings.type === 'friendsdaily') {
-			l = getLdpc();
-		} else if (template.settings.type === 'daily') {
-			l = getLdpc().split('/').splice(0, getLdpc().split('/').length-2).join('/') + '/';
-		} else if (template.settings.type === 'single') {
-			l = template.settings.ldpc.split('/').splice(0, template.settings.ldpc.split('/').length-2).join('/') + '/';
-		}
-		//console.log('setting ldpc of ' + friend + ' to ' + getChannel(l, 'friends', null, hash));
 
 		var fr = {
-			text : 'chat.html?action=chat&' +
-			'/&webid='+encodeURIComponent(template.settings.webid)+'&avatar=' +
-			encodeURIComponent(template.settings.avatar)+'&name=' +
-			encodeURIComponent(template.settings.name) ,
-			uri : 'chat.html?action=chat&ldpc=' +encodeURIComponent(template.settings.ldpc)+ hash + '%2F&webid='+encodeURIComponent(friend),
-			ldpc : getChannel(l, 'friends', null, hash),
-			webid : template.settings.webid,
-			type : 'daily',
-			'@id' : friend
+			text : 'chat.html?action=chat&type=single&ldpc=' + encodeURIComponent(ldpc) +
+			'&webid='+encodeURIComponent(template.settings.webid),
+			uri : '',
+			name : name,
+			ldpc : ldpc,
+			type : 'single',
+			avatar : avatar,
+			status : 'online',
+			webid : template.settings.webid
 		};
 
-		// add avatar
-		if (avatar) {
-			fr.avatar = avatar;
-			fr.value += '&avatar='+encodeURIComponent(avatar);
-		} else {
-			fr.avatar = genericphoto;
+		if (template.settings.avatar) {
+			fr.text += '&avatar=' + encodeURIComponent(template.settings.avatar);
 		}
 
-		// add name
-		if (name) {
-			fr.name = name;
-			fr.value += '&name='+encodeURIComponent(name);
-			fr.text += '&title='+encodeURIComponent(name);
-		} else {
-			fr.name = friend;
-		}
-
-		// add title
 		if (template.settings.name) {
-			fr.value += '&title=' + encodeURIComponent(template.settings.name);
+			fr.text += '&name=' + encodeURIComponent(template.settings.name);
 		}
 
+		fr.text += '&title='+encodeURIComponent(title);
 
-		if (template.users && template.users[friend] ) {
-			//console.log('setting presence of ' + friend );
-			fr.status = template.users[friend].status;
-			fr.lastActive = template.users[friend].lastActive;
-		}
-
-		// insert in right place
 		var exists = false;
 		for (var i=0; i<template.friends.length; i++) {
-			if ( template.friends[i]['@id'] === fr['@id'] ) {
+			if ( template.friends[i].name === fr.name ) {
 				exists = true;
 				template.friends.splice(i,1);
 			}
 		}
 
-		if (fr.status) {
-			template.friends.unshift( fr );
-		} else if (avatar){
-			var count = 0;
-			for (i=0; i<template.friends.length; i++) {
-				if (template.friends[i].status) count++;
+		template.friends.unshift( fr );
+
+	}
+
+	function renderFriends() {
+
+		if (!webid) webid = template.settings.webid;
+		if (!webid) return;
+
+		//console.log('fetching friends of ' + webid);
+
+		// friends
+		//console.log(kb);
+		$.each(g.statementsMatching(kb.sym(webid), FOAF('knows'), undefined), function(index, value) {
+
+			var friend = value.object.value;
+
+			var FACE = $rdf.Namespace("https://graph.facebook.com/schema/~/");
+
+
+			var profileuri = (friend.split('#'))[0];
+
+			var name;
+			var avatar;
+
+			avatar = g.any(kb.sym(friend), FOAF('img')) || g.any(kb.sym(friend), FOAF('depiction'));
+			name = g.any(kb.sym(friend), FOAF('name'))  || g.any(kb.sym(friend), FACE('name')) ;
+
+			if(avatar) avatar = avatar.value;
+			if(name) name = name.value;
+
+			var users = [template.settings.webid,friend];
+			users.sort();
+			users = users.join("\n");
+			var hash = CryptoJS.SHA256(users);
+			//console.log(friend + ' ' + f.getState(friend));
+			//console.log(getLdpc());
+
+			var l = getLdpc();
+
+			if (template.settings.type === 'friendsdaily') {
+				l = getLdpc();
+			} else if (template.settings.type === 'daily') {
+				l = getLdpc().split('/').splice(0, getLdpc().split('/').length-2).join('/') + '/';
+			} else if (template.settings.type === 'single') {
+				l = template.settings.ldpc.split('/').splice(0, template.settings.ldpc.split('/').length-2).join('/') + '/';
 			}
-			template.friends.splice(count, 0, fr);
-		} else {
-			template.friends.push( fr );
+			//console.log('setting ldpc of ' + friend + ' to ' + getChannel(l, 'friends', null, hash));
+
+			var fr = {
+				text : 'chat.html?action=chat&' +
+				'/&webid='+encodeURIComponent(template.settings.webid)+'&avatar=' +
+				encodeURIComponent(template.settings.avatar)+'&name=' +
+				encodeURIComponent(template.settings.name) ,
+				uri : 'chat.html?action=chat&ldpc=' +encodeURIComponent(template.settings.ldpc)+ hash + '%2F&webid='+encodeURIComponent(friend),
+				ldpc : getChannel(l, 'friends', null, hash),
+				webid : template.settings.webid,
+				type : 'daily',
+				'@id' : friend
+			};
+
+			// add avatar
+			if (avatar) {
+				fr.avatar = avatar;
+				fr.value += '&avatar='+encodeURIComponent(avatar);
+			} else {
+				fr.avatar = genericphoto;
+			}
+
+			// add name
+			if (name) {
+				fr.name = name;
+				fr.value += '&name='+encodeURIComponent(name);
+				fr.text += '&title='+encodeURIComponent(name);
+			} else {
+				fr.name = friend;
+			}
+
+			// add title
+			if (template.settings.name) {
+				fr.value += '&title=' + encodeURIComponent(template.settings.name);
+			}
+
+
+			if (template.users && template.users[friend] ) {
+				//console.log('setting presence of ' + friend );
+				fr.status = template.users[friend].status;
+				fr.lastActive = template.users[friend].lastActive;
+			}
+
+			// insert in right place
+			var exists = false;
+			for (var i=0; i<template.friends.length; i++) {
+				if ( template.friends[i]['@id'] === fr['@id'] ) {
+					exists = true;
+					template.friends.splice(i,1);
+				}
+			}
+
+			if (fr.status) {
+				template.friends.unshift( fr );
+			} else if (avatar){
+				var count = 0;
+				for (i=0; i<template.friends.length; i++) {
+					if (template.friends[i].status) count++;
+				}
+				template.friends.splice(count, 0, fr);
+			} else {
+				template.friends.push( fr );
+			}
+
+			// sort
+			template.friends.sort(function(a, b) {
+				if (a.status && b.status) {
+					if (!a.lastActive) return -1;
+					if (!b.lastActive) return 1;
+					return new Date(b.lastActive).getTime() - new Date(a.lastActive).getTime();
+				}
+				if (a.status) return -1;
+
+				return 1;
+			});
+
+
+
+		});
+	}
+
+
+
+
+	// helper functions //
+
+	// getChannel
+	// 4 workflows
+	//
+	// single       : normal self contained ldpc
+	// daily        : one subdir per day
+	// friends      : one subdir per friends hash
+	// friendsdaily : subdir by friends, then by day
+	function getChannel(ldpc, type, date, hash) {
+		if (!ldpc) {
+			return;
 		}
 
-		// sort
-		template.friends.sort(function(a, b) {
-			if (a.status && b.status) {
-				if (!a.lastActive) return -1;
-				if (!b.lastActive) return 1;
-				return new Date(b.lastActive).getTime() - new Date(a.lastActive).getTime();
-			}
-			if (a.status) return -1;
+		if (!date) date = template.settings.date;
+		if (!type) type = template.settings.type;
+		if (!ldpc) ldpc = template.settings.ldpc;
+		if (!type) hash = template.settings.hash;
 
-			return 1;
-		});
+		var today = new Date().toISOString().substr(0,10);
+		if (!date) date = today;
 
+		if (ldpc.slice(-1) !== '/') {
+			ldpc += '/';
+		}
 
+		if (type==='single') {
+			return ldpc;
+		}
 
-	});
-}
+		if (type==='daily') {
+			return ldpc + date + '/';
+		}
 
+		if (type==='friends') {
+			return ldpc + hash + '/';
+		}
 
+		if (type==='friendsdaily') {
+			//return ldpc + hash + '/' + date + '/';
+			return ldpc;
+		}
 
-
-// helper functions //
-
-// getChannel
-// 4 workflows
-//
-// single       : normal self contained ldpc
-// daily        : one subdir per day
-// friends      : one subdir per friends hash
-// friendsdaily : subdir by friends, then by day
-function getChannel(ldpc, type, date, hash) {
-	if (!ldpc) {
-		return;
-	}
-
-	if (!date) date = template.settings.date;
-	if (!type) type = template.settings.type;
-	if (!ldpc) ldpc = template.settings.ldpc;
-	if (!type) hash = template.settings.hash;
-
-	var today = new Date().toISOString().substr(0,10);
-	if (!date) date = today;
-
-	if (ldpc.slice(-1) !== '/') {
-		ldpc += '/';
-	}
-
-	if (type==='single') {
 		return ldpc;
 	}
 
-	if (type==='daily') {
-		return ldpc + date + '/';
-	}
 
-	if (type==='friends') {
-		return ldpc + hash + '/';
-	}
-
-	if (type==='friendsdaily') {
-		//return ldpc + hash + '/' + date + '/';
-		return ldpc;
-	}
-
-	return ldpc;
-}
-
-
-function showNewest() {
-	var chatDiv = document.querySelector('.post-list');
-	if (chatDiv) {
-		chatDiv.scrollTop = chatDiv.scrollHeight;
-	}
-	setTimeout(function () { if (chatDiv) chatDiv.scrollTop = chatDiv.scrollHeight; }, 500);
-	//setTimeout(function () { if (chatDiv) chatDiv.scrollTop = chatDiv.scrollHeight; }, 1000);
-	//setTimeout(function () { if (chatDiv) chatDiv.scrollTop = chatDiv.scrollHeight; }, 2000);
-	//setTimeout(function () { if (chatDiv) chatDiv.scrollTop = chatDiv.scrollHeight; }, 3000);
-}
-
-// add functions
-
-function addStorage(storage) {
-	var exists = false;
-	for (var i=0; i<template.settings.storage.length; i++) {
-		if (template.settings.storage[i] == storage) {
-			exists = true;
+	function showNewest() {
+		var chatDiv = document.querySelector('.post-list');
+		if (chatDiv) {
+			chatDiv.scrollTop = chatDiv.scrollHeight;
 		}
-	}
-	if (!exists) {
-		template.settings.storage.push(storage);
-	}
-	//renderSidebar();
-}
-
-function addPost(avatar, message, webid, name, uri, time, like, viewer) {
-
-	like = !!like;
-
-	var isImage   = (/\.(gif|jpg|jpeg|tiff|png|svg)$/i).test(message);
-	var isVideo   = (/\.(mp4|mov|avi)$/i).test(message);
-	var isAudio   = (/\.(mp3|wav)$/i).test(message);
-
-	var m = {
-		name: name,
-		avatar: avatar,
-		color: color,
-		viewer: viewer,
-		webid: webid,
-		text: message,
-		timestamp: time,
-		uri : uri,
-		like : like
-	};
-
-	if (isImage) {
-		m.img = message;
+		setTimeout(function () { if (chatDiv) chatDiv.scrollTop = chatDiv.scrollHeight; }, 500);
+		//setTimeout(function () { if (chatDiv) chatDiv.scrollTop = chatDiv.scrollHeight; }, 1000);
+		//setTimeout(function () { if (chatDiv) chatDiv.scrollTop = chatDiv.scrollHeight; }, 2000);
+		//setTimeout(function () { if (chatDiv) chatDiv.scrollTop = chatDiv.scrollHeight; }, 3000);
 	}
 
-	if (isVideo) {
-		m.video = message;
-	}
+	// add functions
 
-	if (isAudio) {
-		m.audio = message;
-	}
-
-
-	if (!m.avatar) {
-		m.avatar = genericphoto;
-	}
-
-	var status;
-
-
-
-	m.status = status;
-
-	// check if exists
-	var exists = false;
-	var index;
-	for (var i=0; i<template.posts.length; i++) {
-		if (template.posts[i].uri === m.uri) {
-			exists = true;
-			if (template.posts[i].message != m.message) {
-				template.posts[i].message = m.message;
+	function addStorage(storage) {
+		var exists = false;
+		for (var i=0; i<template.settings.storage.length; i++) {
+			if (template.settings.storage[i] == storage) {
+				exists = true;
 			}
 		}
-	}
-	if (!exists) {
-		template.posts.push(m);
-		showNewest();
-	}
-
-	localStorage.setItem(uri, 'r');
-
-
-	// work out presence
-	if (template.settings.webid) {
-		setPresence(template.settings.webid, new Date(time));
+		if (!exists) {
+			template.settings.storage.push(storage);
+		}
+		//renderSidebar();
 	}
 
+	function addPost(avatar, message, webid, name, uri, time, like, viewer) {
 
-}
+		like = !!like;
+
+		var isImage   = (/\.(gif|jpg|jpeg|tiff|png|svg)$/i).test(message);
+		var isVideo   = (/\.(mp4|mov|avi)$/i).test(message);
+		var isAudio   = (/\.(mp3|wav)$/i).test(message);
+
+		var m = {
+			name: name,
+			avatar: avatar,
+			color: color,
+			viewer: viewer,
+			webid: webid,
+			text: message,
+			timestamp: time,
+			uri : uri,
+			like : like
+		};
+
+		if (isImage) {
+			m.img = message;
+		}
+
+		if (isVideo) {
+			m.video = message;
+		}
+
+		if (isAudio) {
+			m.audio = message;
+		}
 
 
-function getRoom(webid, friend) {
+		if (!m.avatar) {
+			m.avatar = genericphoto;
+		}
 
-}
+		var status;
 
-function getSharedRoom(webid, friend) {
-	var users = [template.settings.webid,friend];
-	users.sort();
-	users = users.join("\n");
-	var hash = CryptoJS.SHA256(users);
-	return 'https://klaranet.com/d/chat/' + hash + '/';
 
-}
 
-function connectToSockets() {
-	var today = new Date().toISOString().substr(0,10);
+		m.status = status;
 
-	for (var i=0; i<template.friends.length; i++) {
-		var sub = template.friends[i].ldpc + today + '/';
-		console.log('connecting to : ' + sub);
-		connectToSocket(sub, template.subs);
+		// check if exists
+		var exists = false;
+		var index;
+		for (var i=0; i<template.posts.length; i++) {
+			if (template.posts[i].uri === m.uri) {
+				exists = true;
+				if (template.posts[i].message != m.message) {
+					template.posts[i].message = m.message;
+				}
+			}
+		}
+		if (!exists) {
+			template.posts.push(m);
+			showNewest();
+		}
+
+		localStorage.setItem(uri, 'r');
+
+
+		// work out presence
+		if (template.settings.webid) {
+			setPresence(template.settings.webid, new Date(time));
+		}
+
+
 	}
-}
 
 
-function getWss(uri) {
-	return 'wss://' + uri.split('/')[2];
-}
+	function getRoom(webid, friend) {
+
+	}
+
+	function getSharedRoom(webid, friend) {
+		var users = [template.settings.webid,friend];
+		users.sort();
+		users = users.join("\n");
+		var hash = CryptoJS.SHA256(users);
+		return 'https://klaranet.com/d/chat/' + hash + '/';
+
+	}
+
+	function connectToSockets() {
+		var today = new Date().toISOString().substr(0,10);
+
+		for (var i=0; i<template.friends.length; i++) {
+			var sub = template.friends[i].ldpc + today + '/';
+			console.log('connecting to : ' + sub);
+			connectToSocket(sub, template.subs);
+		}
+	}
 
 
-function sendSub(message, socket) {
-	socket.send(message);
-}
+	function getWss(uri) {
+		return 'wss://' + uri.split('/')[2];
+	}
 
-function connectToSocket(sub, subs) {
-	var socket;
 
-	// socket
-	if ( subs.indexOf(sub) !== -1 ) {
-		console.log('Already subscribed to : ' + sub);
-	} else {
-		var wss = getWss(sub);
-		if (template.settings.wss.indexOf(wss) === -1) {
-			console.log("Opening socket to : " + wss);
-			template.settings.wss.push(wss);
-			socket = new WebSocket(wss);
-			template.sockets.push(socket);
+	function sendSub(message, socket) {
+		socket.send(message);
+	}
 
-			socket.onopen = function(){
-				console.log(this);
-				console.log(sub);
-			};
+	function connectToSocket(sub, subs) {
+		var socket;
 
-			socket.onmessage = function(msg){
-				console.log('Incoming message : ');
-				var a = msg.data.split(' ');
-				console.log(a[1]);
-				addToQueue(template.settings.queue, a[1]);
-				addToQueue(template.settings.queue, a[1] + '*');
-				db.cache.delete(a[1] + '*').then(function() {
-					fetch(a[1] + '*');
-				});
-				var today = new Date().toISOString().substr(0,10);
-
-				playSound(soundURI);
-				renderMain(template.settings.webid, today, true);
-
-				Notification.requestPermission(function (permission) {
-					// If the user is okay, let's create a notification
-					if (permission === "granted") {
-						notify = true;
-					}
-				});
-			};
-
+		// socket
+		if ( subs.indexOf(sub) !== -1 ) {
+			console.log('Already subscribed to : ' + sub);
 		} else {
-			socket = template.sockets[template.settings.wss.indexOf(wss)];
+			var wss = getWss(sub);
+			if (template.settings.wss.indexOf(wss) === -1) {
+				console.log("Opening socket to : " + wss);
+				template.settings.wss.push(wss);
+				socket = new WebSocket(wss);
+				template.sockets.push(socket);
+
+				socket.onopen = function(){
+					console.log(this);
+					console.log(sub);
+				};
+
+				socket.onmessage = function(msg){
+					console.log('Incoming message : ');
+					var a = msg.data.split(' ');
+					console.log(a[1]);
+					addToQueue(template.settings.queue, a[1]);
+					addToQueue(template.settings.queue, a[1] + '*');
+					db.cache.delete(a[1] + '*').then(function() {
+						fetch(a[1] + '*');
+					});
+					var today = new Date().toISOString().substr(0,10);
+
+					playSound(soundURI);
+					renderMain(template.settings.webid, today, true);
+
+					Notification.requestPermission(function (permission) {
+						// If the user is okay, let's create a notification
+						if (permission === "granted") {
+							notify = true;
+						}
+					});
+				};
+
+			} else {
+				socket = template.sockets[template.settings.wss.indexOf(wss)];
+			}
+
+
+
+			subs.push(sub);
+			setTimeout(function(){
+				sendSub('sub ' + sub, socket);
+			}, 1000);
+
+
 		}
-
-
-
-		subs.push(sub);
-		setTimeout(function(){
-			sendSub('sub ' + sub, socket);
-		}, 1000);
-
-
 	}
-}
 
 
 
-// updatePresence
-//
-// deletes lastActive and updates it
-function updatePresence(webid, presenceURI) {
+	// updatePresence
+	//
+	// deletes lastActive and updates it
+	function updatePresence(webid, presenceURI) {
 
-	f.nowOrWhenFetched( presenceURI , undefined, function(ok, body) {
+		f.nowOrWhenFetched( presenceURI , undefined, function(ok, body) {
 
-		var turtle = 'DELETE DATA { ';
+			var turtle = 'DELETE DATA { ';
 
-		$.each(g.statementsMatching(undefined, SIOC('last_activity_date'), undefined), function(index, value) {
-			//console.log('logins : ' + value.object);
-			if (webid === value.subject.value) {
-				turtle += '<'+webid+'> <http://rdfs.org/sioc/ns#last_activity_date> "' + value.object.value + '" . ';
-			}
-			setPresence(value.subject.value, value.object.value);
-		});
-		turtle += " } ; \n";
-		console.log(turtle);
+			$.each(g.statementsMatching(undefined, SIOC('last_activity_date'), undefined), function(index, value) {
+				//console.log('logins : ' + value.object);
+				if (webid === value.subject.value) {
+					turtle += '<'+webid+'> <http://rdfs.org/sioc/ns#last_activity_date> "' + value.object.value + '" . ';
+				}
+				setPresence(value.subject.value, value.object.value);
+			});
+			turtle += " } ; \n";
+			console.log(turtle);
 
-		turtle += 'INSERT DATA { <'+(webid)+'> <http://rdfs.org/sioc/ns#last_activity_date>  "'+ new Date().toISOString() +'" . } ';
+			turtle += 'INSERT DATA { <'+(webid)+'> <http://rdfs.org/sioc/ns#last_activity_date>  "'+ new Date().toISOString() +'" . } ';
 
-		console.log(turtle);
+			console.log(turtle);
 
-		$.ajax({
-			url: presenceURI,
-			contentType: "application/sparql-update",
-			type: 'PATCH',
-			data: turtle,
-			success: function(result) {
-			}
+			$.ajax({
+				url: presenceURI,
+				contentType: "application/sparql-update",
+				type: 'PATCH',
+				data: turtle,
+				success: function(result) {
+				}
+			});
+
 		});
 
-	});
-
-}
-
-// setPresence
-//
-// sets template.users.webid
-//   lastActive
-//   status online | away | offline
-function setPresence(webid, time) {
-	var onlinetime = 86400000;
-	var awaytime   = 864000000;
-	if (!template.users) {
-		template.users = {};
 	}
-	var status = 'online';
-	if (template.users[webid] && template.users[webid].lastActive) {
-		if ( new Date(template.users[webid].lastActive) < new Date (time) ) {
+
+	// setPresence
+	//
+	// sets template.users.webid
+	//   lastActive
+	//   status online | away | offline
+	function setPresence(webid, time) {
+		var onlinetime = 86400000;
+		var awaytime   = 864000000;
+		if (!template.users) {
+			template.users = {};
+		}
+		var status = 'online';
+		if (template.users[webid] && template.users[webid].lastActive) {
+			if ( new Date(template.users[webid].lastActive) < new Date (time) ) {
+				template.users[webid] = {lastActive: time};
+			}
+		} else {
 			template.users[webid] = {lastActive: time};
 		}
-	} else {
-		template.users[webid] = {lastActive: time};
-	}
 
-	if ( new Date().getTime() - new Date(template.users[webid].lastActive).getTime() < onlinetime ) {
-		status = 'online';
-	} else if ( new Date().getTime() - new Date(template.users[webid].lastActive).getTime() < awaytime ) {
-		status = 'away';
-	} else {
-		status = 'offline';
-	}
+		if ( new Date().getTime() - new Date(template.users[webid].lastActive).getTime() < onlinetime ) {
+			status = 'online';
+		} else if ( new Date().getTime() - new Date(template.users[webid].lastActive).getTime() < awaytime ) {
+			status = 'away';
+		} else {
+			status = 'offline';
+		}
 
-	template.users[webid].status = status;
-
-	/*
-	for(var i=0; i<template.friends.length; i++) {
-	template.friends[i].statue = status;
-	template.friends[i].lastActive = time;
-}
-*/
-
-template.posts.forEach(function(el, i){
-
-	if (el.webid === webid) {
-		el.status = status;
 		template.users[webid].status = status;
-	}
 
-});
+		/*
+		for(var i=0; i<template.friends.length; i++) {
+		template.friends[i].statue = status;
+		template.friends[i].lastActive = time;
+	}
+	*/
+
+	template.posts.forEach(function(el, i){
+
+		if (el.webid === webid) {
+			el.status = status;
+			template.users[webid].status = status;
+		}
+
+	});
 
 
 
