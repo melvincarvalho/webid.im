@@ -978,14 +978,14 @@ jQuery(document).ready(function() {
 			}
 
 
-			var uri = localStorage.getItem(post.subject.value );
-			var unread = ( !uri || uri === 'u' )
+			var uri = localStorage.getItem( post.subject.value );
+			var unread = ( !uri || uri === 'u' );
 			if( notify && i === posts.length-1 && unread ){
 				//if( notify && i === posts.length-1 &&  url[0].object.value != webid && hidden ){
-				popup(name, text);
+				popup(name, text, uri, i);
 
 			}
-			localStorage.setItem(uri, 'r');
+			localStorage.setItem(post.subject.value, 'r');
 
 		}
 
@@ -1471,7 +1471,7 @@ jQuery(document).ready(function() {
 
 		// socket
 		if ( subs.indexOf(sub) !== -1 ) {
-			console.log('Already subscribed to : ' + sub);
+			//console.log('Already subscribed to : ' + sub);
 		} else {
 			var wss = getWss(sub);
 			if (template.settings.wss.indexOf(wss) === -1) {
@@ -1766,8 +1766,11 @@ window.addEventListener('action-changed', function(e) {
 });
 
 
-function popup(name, text) {
+function popup(name, text, uri, i) {
 	var notification = new Notification(name, {'icon': defaultIcon, "body" : text });
+	console.log('Notify!');
+	console.log(uri);
+	console.log(i);
 
 	notification.onclick = function(x) {
 		try {
