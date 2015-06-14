@@ -76,7 +76,7 @@
 							<section layout vertical>
 								<core-collapse opened="true" id="roster">
 									<template repeat="{{friend in friends}}">
-										<x-friend-list unread={{friend.unread}} webid="{{friend.webid}}" type="{{friend.type}}" ldpc="{{friend.ldpc}}" lastActive="{{friend.lastActive}}" uri="{{friend.uri}}" img="{{friend.img}}" color="{{friend.color}}" avatar="{{friend.avatar}}" username="{{friend.name}}" text="{{friend.text}}"  status="{{friend.status}}" timestamp="{{friend.timestamp}}"></x-friend-list>
+										<x-friend-list id={{friend['@id']}} unread={{friend.unread}} webid="{{friend.webid}}" type="{{friend.type}}" ldpc="{{friend.ldpc}}" lastActive="{{friend.lastActive}}" uri="{{friend.uri}}" img="{{friend.img}}" color="{{friend.color}}" avatar="{{friend.avatar}}" username="{{friend.name}}" text="{{friend.text}}"  status="{{friend.status}}" timestamp="{{friend.timestamp}}"></x-friend-list>
 									</template>
 								</core-collapse>
 							</section>
@@ -127,7 +127,7 @@
 		<template if={{ui.friends}}>
 			<div flex class="chat-list">
 				<template repeat="{{friend in friends}}">
-					<x-friend-list unread={{friend.unread}} webid="{{friend.webid}}" type="{{friend.type}}" ldpc="{{friend.ldpc}}" lastActive="{{friend.lastActive}}" uri="{{friend.uri}}" img="{{friend.img}}" color="{{friend.color}}" avatar="{{friend.avatar}}" username="{{friend.name}}" text="{{friend.text}}"  status="{{friend.status}}" timestamp="{{friend.timestamp}}"></x-friend-list>
+					<x-friend-list id={{friend['@id']}} unread={{friend.unread}} webid="{{friend.webid}}" type="{{friend.type}}" ldpc="{{friend.ldpc}}" lastActive="{{friend.lastActive}}" uri="{{friend.uri}}" img="{{friend.img}}" color="{{friend.color}}" avatar="{{friend.avatar}}" username="{{friend.name}}" text="{{friend.text}}"  status="{{friend.status}}" timestamp="{{friend.timestamp}}"></x-friend-list>
 				</template>
 			</div>
 			<template if={{new}}>

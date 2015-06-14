@@ -1732,7 +1732,7 @@ window.addEventListener('action-changed', function(e) {
 	turtle += '<#sub2> ';
 	turtle += '    <http://www.w3.org/ns/mblog#toChannel> <../' + hash + '/>  ; ';
 	turtle += '    a <http://www.w3.org/ns/mblog#Subscription> ; ';
-	turtle += '    <http://www.w3.org/ns/mblog#owner> <'+ detail.webid +'> . ';
+	turtle += '    <http://www.w3.org/ns/mblog#owner> <'+ detail['id'] +'> . ';
 
 	turtle += '<../'+hash+'> ';
 	turtle += '    a <https://ns.rww.io/chat#DailyChannel> . ';
