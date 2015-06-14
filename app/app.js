@@ -329,7 +329,7 @@ jQuery(document).ready(function() {
 		}
 
 		return channels;
-	};
+	},
 
 
 	template.getRecentDates = function() {
@@ -340,7 +340,63 @@ jQuery(document).ready(function() {
 		}
 
 		return recentDates;
-	};
+	},
+
+	template.getPosts = function(date) {
+		var channels = template.getChannels();
+
+		for (var i=0; i<channels.length; i++) {
+			posts = posts.concat(g.statementsMatching(undefined, undefined, SIOC('Post'), $rdf.sym(channels[i] + date + '/*')));
+		}
+		// sort by date
+		if (posts && posts.length > 0) {
+			posts.sort(function(a, b) {
+				var subjecta = a.subject;
+				var subjectb = b.subject;
+				var createda = g.statementsMatching(subjecta, DCT('created'), undefined);
+				var createdb = g.statementsMatching(subjectb, DCT('created'), undefined);
+				createda = createda[0];
+				createdb = createdb[0];
+				if ( !subjecta || !subjectb || !createda || !createdb ) return;
+				a = new Date(createda.object.value);
+				b = new Date(createdb.object.value);
+				return a>b ? 1 : a<b ? -1 : 0;
+			});
+		}
+
+		for (i=0; i<posts.length; i++) {
+			var post = posts[i];
+			var subject = post.subject;
+			var details = g.statementsMatching(subject, undefined, undefined);
+			var author = g.statementsMatching(subject, DCT('creator'), undefined);
+			if (!author.length) {
+				author = g.statementsMatching(subject, SIOC('has_creator'), undefined);
+			}
+			if (!author.length) continue;
+			var created = g.statementsMatching(subject, DCT('created'), undefined);
+			var text = g.statementsMatching(subject, SIOC('content'), undefined);
+			var name = g.statementsMatching(author[0].object, FOAF('name'), undefined);
+			var url = g.statementsMatching(author[0].object, OWL('sameAs'), undefined);
+			if (!url.length) {
+				url = g.statementsMatching(author[0].object, SIOC('account_of'), undefined);
+			}
+			if (!url.length) continue;
+			var avatar = g.statementsMatching(author[0].object, FOAF('img'), undefined);
+			if (!avatar.length) {
+				avatar = g.statementsMatching(author[0].object, FOAF('depiction'), undefined);
+			}
+			if (!avatar.length) {
+				avatar = g.statementsMatching(author[0].object, SIOC('avatar'), undefined);
+			}
+			var like = g.statementsMatching($rdf.sym(webid), LIKE('likes'), subject);
+			if (debug) {
+				console.log(text[0].object.value + ' ' + subject.value);
+			}
+		}
+
+		return posts;
+
+	},
 
 	template.getRecentPosts = function(debug) {
 		var channels    = template.getChannels();
@@ -403,7 +459,7 @@ jQuery(document).ready(function() {
 
 		return posts;
 
-	};
+	},
 
 
 
@@ -922,12 +978,14 @@ jQuery(document).ready(function() {
 			}
 
 
-
-			if( notify && i === posts.length-1 &&  !localStorage.getItem(post.subject.value ) ){
+			var uri = localStorage.getItem(post.subject.value );
+			var unread = ( !uri || uri === 'u' )
+			if( notify && i === posts.length-1 && unread ){
 				//if( notify && i === posts.length-1 &&  url[0].object.value != webid && hidden ){
 				popup(name, text);
 
 			}
+			localStorage.setItem(uri, 'r');
 
 		}
 
@@ -1364,7 +1422,6 @@ jQuery(document).ready(function() {
 			showNewest();
 		}
 
-		localStorage.setItem(uri, 'r');
 
 
 		// work out presence
@@ -1394,7 +1451,7 @@ jQuery(document).ready(function() {
 
 		for (var i=0; i<template.friends.length; i++) {
 			var sub = template.friends[i].ldpc + today + '/';
-			console.log('connecting to : ' + sub);
+			//console.log('connecting to : ' + sub);
 			connectToSocket(sub, template.subs);
 		}
 	}
@@ -1709,7 +1766,7 @@ window.addEventListener('action-changed', function(e) {
 });
 
 
-function popup(text, name) {
+function popup(name, text) {
 	var notification = new Notification(name, {'icon': defaultIcon, "body" : text });
 
 	notification.onclick = function(x) {
