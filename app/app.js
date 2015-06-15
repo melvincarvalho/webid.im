@@ -990,7 +990,7 @@ jQuery(document).ready(function() {
 
 			var uri = localStorage.getItem( post.subject.value );
 			var unread = ( !uri || uri === 'u' );
-			if( notify && i === posts.length-1 && unread ){
+			if( notify && i === posts.length-1 && unread && url[0].object.value !== template.settings.webid ){
 				//if( notify && i === posts.length-1 &&  url[0].object.value != webid && hidden ){
 				popup(name, text, uri, i);
 
