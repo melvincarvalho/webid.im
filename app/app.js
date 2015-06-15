@@ -406,7 +406,7 @@ jQuery(document).ready(function() {
 
 		var posts = [];
 
-    if (template.settings.type === 'single' ) {
+		if (template.settings.type === 'single' ) {
 			posts = posts.concat(g.statementsMatching(undefined, undefined, SIOC('Post'), $rdf.sym(channels[0] + '*')));
 		} else {
 			for (i=0; i<channels.length; i++) {
@@ -1471,6 +1471,12 @@ jQuery(document).ready(function() {
 			}
 			//console.log('connecting to : ' + sub);
 			connectToSocket(sub, template.subs);
+		}
+
+		if (template.settings.type === 'single') {
+			connectToSocket(template.settings.ldpc, template.subs);
+		} else {
+			connectToSocket(template.settings.ldpc + today + '/', template.subs);
 		}
 	}
 
