@@ -1461,7 +1461,14 @@ jQuery(document).ready(function() {
 		var today = new Date().toISOString().substr(0,10);
 
 		for (var i=0; i<template.friends.length; i++) {
-			var sub = template.friends[i].ldpc + today + '/';
+			var sub;
+			var type = template.friends[i].type;
+
+			if (type === 'single') {
+				sub = template.friends[i].ldpc;
+			} else {
+				sub = template.friends[i].ldpc + today + '/';
+			}
 			//console.log('connecting to : ' + sub);
 			connectToSocket(sub, template.subs);
 		}
