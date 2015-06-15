@@ -399,14 +399,20 @@ jQuery(document).ready(function() {
 	};
 
 	template.getRecentPosts = function(debug) {
+		var i;
+		var j;
 		var channels    = template.getChannels();
 		var recentDates = template.getRecentDates();
 
 		var posts = [];
 
-		for (var i=0; i<channels.length; i++) {
-			for (var j=0; j<recentDates.length; j++) {
-				posts = posts.concat(g.statementsMatching(undefined, undefined, SIOC('Post'), $rdf.sym(channels[i] + recentDates[j] + '/*')));
+    if (template.settings.type === 'single' ) {
+			posts = posts.concat(g.statementsMatching(undefined, undefined, SIOC('Post'), $rdf.sym(channels[0] + '*')));
+		} else {
+			for (i=0; i<channels.length; i++) {
+				for (j=0; j<recentDates.length; j++) {
+					posts = posts.concat(g.statementsMatching(undefined, undefined, SIOC('Post'), $rdf.sym(channels[i] + recentDates[j] + '/*')));
+				}
 			}
 		}
 
@@ -652,6 +658,10 @@ jQuery(document).ready(function() {
 			}
 		}
 
+		if (template.settings.type === 'single') {
+			addToQueue(template.queue, getLdpc() + '*');
+		}
+
 		var subscribedTo = g.statementsMatching($rdf.sym(template.settings.room), MBLOG('subscribedTo'), undefined);
 		for (i=0; i<subscribedTo.length; i++) {
 			//console.log('subscribedTo found : ' + subscribedTo[i].object.value);
@@ -875,7 +885,7 @@ jQuery(document).ready(function() {
 
 			}
 
-			
+
 			showNewest();
 
 
@@ -1138,7 +1148,8 @@ jQuery(document).ready(function() {
 			type : 'single',
 			avatar : avatar,
 			status : 'online',
-			webid : template.settings.webid
+			webid : template.settings.webid,
+			id : ldpc
 		};
 
 		if (template.settings.avatar) {
@@ -1613,6 +1624,7 @@ jQuery(document).ready(function() {
 		renderStorage();
 		renderSidebar();
 		renderMain();
+		fetchPublicChannels();
 	}
 
 
