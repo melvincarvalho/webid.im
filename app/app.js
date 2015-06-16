@@ -1133,9 +1133,9 @@ jQuery(document).ready(function() {
 
 	function fetchPublicChannels() {
 
-		var ldpc = 'https://klaranet.com/d/chat/watercooler/';
-		var title = 'Help Room';
-		var name = 'Help Room';
+		var ldpc   = 'https://klaranet.com/d/chat/watercooler/';
+		var title  = 'Help Room';
+		var name   = 'Help Room';
 		var avatar = genericphoto;
 
 
@@ -1220,11 +1220,11 @@ jQuery(document).ready(function() {
 			//console.log('setting ldpc of ' + friend + ' to ' + getChannel(l, 'friends', null, hash));
 
 			var fr = {
-				text : 'chat.html?action=chat&' +
-				'/&webid='+encodeURIComponent(template.settings.webid)+'&avatar=' +
-				encodeURIComponent(template.settings.avatar)+'&name=' +
-				encodeURIComponent(template.settings.name) ,
-				uri : 'chat.html?action=chat&ldpc=' +encodeURIComponent(template.settings.ldpc)+ hash + '%2F&webid='+encodeURIComponent(friend),
+				//text : 'chat.html?action=chat&' +
+				//'/&webid='+encodeURIComponent(template.settings.webid)+'&avatar=' +
+				//encodeURIComponent(template.settings.avatar)+'&name=' +
+				//encodeURIComponent(template.settings.name) ,
+				//uri : 'chat.html?action=chat&ldpc=' +encodeURIComponent(template.settings.ldpc)+ hash + '%2F&webid='+encodeURIComponent(friend),
 				ldpc : getChannel(l, 'friends', null, hash),
 				webid : template.settings.webid,
 				type : 'daily',
@@ -1301,6 +1301,7 @@ jQuery(document).ready(function() {
 
 
 
+
 	// helper functions //
 
 	// getChannel
@@ -1345,6 +1346,45 @@ jQuery(document).ready(function() {
 		}
 
 		return ldpc;
+	}
+
+	function createContact(room, text, uri, ldpc, webid, type, avatar, name, value) {
+		var fr = {
+			text : 'chat.html?action=chat&' +
+			'/&webid='+encodeURIComponent(template.settings.webid)+'&avatar=' +
+			encodeURIComponent(template.settings.avatar)+'&name=' +
+			encodeURIComponent(template.settings.name) ,
+			uri : 'chat.html?action=chat&ldpc=' +encodeURIComponent(template.settings.ldpc)+ hash + '%2F&webid='+encodeURIComponent(friend),
+			ldpc : getChannel(l, 'friends', null, hash),
+			webid : template.settings.webid,
+			type : 'daily',
+			'@id' : friend
+		};
+
+		// add avatar
+		if (avatar) {
+			fr.avatar = avatar;
+			fr.value += '&avatar='+encodeURIComponent(avatar);
+		} else {
+			fr.avatar = genericphoto;
+		}
+
+		// add name
+		if (name) {
+			fr.name = name;
+			fr.value += '&name='+encodeURIComponent(name);
+			fr.text += '&title='+encodeURIComponent(name);
+		} else {
+			fr.name = friend;
+		}
+
+		// add title
+		if (template.settings.name) {
+			fr.value += '&title=' + encodeURIComponent(template.settings.name);
+		}
+
+    return fr;
+
 	}
 
 
