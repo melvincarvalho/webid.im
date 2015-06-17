@@ -1140,9 +1140,6 @@ jQuery(document).ready(function() {
 
 
 		var fr = {
-			text : 'chat.html?action=chat&type=single&ldpc=' + encodeURIComponent(ldpc) +
-			'&webid='+encodeURIComponent(template.settings.webid),
-			uri : '',
 			name : name,
 			ldpc : ldpc,
 			type : 'single',
@@ -1152,15 +1149,6 @@ jQuery(document).ready(function() {
 			id : ldpc
 		};
 
-		if (template.settings.avatar) {
-			fr.text += '&avatar=' + encodeURIComponent(template.settings.avatar);
-		}
-
-		if (template.settings.name) {
-			fr.text += '&name=' + encodeURIComponent(template.settings.name);
-		}
-
-		fr.text += '&title='+encodeURIComponent(title);
 
 		var exists = false;
 		for (var i=0; i<template.friends.length; i++) {
@@ -1172,6 +1160,14 @@ jQuery(document).ready(function() {
 
 		template.friends.unshift( fr );
 
+	}
+
+  function parent(file) {
+    var ret;
+
+		ret = file.split('/').splice(0, file.split('/').length-2).join('/') + '/';
+
+		return ret;
 	}
 
 	function renderFriends() {
@@ -1213,52 +1209,12 @@ jQuery(document).ready(function() {
 			if (template.settings.type === 'friendsdaily') {
 				l = getLdpc();
 			} else if (template.settings.type === 'daily') {
-				l = getLdpc().split('/').splice(0, getLdpc().split('/').length-2).join('/') + '/';
+				l = parent(getLdpc());
 			} else if (template.settings.type === 'single') {
-				l = template.settings.ldpc.split('/').splice(0, template.settings.ldpc.split('/').length-2).join('/') + '/';
-			}
-			//console.log('setting ldpc of ' + friend + ' to ' + getChannel(l, 'friends', null, hash));
-
-			var fr = {
-				//text : 'chat.html?action=chat&' +
-				//'/&webid='+encodeURIComponent(template.settings.webid)+'&avatar=' +
-				//encodeURIComponent(template.settings.avatar)+'&name=' +
-				//encodeURIComponent(template.settings.name) ,
-				//uri : 'chat.html?action=chat&ldpc=' +encodeURIComponent(template.settings.ldpc)+ hash + '%2F&webid='+encodeURIComponent(friend),
-				ldpc : getChannel(l, 'friends', null, hash),
-				webid : template.settings.webid,
-				type : 'daily',
-				'@id' : friend
-			};
-
-			// add avatar
-			if (avatar) {
-				fr.avatar = avatar;
-				fr.value += '&avatar='+encodeURIComponent(avatar);
-			} else {
-				fr.avatar = genericphoto;
+				l = parent(getLdpc());
 			}
 
-			// add name
-			if (name) {
-				fr.name = name;
-				fr.value += '&name='+encodeURIComponent(name);
-				fr.text += '&title='+encodeURIComponent(name);
-			} else {
-				fr.name = friend;
-			}
-
-			// add title
-			if (template.settings.name) {
-				fr.value += '&title=' + encodeURIComponent(template.settings.name);
-			}
-
-
-			if (template.users && template.users[friend] ) {
-				//console.log('setting presence of ' + friend );
-				fr.status = template.users[friend].status;
-				fr.lastActive = template.users[friend].lastActive;
-			}
+			var fr = createContact(null, getChannel(l, 'friends', null, hash), template.settings.webid, 'daily', avatar, name, friend);
 
 			// insert in right place
 			var exists = false;
@@ -1348,23 +1304,17 @@ jQuery(document).ready(function() {
 		return ldpc;
 	}
 
-	function createContact(room, text, uri, ldpc, webid, type, avatar, name, value) {
+	function createContact(roomUri, ldpc, webid, type, avatar, name, friend) {
 		var fr = {
-			text : 'chat.html?action=chat&' +
-			'/&webid='+encodeURIComponent(template.settings.webid)+'&avatar=' +
-			encodeURIComponent(template.settings.avatar)+'&name=' +
-			encodeURIComponent(template.settings.name) ,
-			uri : 'chat.html?action=chat&ldpc=' +encodeURIComponent(template.settings.ldpc)+ hash + '%2F&webid='+encodeURIComponent(friend),
-			ldpc : getChannel(l, 'friends', null, hash),
-			webid : template.settings.webid,
-			type : 'daily',
+			'ldpc' : ldpc,
+			'webid' : webid,
+			'type' : 'daily',
 			'@id' : friend
 		};
 
 		// add avatar
 		if (avatar) {
 			fr.avatar = avatar;
-			fr.value += '&avatar='+encodeURIComponent(avatar);
 		} else {
 			fr.avatar = genericphoto;
 		}
@@ -1372,15 +1322,14 @@ jQuery(document).ready(function() {
 		// add name
 		if (name) {
 			fr.name = name;
-			fr.value += '&name='+encodeURIComponent(name);
-			fr.text += '&title='+encodeURIComponent(name);
 		} else {
 			fr.name = friend;
 		}
 
-		// add title
-		if (template.settings.name) {
-			fr.value += '&title=' + encodeURIComponent(template.settings.name);
+		if (template.users && template.users[friend] ) {
+			//console.log('setting presence of ' + friend );
+			fr.status = template.users[friend].status;
+			fr.lastActive = template.users[friend].lastActive;
 		}
 
     return fr;
