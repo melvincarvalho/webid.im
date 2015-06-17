@@ -1138,7 +1138,7 @@ jQuery(document).ready(function() {
 		var name   = 'Help Room';
 		var avatar = genericphoto;
 
-
+/*
 		var fr = {
 			name : name,
 			ldpc : ldpc,
@@ -1148,6 +1148,15 @@ jQuery(document).ready(function() {
 			webid : template.settings.webid,
 			id : ldpc
 		};
+*/
+
+
+    if (!template.users[ldpc]) {
+			template.users[ldpc] = {};
+		}
+		template.users[ldpc].status = 'online';
+
+		var fr = createContact(null, ldpc, template.settings.webid, 'single', avatar, name, ldpc);
 
 
 		var exists = false;
@@ -1308,7 +1317,7 @@ jQuery(document).ready(function() {
 		var fr = {
 			'ldpc' : ldpc,
 			'webid' : webid,
-			'type' : 'daily',
+			'type' : type,
 			'@id' : friend
 		};
 
