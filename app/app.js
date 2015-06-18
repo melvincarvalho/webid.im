@@ -1842,8 +1842,6 @@ jQuery(document).ready(function() {
 
 	}
 
-	//$(window).bind("popstate", back);
-
 	function back() {
 		console.log('going back');
 		var stateObject = { 'action' : 'chat' };
