@@ -284,7 +284,7 @@ jQuery(document).ready(function() {
 		var channels;
 
 		dates    = [];
-		channels = template.getChannels();
+		channels = getChannels();
 		ldpc     = getLdpc();
 
 
@@ -319,7 +319,7 @@ jQuery(document).ready(function() {
 	};
 
 
-	template.getChannels = function() {
+	function getChannels() {
 		var channels;
 
 		if (template.settings.toChannel && template.settings.toChannel.length > 0) {
@@ -329,7 +329,7 @@ jQuery(document).ready(function() {
 		}
 
 		return channels;
-	};
+	}
 
 
 	template.getRecentDates = function(debug) {
@@ -348,7 +348,7 @@ jQuery(document).ready(function() {
 	};
 
 	template.getPosts = function(date) {
-		var channels = template.getChannels();
+		var channels = getChannels();
 
 		for (var i=0; i<channels.length; i++) {
 			posts = posts.concat(g.statementsMatching(undefined, undefined, SIOC('Post'), $rdf.sym(channels[i] + date + '/*')));
@@ -406,7 +406,7 @@ jQuery(document).ready(function() {
 	template.getRecentPosts = function(debug) {
 		var i;
 		var j;
-		var channels    = template.getChannels();
+		var channels    = getChannels();
 		var recentDates = template.getRecentDates();
 
 		var posts = [];
@@ -657,9 +657,12 @@ jQuery(document).ready(function() {
 		}
 
 		if (template.settings.type === 'daily') {
-			var dates = g.statementsMatching($rdf.sym(getLdpc()), LDP('contains'), undefined);
-			for (i=0; i<dates.length; i++) {
-				addToQueue(template.queue, dates[i].object.value + '*');
+			channels = getChannels();
+			for (i=0; i<channels.length; i++) {
+				var dates = g.statementsMatching($rdf.sym(channels[i]), LDP('contains'), undefined);
+				for (j=0; j<dates.length; j++) {
+					addToQueue(template.queue, dates[j].object.value + '*');
+				}
 			}
 		}
 
@@ -1479,7 +1482,10 @@ jQuery(document).ready(function() {
 		if (template.settings.type === 'single') {
 			connectToSocket(template.settings.ldpc, template.subs);
 		} else {
-			connectToSocket(template.settings.ldpc + today + '/', template.subs);
+			var channels = getChannels();
+			for (i=0; i<channels.length; i++) {
+				connectToSocket(channels[i] + today + '/', template.subs);				
+			}
 		}
 	}
 
