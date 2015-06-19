@@ -332,8 +332,13 @@ jQuery(document).ready(function() {
 	};
 
 
-	template.getRecentDates = function() {
+	template.getRecentDates = function(debug) {
 		var recentDates = [];
+
+		if (debug) {
+      var ldpc = getLdpc();
+			console.log('ldpc() : ' + ldpc);
+		}
 
 		if (template.settings.dates && template.settings.dates.length > 0) {
 			recentDates = template.settings.dates.slice(0,2);
@@ -1756,9 +1761,14 @@ jQuery(document).ready(function() {
 
 		var root = detail.ldpc.split('/').splice(0, detail.ldpc.split('/').length-2).join('/') + '/';
 
-		putFile(root + 'rooms/' + hash, turtle);
-		template.settings.room = root + 'rooms/' + hash + '#main';
-		addToQueue(template.settings.queue, root + 'rooms/' + hash);
+    var room = root + 'rooms/' + hash;
+    db.cache.get(room).then(function(res) {
+			if (res) {
+				putFile(room, turtle);
+			}
+		});
+		template.settings.room = room + '#main';
+		addToQueue(template.settings.queue, room);
 
 		window.history.pushState(stateObject, "",
 		'?action=chat&name=' + encodeURIComponent(template.settings.name) +
