@@ -517,31 +517,8 @@ jQuery(document).ready(function() {
 				}
 			});
 
-
 			return;
 		}
-
-
-		function postFile(file, data) {
-
-			$.ajax({
-				url: file,
-				contentType: "text/turtle",
-				type: 'POST',
-				data: data,
-				success: function(result) {
-					showNewest();
-					//console.log(result);
-				},
-				statusCode: {
-					500: function() {
-						console.log('Internal error!');
-					}
-				}
-			});
-
-		}
-
 
 		var id = Math.floor(Math.random() * 100000000);
 
@@ -1484,7 +1461,7 @@ jQuery(document).ready(function() {
 		} else {
 			var channels = getChannels();
 			for (i=0; i<channels.length; i++) {
-				connectToSocket(channels[i] + today + '/', template.subs);				
+				connectToSocket(channels[i] + today + '/', template.subs);
 			}
 		}
 	}
@@ -1857,6 +1834,27 @@ jQuery(document).ready(function() {
 		console.log('Unread posts : ' + count);
 
 	}
+
+	function postFile(file, data) {
+
+		$.ajax({
+			url: file,
+			contentType: "text/turtle",
+			type: 'POST',
+			data: data,
+			success: function(result) {
+				showNewest();
+				//console.log(result);
+			},
+			statusCode: {
+				500: function() {
+					console.log('Internal error!');
+				}
+			}
+		});
+
+	}
+
 
 	function back() {
 		console.log('going back');
