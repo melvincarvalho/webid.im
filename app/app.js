@@ -246,7 +246,12 @@ jQuery(document).ready(function() {
 		var today = new Date().toISOString().substr(0,10);
 		console.info('refresh');
 		template.invalidate(getLdpc());
-		template.invalidate(getLdpc() + today + '/*');
+		if (template.settings.type === 'daily') {
+			template.invalidate(getLdpc() + today + '/*');
+		}
+		if (template.settings.type === 'single') {
+			template.invalidate(getLdpc() + '*');
+		}
 		unreadPosts();
 		fetchAll();
 		render();
