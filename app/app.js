@@ -703,30 +703,30 @@ jQuery(document).ready(function() {
 	}
 
 
-	function daemon() {
-		var heartbeat = 60;
+	function run() {
 
-		function run() {
+		console.log('ping');
 
-			console.log('ping');
+		setLastPing();
 
-			setLastPing();
-
-			if (template.newHour) {
-
-			}
-
-			if (template.newDate) {
-
-			}
-
-			fetchAll();
-			render();
-			connectToSockets();
-			unreadPosts();
+		if (template.newHour) {
 
 		}
 
+		if (template.newDate) {
+
+		}
+
+		fetchAll();
+		render();
+		connectToSockets();
+		unreadPosts();
+
+	}
+
+
+	function daemon() {
+		var heartbeat = 60;
 		run();
 		setInterval(run, heartbeat * 1000);
 	}
