@@ -1506,6 +1506,7 @@ jQuery(document).ready(function() {
 					console.log(a[1]);
 					addToQueue(template.settings.queue, a[1]);
 					addToQueue(template.settings.queue, a[1] + '*');
+					template.invalidate(a[1] + '*');
 					db.cache.delete(a[1] + '*').then(function() {
 						fetch(a[1] + '*');
 					});
