@@ -15,7 +15,9 @@ var PIM   = $rdf.Namespace("http://www.w3.org/ns/pim/space#");
 var RDF   = $rdf.Namespace("http://www.w3.org/1999/02/22-rdf-syntax-ns#");
 var RDFS  = $rdf.Namespace("http://www.w3.org/2000/01/rdf-schema#");
 var SIOC  = $rdf.Namespace("http://rdfs.org/sioc/ns#");
+var SOLID = $rdf.Namespace("http://www.w3.org/ns/solid/app#");
 
+var APP_HOMEPAGE = "https://webid.im/";
 
 jQuery(document).ready(function() {
 
@@ -1116,6 +1118,14 @@ jQuery(document).ready(function() {
 
 		for (var i=0; i<storage.length; i++) {
 			addStorage(storage[i].object.value);
+		}
+
+		var st = g.statementsMatching(undefined, SOLID('homepage'), $rdf.term(APP_HOMEPAGE));
+		if (st.length) {
+			var dataSource = g.any(st[0].subject, SOLID('dataSource'));
+			if (dataSource) {
+				template.settings.dataSource = dataSource.value;
+			}
 		}
 
 	}
