@@ -36,6 +36,7 @@ jQuery(document).ready(function() {
 	var ldpc          = getParam('ldpc');
 	var room          = getParam('room');
 	var name          = getParam('name');
+	var readOnly      = getParam('readOnly');
 	var seeAlso       = getParam('seeAlso')  || getParam('invite');
 	var title         = getParam('title');
 	var type          = getParam('type');
@@ -74,6 +75,7 @@ jQuery(document).ready(function() {
 		ldpc        : ldpc,
 		room        : room,
 		name        : name,
+		readOnly    : readOnly,
 		seeAlso     : seeAlso,
 		title       : title,
 		type        : type,
@@ -90,6 +92,7 @@ jQuery(document).ready(function() {
 		dataSource  : template.init.dataSource,
 		hash        : template.init.hash,
 		name        : template.init.name,
+		readOnly    : template.init.readOnly,
 		seeAlso     : template.init.seeAlso,
 		title       : template.init.title,
 		type        : template.init.type,
@@ -832,6 +835,10 @@ jQuery(document).ready(function() {
 	//
 	// renders the main area
 	function renderMain(webid, date, refresh) {
+
+    if (template.settings.readOnly) {
+			template.show = false;
+		}
 
 		if (!webid) {
 			webid = template.settings.webid;
@@ -1741,7 +1748,6 @@ jQuery(document).ready(function() {
 		template.ui.friends = false;
 		template.chat = true;
 		template.settings.action = 'chat';
-		template.show = true;
 		template.settings.type = detail.type;
 		template.settings.date = undefined;
 		template.title = detail.title;
