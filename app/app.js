@@ -253,12 +253,16 @@ jQuery(document).ready(function() {
 	template.refresh = function() {
 		var today = new Date().toISOString().substr(0,10);
 		console.info('refresh');
-		template.invalidate(getLdpc());
+		var channels = getChannels();
 		if (template.settings.type === 'daily') {
-			template.invalidate(getLdpc() + today + '/*');
+      for (var i=0; i<channels.length; i++) {
+				template.invalidate(channels[i]);
+				template.invalidate(channels[i] + today + '/*');
+			}
 		}
 		if (template.settings.type === 'single') {
-			template.invalidate(getLdpc() + '*');
+			template.invalidate(channels[0]);
+			template.invalidate(channels[0] + '*');
 		}
 		unreadPosts();
 		fetchAll();
