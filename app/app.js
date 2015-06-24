@@ -31,6 +31,7 @@ jQuery(document).ready(function() {
 	var avatar        = getParam('avatar');
 	var color         = getParam('color');
 	var date          = getParam('date');
+	var dataSource    = getParam('dataSource');
 	var hash          = getParam('hash');
 	var ldpc          = getParam('ldpc');
 	var room          = getParam('room');
@@ -68,6 +69,7 @@ jQuery(document).ready(function() {
 		avatar      : avatar,
 		color       : color,
 		date        : date,
+		dataSource  : dataSource,
 		hash        : hash,
 		ldpc        : ldpc,
 		room        : room,
@@ -85,6 +87,7 @@ jQuery(document).ready(function() {
 		ldpc        : template.init.ldpc,
 		room        : template.init.room,
 		date        : template.init.date,
+		dataSource  : template.init.dataSource,
 		hash        : template.init.hash,
 		name        : template.init.name,
 		seeAlso     : template.init.seeAlso,
@@ -116,6 +119,9 @@ jQuery(document).ready(function() {
 	}
 	if (!template.settings.type) {
 		template.settings.type = 'friendsdaily';
+	}
+	if (!template.settings.dataSource) {
+		template.settings.dataSource = template.settings.ldpc;
 	}
 
 	// Assign a random color
@@ -276,7 +282,7 @@ jQuery(document).ready(function() {
 		if (template.settings.room && template.settings.room.length > 0) {
 			room = template.settings.room;
 		} else {
-			room = template.settings.ldpd;
+			room = template.settings.ldpc;
 		}
 
 		return room;
@@ -1213,15 +1219,26 @@ jQuery(document).ready(function() {
 			//console.log(friend + ' ' + f.getState(friend));
 			//console.log(getLdpc());
 
-			var l = getLdpc();
 
-			if (template.settings.type === 'friendsdaily') {
-				l = getLdpc();
-			} else if (template.settings.type === 'daily') {
-				l = parent(getLdpc());
-			} else if (template.settings.type === 'single') {
-				l = parent(getLdpc());
+      function getDataSource() {
+				var l = getLdpc();
+				if (template.settings.dataSource) {
+					return template.settings.dataSource;
+				}
+
+				if (template.settings.type === 'friendsdaily') {
+					l = getLdpc();
+				} else if (template.settings.type === 'daily') {
+					l = parent(getLdpc());
+				} else if (template.settings.type === 'single') {
+					l = parent(getLdpc());
+				}
+
+				return l;
+
 			}
+
+      var l = getDataSource();
 
 			var fr = createContact(null, getChannel(l, 'friends', null, hash), template.settings.webid, 'daily', avatar, name, friend);
 
