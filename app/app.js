@@ -431,6 +431,13 @@ jQuery(document).ready(function() {
 
 		var posts = [];
 
+    if (debug) {
+			console.log('Channels');
+			for (i=0; i<channels.length; i++) {
+				console.log('channel : ' + channels[i]);
+			}
+		}
+
 		if (template.settings.type === 'single' ) {
 			posts = posts.concat(g.statementsMatching(undefined, undefined, SIOC('Post'), $rdf.sym(channels[0] + '*')));
 		} else {
