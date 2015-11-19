@@ -20,6 +20,13 @@ var webid = process.argv[2];
 var message = process.argv[3];
 var application = process.argv[4];
 
+/**
+ * create a post in turtle
+ * @param  {string} webid       the creator
+ * @param  {string} message     the message to send
+ * @param  {string} application application that created it
+ * @return {string}             the message in turtle
+ */
 function createPost(webid, message, application) {
   var turtle;
   turtle += '<#this> ';
@@ -29,7 +36,7 @@ function createPost(webid, message, application) {
   turtle += '    a <http://rdfs.org/sioc/ns#Post> ;\n';
 
   if (application) {
-    turtle += '    <https://w3.org/ns/solid/app#application> <' + application + '> ;\n';    
+    turtle += '    <https://w3.org/ns/solid/app#application> <' + application + '> ;\n';
   }
 
   turtle += '    <http://www.w3.org/ns/mblog#author> <'+ webid +'> .\n';
