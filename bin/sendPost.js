@@ -29,7 +29,7 @@ var application = process.argv[4];
  */
 function createPost(webid, message, application) {
   var turtle;
-  turtle += '<#this> ';
+  turtle = '<#this> ';
   turtle += '    <http://purl.org/dc/terms/created> "'+ new Date().toISOString() +'"^^<http://www.w3.org/2001/XMLSchema#dateTime> ;\n';
   turtle += '    <http://purl.org/dc/terms/creator> <' + webid + '> ;\n';
   turtle += '    <http://rdfs.org/sioc/ns#content> "'+ message.trim() +'" ;\n';
